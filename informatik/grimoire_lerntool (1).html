@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>☩ Das Grimoire der Digitalen Künste ☩</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blutrot: #8b1a1a;
+    --dunkelrot: #5c0e0e;
+    --gold: #d4a017;
+    --dunklegold: #a07c10;
+    --rostgold: #b06010;
+    --knochen: #f0e8d0;
+    --staub: #c8bca0;
+    --asche: #8a8070;
+    --dunkelgrau: #1a1814;
+    --mittelgrau: #3a3530;
+    --hellgrau: #d0c8b8;
+    --mystisch: #8060b0;
+    --eisblau: #6090b0;
+    --giftgrün: #40a020;
+    --smaragd: #207850;
+    --kupfer: #b05010;
+    --purpur: #800090;
+    --türkis: #2090a0;
+    --orange: #c06010;
+    --bg-schwarz: #0d0b08;
+    --bg-dunkel: #141210;
+    --bg-panel: #1c1814;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--bg-schwarz);
+    color: var(--knochen);
+    font-family: 'IM Fell English', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* Parchment texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(139,26,26,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(128,0,144,0.05) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-schwarz); }
+  ::-webkit-scrollbar-thumb { background: var(--dunkelrot); border-radius: 3px; }
+
+  /* ── HEADER ── */
+  .grimoire-header {
+    text-align: center;
+    padding: 3rem 2rem 2rem;
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid var(--dunkelrot);
+    background: linear-gradient(180deg, rgba(92,14,14,0.15) 0%, transparent 100%);
+  }
+
+  .header-ornament {
+    font-size: 1.2rem;
+    color: var(--gold);
+    letter-spacing: 0.5rem;
+    opacity: 0.7;
+    animation: flicker 4s infinite;
+  }
+
+  .grimoire-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.4rem, 4vw, 2.8rem);
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow:
+      0 0 20px rgba(212,160,23,0.4),
+      0 0 60px rgba(212,160,23,0.15),
+      2px 2px 0 var(--dunkelrot);
+    letter-spacing: 0.1em;
+    margin: 0.5rem 0;
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  .grimoire-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: var(--staub);
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .header-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1rem 0 0;
+    color: var(--dunkelrot);
+    font-size: 1.4rem;
+  }
+
+  .header-divider::before,
+  .header-divider::after {
+    content: '';
+    flex: 1;
+    max-width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--dunkelrot), transparent);
+  }
+
+  /* ── NAVIGATION ── */
+  .nav-strip {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,11,8,0.97);
+    border-bottom: 1px solid var(--mittelgrau);
+    padding: 0.6rem 1rem;
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid var(--mittelgrau);
+    color: var(--staub);
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    padding: 0.35rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .nav-btn:hover, .nav-btn.active {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(212,160,23,0.08);
+    text-shadow: 0 0 8px rgba(212,160,23,0.5);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .grimoire-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── CHAPTER SECTIONS ── */
+  .chapter {
+    margin-bottom: 3rem;
+    animation: fade-in 0.6s ease both;
+  }
+
+  .chapter-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid;
+  }
+
+  .chapter-num {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    opacity: 0.4;
+    min-width: 2.5rem;
+  }
+
+  .chapter-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .chapter-icon {
+    margin-left: auto;
+    font-size: 1.8rem;
+    opacity: 0.5;
+  }
+
+  /* Chapter color schemes */
+  .ch-binaer .chapter-header { border-color: var(--gold); }
+  .ch-binaer .chapter-num, .ch-binaer .chapter-title { color: var(--gold); }
+
+  .ch-gatter .chapter-header { border-color: var(--mystisch); }
+  .ch-gatter .chapter-num, .ch-gatter .chapter-title { color: var(--mystisch); }
+
+  .ch-schaltterme .chapter-header { border-color: var(--dunklegold); }
+  .ch-schaltterme .chapter-num, .ch-schaltterme .chapter-title { color: var(--dunklegold); }
+
+  .ch-schaltungen .chapter-header { border-color: var(--smaragd); }
+  .ch-schaltungen .chapter-num, .ch-schaltungen .chapter-title { color: var(--smaragd); }
+
+  .ch-krypto .chapter-header { border-color: var(--mystisch); }
+  .ch-krypto .chapter-num, .ch-krypto .chapter-title { color: var(--purpur); }
+
+  /* ── CONTENT CARDS ── */
+  .card {
+    background: var(--bg-panel);
+    border: 1px solid var(--mittelgrau);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+  }
+
+  .card:hover { border-color: var(--asche); }
+
+  .ch-binaer .card::before { background: var(--gold); }
+  .ch-gatter .card::before { background: var(--mystisch); }
+  .ch-schaltterme .card::before { background: var(--dunklegold); }
+  .ch-schaltungen .card::before { background: var(--smaragd); }
+  .ch-krypto .card::before { background: var(--purpur); }
+
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    opacity: 0.7;
+  }
+
+  /* ── TRUTH TABLE ── */
+  .truth-table {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .truth-table th {
+    color: var(--gold);
+    border-bottom: 1px solid var(--dunkelrot);
+    padding: 0.4rem 1.2rem;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+
+  .truth-table td {
+    text-align: center;
+    padding: 0.3rem 1.2rem;
+    border-bottom: 1px solid rgba(58,53,48,0.5);
+    color: var(--knochen);
+  }
+
+  .truth-table tr:hover td { background: rgba(212,160,23,0.05); }
+
+  .val-1 { color: var(--giftgrün); font-weight: bold; }
+  .val-0 { color: var(--asche); }
+
+  /* ── GATE GRID ── */
+  .gate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .gate-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--mittelgrau);
+    padding: 1.2rem;
+    position: relative;
+    transition: all 0.25s;
+    overflow: hidden;
+  }
+
+  .gate-card::after {
+    content: attr(data-glyph);
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    opacity: 0.06;
+    font-family: 'Share Tech Mono', monospace;
+    pointer-events: none;
+  }
+
+  .gate-card:hover {
+    border-color: var(--mystisch);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(128,96,176,0.15);
+  }
+
+  .gate-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--mystisch);
+    margin-bottom: 0.3rem;
+  }
+
+  .gate-formula {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--gold);
+    margin-bottom: 0.8rem;
+    opacity: 0.8;
+  }
+
+  .gate-desc {
+    font-size: 0.82rem;
+    color: var(--staub);
+    font-style: italic;
+    margin-bottom: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .gate-highlight {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    background: rgba(128,96,176,0.12);
+    border-left: 2px solid var(--mystisch);
+    padding: 0.4rem 0.8rem;
+    color: var(--staub);
+  }
+
+  /* ── BINARY CONVERTER ── */
+  .converter-widget {
+    background: rgba(92,14,14,0.12);
+    border: 1px solid var(--dunkelrot);
+    padding: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .converter-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--asche);
+    margin-bottom: 0.4rem;
+  }
+
+  .converter-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+  }
+
+  .conv-group { flex: 1; min-width: 180px; }
+
+  .conv-input {
+    width: 100%;
+    background: var(--bg-schwarz);
+    border: 1px solid var(--mittelgrau);
+    color: var(--knochen);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    padding: 0.5rem 0.8rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .conv-input:focus { border-color: var(--gold); }
+
+  .conv-btn {
+    background: var(--dunkelrot);
+    border: 1px solid var(--blutrot);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .conv-btn:hover {
+    background: var(--blutrot);
+    box-shadow: 0 0 10px rgba(139,26,26,0.4);
+  }
+
+  .conv-result {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--gold);
+    margin-top: 0.8rem;
+    padding: 0.6rem 1rem;
+    background: rgba(212,160,23,0.06);
+    border: 1px solid rgba(212,160,23,0.2);
+    min-height: 2.5rem;
+    word-break: break-all;
+  }
+
+  /* ── GATE ORACLE ── */
+  .oracle-widget {
+    background: rgba(128,0,144,0.06);
+    border: 1px solid rgba(128,0,144,0.3);
+    padding: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .oracle-inputs {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    align-items: flex-end;
+  }
+
+  .oracle-select {
+    background: var(--bg-schwarz);
+    border: 1px solid var(--mittelgrau);
+    color: var(--knochen);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .oracle-select:focus { border-color: var(--mystisch); }
+
+  .oracle-toggle {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .bit-btn {
+    width: 50px;
+    height: 50px;
+    border: 2px solid var(--mittelgrau);
+    background: var(--bg-schwarz);
+    color: var(--asche);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .bit-btn.on {
+    border-color: var(--giftgrün);
+    background: rgba(64,160,32,0.15);
+    color: var(--giftgrün);
+    box-shadow: 0 0 10px rgba(64,160,32,0.2);
+  }
+
+  .oracle-result {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.4rem;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid var(--mittelgrau);
+    background: var(--bg-schwarz);
+    color: var(--staub);
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .oracle-result.res-1 { color: var(--giftgrün); border-color: var(--giftgrün); background: rgba(64,160,32,0.05); }
+  .oracle-result.res-0 { color: var(--blutrot); border-color: var(--blutrot); background: rgba(139,26,26,0.05); }
+
+  /* ── STELLENWERTE ── */
+  .bitwert-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+  }
+
+  .bitwert-cell {
+    background: var(--bg-schwarz);
+    border: 1px solid var(--mittelgrau);
+    padding: 0.6rem 0.8rem;
+    text-align: center;
+    min-width: 60px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .bitwert-cell:hover {
+    border-color: var(--gold);
+    background: rgba(212,160,23,0.08);
+  }
+
+  .bitwert-top {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    color: var(--gold);
+    font-weight: bold;
+  }
+
+  .bitwert-bottom {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--asche);
+    margin-top: 0.2rem;
+  }
+
+  /* ── CIRCUIT DIAGRAMS ── */
+  .circuit-box {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    background: var(--bg-schwarz);
+    border: 1px solid var(--mittelgrau);
+    padding: 1.2rem 1.5rem;
+    color: var(--eisblau);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* ── CRYPTO FLOW ── */
+  .crypto-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1rem;
+  }
+
+  .flow-box {
+    background: var(--bg-schwarz);
+    border: 1px solid var(--mittelgrau);
+    padding: 0.6rem 2rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--knochen);
+    text-align: center;
+    width: 200px;
+  }
+
+  .flow-box.accent { border-color: var(--purpur); color: var(--purpur); background: rgba(128,0,144,0.08); }
+  .flow-box.key { border-color: var(--gold); color: var(--gold); background: rgba(212,160,23,0.06); }
+  .flow-box.out { border-color: var(--smaragd); color: var(--smaragd); background: rgba(32,120,80,0.08); }
+
+  .flow-arrow {
+    color: var(--asche);
+    font-size: 1.2rem;
+  }
+
+  /* ── TAGS ── */
+  .tag {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid;
+    margin: 0.2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .tag-gold { border-color: var(--gold); color: var(--gold); background: rgba(212,160,23,0.08); }
+  .tag-rot { border-color: var(--blutrot); color: var(--blutrot); background: rgba(139,26,26,0.08); }
+  .tag-grün { border-color: var(--giftgrün); color: var(--giftgrün); background: rgba(64,160,32,0.08); }
+  .tag-blau { border-color: var(--eisblau); color: var(--eisblau); background: rgba(96,144,176,0.08); }
+  .tag-purpur { border-color: var(--purpur); color: var(--purpur); background: rgba(128,0,144,0.08); }
+
+  /* ── FORMULA DISPLAY ── */
+  .formula {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    background: rgba(212,160,23,0.06);
+    border: 1px solid rgba(212,160,23,0.2);
+    padding: 0.6rem 1.2rem;
+    color: var(--gold);
+    margin: 0.5rem 0;
+    display: inline-block;
+  }
+
+  /* ── ZWEI-SPALTEN LAYOUT ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media(max-width: 600px) {
+    .two-col { grid-template-columns: 1fr; }
+    .gate-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── QUOTE ── */
+  .grimoire-quote {
+    text-align: center;
+    padding: 2rem;
+    font-style: italic;
+    color: var(--asche);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--mittelgrau);
+    border-bottom: 1px solid var(--mittelgrau);
+    margin: 2rem 0;
+  }
+
+  .grimoire-quote::before { content: '❝  '; color: var(--dunkelrot); }
+  .grimoire-quote::after  { content: '  ❞'; color: var(--dunkelrot); }
+
+  /* ── FOOTER ── */
+  .grimoire-footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--asche);
+    font-size: 0.8rem;
+    font-style: italic;
+    border-top: 1px solid var(--mittelgrau);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes flicker {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 0.4; }
+    75% { opacity: 0.8; }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(212,160,23,0.4), 0 0 60px rgba(212,160,23,0.15), 2px 2px 0 var(--dunkelrot); }
+    50% { text-shadow: 0 0 30px rgba(212,160,23,0.6), 0 0 80px rgba(212,160,23,0.25), 2px 2px 0 var(--dunkelrot); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chapter { animation-delay: calc(var(--i, 0) * 0.1s); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-banner {
+    background: var(--bg-panel);
+    border: 1px solid var(--mittelgrau);
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .progress-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--asche);
+    min-width: 120px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--mittelgrau);
+    min-width: 100px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--dunkelrot), var(--gold));
+    width: 0%;
+    transition: width 1s ease;
+  }
+
+  .progress-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--gold);
+  }
+
+  /* ── ACCORDION SECTIONS ── */
+  .accordion-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--mittelgrau);
+    color: var(--knochen);
+    text-align: left;
+    padding: 0.8rem 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .accordion-toggle:hover { color: var(--gold); }
+
+  .accordion-arrow {
+    transition: transform 0.3s;
+    color: var(--asche);
+    font-size: 0.8rem;
+  }
+
+  .accordion-toggle.open .accordion-arrow { transform: rotate(180deg); }
+
+  .accordion-body {
+    display: none;
+    padding: 1rem 0;
+    animation: fade-in 0.3s ease;
+  }
+
+  .accordion-body.open { display: block; }
+
+  /* info highlight */
+  .highlight-box {
+    background: rgba(212,160,23,0.06);
+    border-left: 3px solid var(--gold);
+    padding: 0.8rem 1.2rem;
+    margin: 0.8rem 0;
+    font-size: 0.88rem;
+    color: var(--staub);
+    line-height: 1.6;
+  }
+
+  .highlight-box.rot { border-color: var(--blutrot); background: rgba(92,14,14,0.12); }
+  .highlight-box.grün { border-color: var(--giftgrün); background: rgba(64,160,32,0.06); }
+  .highlight-box.purpur { border-color: var(--purpur); background: rgba(128,0,144,0.08); }
+  .highlight-box.blau { border-color: var(--eisblau); background: rgba(96,144,176,0.06); }
+
+  p { line-height: 1.7; color: var(--staub); margin-bottom: 0.5rem; }
+  ul { padding-left: 1.2rem; color: var(--staub); line-height: 1.8; }
+  li { margin-bottom: 0.2rem; }
+
+  /* ── SCHALTTERM EVALUATOR ── */
+  .eval-widget {
+    background: rgba(160,124,16,0.06);
+    border: 1px solid rgba(160,124,16,0.3);
+    padding: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .eval-row {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+  }
+
+  .eval-input {
+    background: var(--bg-schwarz);
+    border: 1px solid var(--mittelgrau);
+    color: var(--knochen);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.8rem;
+    outline: none;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .eval-input:focus { border-color: var(--dunklegold); }
+
+  .eval-vars {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .eval-result {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    padding: 0.8rem 1rem;
+    background: var(--bg-schwarz);
+    border: 1px solid var(--mittelgrau);
+    color: var(--staub);
+    min-height: 2.5rem;
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="grimoire-header">
+  <div class="header-ornament">✦ · · · ☩ · · · ✦</div>
+  <h1 class="grimoire-title">Das Grimoire der Digitalen Künste</h1>
+  <p class="grimoire-subtitle">Ein Kompendium der Binären Magie &amp; Kryptographischen Geheimnisse</p>
+  <div class="header-divider">☩</div>
+</header>
+
+<!-- NAV -->
+<nav class="nav-strip" id="mainNav">
+  <button class="nav-btn active" onclick="scrollTo('binaer')">I · Binär</button>
+  <button class="nav-btn" onclick="scrollTo('gatter')">II · Gatter</button>
+  <button class="nav-btn" onclick="scrollTo('schaltterme')">III · Schaltterme</button>
+  <button class="nav-btn" onclick="scrollTo('schaltungen')">IV · Schaltungen</button>
+  <button class="nav-btn" onclick="scrollTo('krypto')">V · Kryptographie</button>
+  <button class="nav-btn" onclick="scrollTo('pruefung')" style="border-color:var(--blutrot);color:var(--blutrot)">☩ Prüfung</button>
+</nav>
+
+<!-- EASTER EGG OVERLAY -->
+<div id="easterEgg" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.97);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer" onclick="closeEgg()">
+  <div style="text-align:center;max-width:600px;padding:2rem;animation:egg-appear 0.8s ease both">
+    <div style="font-size:4rem;margin-bottom:1rem;animation:spin-slow 6s linear infinite">☩</div>
+    <div style="font-family:'Cinzel Decorative',serif;font-size:1.8rem;color:var(--gold);text-shadow:0 0 30px rgba(212,160,23,0.6);margin-bottom:1rem">Du hast das Grimoire erweckt</div>
+    <div style="font-family:'IM Fell English',serif;font-style:italic;color:var(--staub);line-height:1.9;font-size:1rem;margin-bottom:1.5rem">
+      Dieses Werkzeug wurde erschaffen von<br>
+      <span style="color:var(--gold);font-size:1.2rem">Babsi x Cem</span><br><br>
+      <span style="color:var(--asche);font-size:0.85rem">„Wer die Nullen beherrscht, beherrscht die Einsen.<br>Wer die Einsen beherrscht, beherrscht die Welt."</span><br><br>
+      <span style="color:var(--mystisch);font-size:0.8rem;font-family:'Share Tech Mono',monospace">01001000 01101111 01110100 01110100 01100101</span><br>
+      <span style="color:var(--mystisch);font-size:0.8rem;font-family:'Share Tech Mono',monospace">01000011 01100101 01101101</span>
+    </div>
+    <div id="eggDecoded" style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--giftgrün);margin-bottom:1.5rem;min-height:1.5rem"></div>
+    <div style="font-family:'Cinzel',serif;font-size:0.7rem;color:var(--asche);letter-spacing:0.2em">KLICKE UM ZU SCHLIEßEN</div>
+  </div>
+</div>
+
+<!-- BODY -->
+<main class="grimoire-body">
+
+  <div class="grimoire-quote">
+    In den Tiefen des Siliziums schlummern Geheimnisse, älter als Stahl...
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-banner">
+    <div class="progress-label">Lernfortschritt</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-count" id="progressCount">0 / 5 Kapitel</div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       I. BINÄRSYSTEM
+  ════════════════════════════════════════ -->
+  <section class="chapter ch-binaer" id="binaer" style="--i:0">
+    <div class="chapter-header">
+      <span class="chapter-num">I</span>
+      <span class="chapter-title">Binärsystem</span>
+      <span class="chapter-icon">⚙</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Grundprinzip</div>
+      <p>Das Binärsystem (Basis 2) verwendet nur die Ziffern <strong style="color:var(--gold)">0</strong> und <strong style="color:var(--gold)">1</strong>. Jede Stelle heißt <em>Bit</em>. Acht Bits bilden ein <em>Byte</em>.</p>
+
+      <div class="highlight-box" style="margin-top:1rem">
+        <strong style="color:var(--gold)">Dezimal → Binär:</strong> Wiederholtes Dividieren durch 2, Rest von unten lesen.<br>
+        <strong style="color:var(--gold)">Binär → Dezimal:</strong> Stellenwerte aufsummieren (2⁰, 2¹, 2², …)
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Stellenwerte</div>
+      <div class="bitwert-row" id="stellenwerte"></div>
+      <p style="margin-top:0.6rem;font-size:0.82rem">
+        <span class="tag tag-gold">Beispiel:</span>
+        <span style="font-family:'Share Tech Mono',monospace;color:var(--knochen)">13₁₀ = 8+4+1 = <span style="color:var(--gold)">1101</span>₂</span>
+      </p>
+    </div>
+
+    <!-- CONVERTER -->
+    <div class="card">
+      <div class="card-title">⚗ Umrechnungs-Orakel</div>
+      <div class="converter-widget">
+        <div class="converter-row">
+          <div class="conv-group">
+            <div class="converter-label">Dezimal eingeben</div>
+            <input type="number" class="conv-input" id="decIn" placeholder="z.B. 42" min="0" max="65535" oninput="convertDec()">
+          </div>
+          <div class="conv-group">
+            <div class="converter-label">Binär eingeben</div>
+            <input type="text" class="conv-input" id="binIn" placeholder="z.B. 101010" oninput="convertBin()">
+          </div>
+          <div class="conv-group">
+            <div class="converter-label">Hexadezimal eingeben</div>
+            <input type="text" class="conv-input" id="hexIn" placeholder="z.B. 2A" oninput="convertHex()">
+          </div>
+        </div>
+        <div class="conv-result" id="convResult">— Gib eine Zahl ein, Schüler —</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Wichtige Begriffe</div>
+      <div class="two-col">
+        <div>
+          <span class="tag tag-gold">Bit</span> kleinste Einheit (0 oder 1)<br><br>
+          <span class="tag tag-gold">Byte</span> 8 Bit → 256 Werte (0–255)<br><br>
+          <span class="tag tag-gold">Nibble</span> 4 Bit → 1 Hex-Ziffer
+        </div>
+        <div>
+          <span class="tag tag-blau">Hexadezimal</span> Basis 16, Ziffern 0–9, A–F<br><br>
+          <span class="tag tag-blau">MSB</span> Most Significant Bit (links)<br><br>
+          <span class="tag tag-blau">LSB</span> Least Significant Bit (rechts)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       II. LOGISCHE GATTER
+  ════════════════════════════════════════ -->
+  <section class="chapter ch-gatter" id="gatter" style="--i:1">
+    <div class="chapter-header">
+      <span class="chapter-num">II</span>
+      <span class="chapter-title">Logische Gatter</span>
+      <span class="chapter-icon">⬡</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Die 7 fundamentalen Gatter</div>
+      <p>Logische Gatter sind die Elementarbausteine digitaler Schaltkreise. Sie verarbeiten binäre Eingangssignale und erzeugen ein definiertes Ausgangssignal.</p>
+    </div>
+
+    <div class="gate-grid" id="gatterGrid"></div>
+
+    <!-- ORACLE -->
+    <div class="card" style="margin-top:1rem">
+      <div class="card-title">⚗ Gatter-Orakel — Eigene Werte testen</div>
+      <div class="oracle-widget">
+        <div class="oracle-inputs">
+          <div>
+            <div class="converter-label">Gatter wählen</div>
+            <select class="oracle-select" id="oracleGate" onchange="calcOracle()">
+              <option value="NOT">NOT (1 Eingang)</option>
+              <option value="AND">AND</option>
+              <option value="OR">OR</option>
+              <option value="NAND">NAND</option>
+              <option value="NOR">NOR</option>
+              <option value="XOR">XOR</option>
+              <option value="XNOR">XNOR</option>
+            </select>
+          </div>
+          <div>
+            <div class="converter-label">Eingang A</div>
+            <div class="oracle-toggle">
+              <button class="bit-btn" id="btnA" onclick="toggleBit('A')">0</button>
+            </div>
+          </div>
+          <div id="inputBGroup">
+            <div class="converter-label">Eingang B</div>
+            <div class="oracle-toggle">
+              <button class="bit-btn" id="btnB" onclick="toggleBit('B')">0</button>
+            </div>
+          </div>
+        </div>
+        <div class="oracle-result" id="oracleResult">→ Ergebnis erscheint hier</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       III. SCHALTTERME
+  ════════════════════════════════════════ -->
+  <section class="chapter ch-schaltterme" id="schaltterme" style="--i:2">
+    <div class="chapter-header">
+      <span class="chapter-num">III</span>
+      <span class="chapter-title">Schaltterme</span>
+      <span class="chapter-icon">∴</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Boolesche Algebra</div>
+      <p>Schaltterme sind logische Formeln, die Schaltfunktionen algebraisch beschreiben. Benannt nach George Boole (1815–1864).</p>
+
+      <div class="highlight-box" style="margin-top:1rem">
+        <strong style="color:var(--gold)">Schreibweisen:</strong><br>
+        AND → <code style="color:var(--gold)">A · B</code> &nbsp;|&nbsp; OR → <code style="color:var(--gold)">A + B</code> &nbsp;|&nbsp; NOT → <code style="color:var(--gold)">¬A</code> oder <code style="color:var(--gold)">Ā</code>
+      </div>
+
+      <div style="margin-top:1rem">
+        <div class="formula">F = A · B + ¬C</div>
+        <div style="font-size:0.82rem;color:var(--asche);margin-top:0.4rem;font-style:italic">
+          &rarr; F ist wahr, wenn (A AND B) ODER NOT C gilt
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">De Morgan'sche Gesetze</div>
+      <div class="two-col">
+        <div>
+          <div class="formula">¬(A · B) = ¬A + ¬B</div>
+          <p style="font-size:0.8rem;margin-top:0.4rem">NOT(A AND B) = (NOT A) OR (NOT B)</p>
+        </div>
+        <div>
+          <div class="formula">¬(A + B) = ¬A · ¬B</div>
+          <p style="font-size:0.8rem;margin-top:0.4rem">NOT(A OR B) = (NOT A) AND (NOT B)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Wichtige Gesetze der Booleschen Algebra</div>
+      <div id="boolGesetze"></div>
+    </div>
+
+    <!-- EVALUATOR -->
+    <div class="card">
+      <div class="card-title">⚗ Formel-Auswertung (interaktiv)</div>
+      <div class="eval-widget">
+        <div class="converter-label" style="margin-bottom:0.6rem">Formel eingeben (verwende: AND, OR, NOT, NAND, NOR, XOR, (, ), A, B, C)</div>
+        <div class="eval-row">
+          <input type="text" class="eval-input" id="formulaIn" placeholder="z.B. (A AND B) OR NOT C" value="(A AND B) OR NOT C">
+          <button class="conv-btn" onclick="evalFormula()">Auswerten ☩</button>
+        </div>
+        <div class="converter-label" style="margin-bottom:0.6rem">Variablenwerte</div>
+        <div class="eval-vars" id="evalVars"></div>
+        <div class="eval-result" id="evalResult">— Gib eine Formel ein —</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Karnaugh-Veitch Hinweis</div>
+      <p>KV-Diagramme dienen zur Minimierung von Schaltfunktionstermen. Gruppen von 1en (Zweierpotenzen: 1, 2, 4, 8 …) werden zu kürzeren Termen zusammengefasst.</p>
+      <div class="highlight-box" style="margin-top:0.8rem">
+        <strong style="color:var(--gold)">Regel:</strong> Immer die größtmögliche Gruppe bilden. Gruppen dürfen sich überlappen. Randgruppen sind erlaubt (zyklisch).
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       IV. LOGISCHE SCHALTUNGEN
+  ════════════════════════════════════════ -->
+  <section class="chapter ch-schaltungen" id="schaltungen" style="--i:3">
+    <div class="chapter-header">
+      <span class="chapter-num">IV</span>
+      <span class="chapter-title">Logische Schaltungen</span>
+      <span class="chapter-icon">◈</span>
+    </div>
+
+    <!-- Halbaddierer -->
+    <div class="card">
+      <button class="accordion-toggle open" onclick="toggleAcc(this)">
+        Halbaddierer
+        <span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body open">
+        <p>Addiert zwei 1-Bit-Zahlen. Liefert <em>Summe (S)</em> und <em>Übertrag (C, Carry)</em>.</p>
+        <div class="two-col" style="margin-top:1rem">
+          <div>
+            <div class="formula">S = A XOR B</div>
+            <div class="formula">C = A AND B</div>
+          </div>
+          <div>
+            <table class="truth-table">
+              <tr><th>A</th><th>B</th><th>S</th><th>C</th></tr>
+              <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+              <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+              <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+              <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="circuit-box" style="margin-top:1rem">A ──┬──[XOR]── S
+    │
+B ──┤
+    │
+    └──[AND]── C (Carry)</div>
+      </div>
+    </div>
+
+    <!-- Volladdierer -->
+    <div class="card">
+      <button class="accordion-toggle" onclick="toggleAcc(this)">
+        Volladdierer
+        <span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
+        <p>Addiert drei 1-Bit-Zahlen (A, B + Carry-In). Kann verkettet werden für n-Bit-Addition.</p>
+        <div class="two-col" style="margin-top:1rem">
+          <div>
+            <div class="formula">S = A XOR B XOR Cᵢₙ</div>
+            <div class="formula">Cₒᵤₜ = (A·B) + (Cᵢₙ·(A XOR B))</div>
+            <div class="highlight-box grün" style="margin-top:0.8rem">
+              Besteht aus 2 Halbaddierern + 1 OR-Gatter
+            </div>
+          </div>
+          <div>
+            <table class="truth-table">
+              <tr><th>A</th><th>B</th><th>Cᵢ</th><th>S</th><th>Cₒ</th></tr>
+              <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+              <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+              <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+              <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+              <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+              <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+              <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+              <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multiplexer -->
+    <div class="card">
+      <button class="accordion-toggle" onclick="toggleAcc(this)">
+        Multiplexer (MUX)
+        <span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
+        <p>Wählt einen von mehreren Eingängen anhand eines Steuersignals (Select) aus und leitet ihn an den Ausgang weiter.</p>
+        <div class="circuit-box" style="margin-top:0.8rem">  D0 ──┐
+  D1 ──┤  [MUX]── Y
+  D2 ──┤
+  D3 ──┘
+    S[1:0] (Select)
+
+  Y = D[S]  (S wählt den Eingang)</div>
+        <div class="highlight-box blau" style="margin-top:0.8rem">
+          2ⁿ Dateneingänge, n Steuerleitungen. Ein 4:1-MUX benötigt 2 Steuerleitungen.
+        </div>
+      </div>
+    </div>
+
+    <!-- Decoder -->
+    <div class="card">
+      <button class="accordion-toggle" onclick="toggleAcc(this)">
+        Decoder
+        <span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
+        <p>Wandelt einen n-Bit-Code in bis zu 2ⁿ Ausgangsleitungen um. Genau eine Ausgangsleitung ist HIGH.</p>
+        <div class="circuit-box" style="margin-top:0.8rem">  A ──┐              Y0 (A=0, B=0)
+  B ──┤  [2:4 DEC]── Y1 (A=0, B=1)
+      │              Y2 (A=1, B=0)
+      └──────────── Y3 (A=1, B=1)</div>
+        <div class="highlight-box blau" style="margin-top:0.8rem">
+          Anwendung: Speicheradressierung, 7-Segment-Anzeige, Befehlsdekodierung in CPUs.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       V. KRYPTOGRAPHIE
+  ════════════════════════════════════════ -->
+  <section class="chapter ch-krypto" id="krypto" style="--i:4">
+    <div class="chapter-header">
+      <span class="chapter-num">V</span>
+      <span class="chapter-title">Blockchiffren &amp; Kryptographie</span>
+      <span class="chapter-icon">🔐</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Was sind Blockchiffren?</div>
+      <p>Blockchiffren verschlüsseln Daten in Blöcken fester Größe. Sie bilden die Basis moderner symmetrischer Kryptographie.</p>
+
+      <div style="margin-top:1.2rem;display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start">
+        <div class="crypto-flow">
+          <div class="flow-box">Klartext (Plaintext)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box key">+ Schlüssel</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box accent">Blockchiffre</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box out">Ciphertext</div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div class="highlight-box purpur">
+            <strong style="color:var(--purpur)">Eigenschaften:</strong><br>
+            • Feste Blockgröße (z.B. 128 Bit)<br>
+            • Symmetrischer Schlüssel<br>
+            • Mehrere Verschlüsselungsrunden<br>
+            • Invertierbar (Entschlüsselung möglich)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DES, AES etc. -->
+    <div class="gate-grid" id="kryptoGrid"></div>
+
+    <!-- XOR Verschlüsselung -->
+    <div class="card" style="margin-top:1rem">
+      <button class="accordion-toggle" onclick="toggleAcc(this)">
+        XOR-Verschlüsselung &amp; One-Time-Pad
+        <span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
+        <p>XOR ist das Herzstück vieler Verschlüsselungsverfahren. XOR mit einem Schlüssel ist die einfachste Form der symmetrischen Verschlüsselung.</p>
+        <div class="two-col" style="margin-top:1rem">
+          <div>
+            <div class="formula">C = P XOR K</div>
+            <div style="font-size:0.82rem;color:var(--asche);margin:0.4rem 0 0.8rem">Ciphertext = Plaintext XOR Key</div>
+            <div class="formula">P = C XOR K</div>
+            <div style="font-size:0.82rem;color:var(--asche);margin-top:0.4rem">Entschlüsselung: gleiche Operation!</div>
+          </div>
+          <div>
+            <div class="highlight-box purpur">
+              <strong style="color:var(--purpur)">One-Time-Pad:</strong><br>
+              Schlüssel so lang wie Nachricht, wirklich zufällig, nur einmal benutzt → theoretisch unknackbar (Shannon, 1949)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hash Funktionen -->
+    <div class="card">
+      <button class="accordion-toggle" onclick="toggleAcc(this)">
+        Hash-Funktionen
+        <span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
+        <p>Hash-Funktionen bilden beliebig lange Eingaben auf einen festen Output (Hash-Wert) ab. Sie sind <em>Einwegfunktionen</em>.</p>
+        <div style="margin-top:1rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.8rem">
+          <div class="highlight-box">
+            <strong style="color:var(--gold)">MD5</strong><br>
+            128 Bit, veraltet, unsicher
+          </div>
+          <div class="highlight-box">
+            <strong style="color:var(--gold)">SHA-1</strong><br>
+            160 Bit, veraltet
+          </div>
+          <div class="highlight-box grün">
+            <strong style="color:var(--giftgrün)">SHA-256</strong><br>
+            256 Bit, sicher, weit verbreitet
+          </div>
+          <div class="highlight-box grün">
+            <strong style="color:var(--giftgrün)">SHA-3</strong><br>
+            256/512 Bit, aktueller Standard
+          </div>
+        </div>
+        <div class="highlight-box" style="margin-top:1rem">
+          <strong style="color:var(--gold)">Eigenschaften:</strong>
+          Deterministisch · Schnell berechenbar · Kollisionsresistent · Lawineneffekt · Nicht umkehrbar
+        </div>
+      </div>
+    </div>
+
+    <!-- Betriebsmodi -->
+    <div class="card">
+      <button class="accordion-toggle" onclick="toggleAcc(this)">
+        Betriebsmodi von Blockchiffren
+        <span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.8rem;margin-top:0.5rem">
+          <div class="highlight-box rot">
+            <strong style="color:var(--blutrot)">ECB</strong> – Electronic Codebook<br>
+            <span style="font-size:0.8rem">Jeder Block unabhängig → <em>unsicher</em>, Muster erkennbar</span>
+          </div>
+          <div class="highlight-box">
+            <strong style="color:var(--gold)">CBC</strong> – Cipher Block Chaining<br>
+            <span style="font-size:0.8rem">Block mit Vorgänger-Ciphertext XORed → sicherer</span>
+          </div>
+          <div class="highlight-box grün">
+            <strong style="color:var(--giftgrün)">CTR</strong> – Counter Mode<br>
+            <span style="font-size:0.8rem">Zähler verschlüsseln → Strom erzeugen, parallelisierbar</span>
+          </div>
+          <div class="highlight-box grün">
+            <strong style="color:var(--giftgrün)">GCM</strong> – Galois/Counter Mode<br>
+            <span style="font-size:0.8rem">CTR + Authentifizierung → Standard heute</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       PRÜFUNG
+  ════════════════════════════════════════ -->
+  <section class="chapter" id="pruefung" style="--i:5;border-top:2px solid var(--blutrot);padding-top:2rem;margin-top:3rem">
+    <div class="chapter-header" style="border-color:var(--blutrot)">
+      <span class="chapter-num" style="color:var(--blutrot)">☩</span>
+      <span class="chapter-title" style="color:var(--blutrot)">Abschlussprüfung</span>
+      <span class="chapter-icon">⚔</span>
+    </div>
+
+    <div class="card" style="border-color:var(--dunkelrot);background:rgba(92,14,14,0.08)">
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center">
+        <div>
+          <div class="card-title" style="color:var(--blutrot)">Prüfungsbedingungen</div>
+          <p style="font-size:0.88rem">20 Fragen · ca. 20 Minuten · 9. Klasse Niveau</p>
+          <p style="font-size:0.82rem;color:var(--asche);margin-top:0.3rem">Themen: Binär, Logik, Gatter, Schaltterme, Kryptographie</p>
+        </div>
+        <div id="examTimerBox" style="display:none;font-family:'Share Tech Mono',monospace;font-size:2rem;color:var(--gold);min-width:100px;text-align:center;border:1px solid var(--dunkelrot);padding:0.5rem 1rem;background:rgba(92,14,14,0.15)">
+          <div id="examTimer">20:00</div>
+          <div style="font-size:0.6rem;color:var(--asche);letter-spacing:0.15em">VERBLEIBEND</div>
+        </div>
+      </div>
+      <div id="examStartArea" style="margin-top:1.2rem">
+        <div style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--asche);letter-spacing:0.1em;margin-bottom:0.8rem">DEIN NAME (optional)</div>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center">
+          <input type="text" id="examName" class="conv-input" placeholder="Schüler des Grimoires..." style="max-width:280px">
+          <button class="conv-btn" onclick="startExam()" style="font-size:0.9rem;padding:0.6rem 2rem;border-color:var(--blutrot);color:var(--blutrot)">☩ Prüfung beginnen</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="examQuestions" style="display:none"></div>
+    <div id="examSubmitArea" style="display:none;margin-top:1.5rem">
+      <button class="conv-btn" onclick="submitExam()" style="width:100%;padding:1rem;font-size:1rem;border-color:var(--blutrot);color:var(--blutrot);letter-spacing:0.15em">☩ Prüfung abgeben ☩</button>
+    </div>
+    <div id="examResults" style="display:none;margin-top:1.5rem"></div>
+  </section>
+
+</main>
+
+<!-- EASTER EGG OVERLAY -->
+<div id="easterEgg" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.97);align-items:center;justify-content:center;flex-direction:column" onclick="closeEgg()">
+  <div style="text-align:center;max-width:600px;padding:2rem;animation:egg-appear 0.8s ease both">
+    <div style="font-size:4rem;margin-bottom:1rem;display:inline-block;animation:spin-slow 8s linear infinite">☩</div>
+    <div style="font-family:'Cinzel Decorative',serif;font-size:1.6rem;color:var(--gold);text-shadow:0 0 30px rgba(212,160,23,0.6);margin-bottom:1rem">Verborgenes Wissen enthüllt</div>
+    <div style="font-family:'IM Fell English',serif;font-style:italic;color:var(--staub);line-height:2;font-size:0.95rem;margin-bottom:1.2rem">
+      Dieses Grimoire wurde erschaffen für<br>
+      <span style="color:var(--gold);font-size:1.3rem;font-style:normal">Babsi &amp; Cem </span><br><br>
+      <span style="color:var(--asche);font-size:0.85rem">„Wer Nullen und einsen lesen kann <br> der findet seine eigene Babsi, Follow the leader."</span>
+    </div>
+
+    <div id="eggDecoded" style="font-family:'Share Tech Mono',monospace;font-size:0.85rem;color:var(--giftgrün);margin:0.8rem 0 1.5rem;min-height:1.4rem;animation:flicker 2s infinite"></div>
+    <div style="font-family:'Cinzel',serif;font-size:0.65rem;color:var(--asche);letter-spacing:0.25em;opacity:0.6">KLICKE UM ZU SCHLIEßEN</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="grimoire-footer">
+  ☩ &nbsp; Das Grimoire schließt sich. Die Geheimnisse der Bits schlummern nun in deinem Geist. &nbsp; ☩<br>
+  <span style="font-size:0.7rem;opacity:0.5;margin-top:0.4rem;display:block">Möge der Code mit dir sein</span>
+</footer>
+
+<script>
+// ─── STELLENWERTE ───────────────────────────────────────────────────────────
+(function() {
+  const cont = document.getElementById('stellenwerte');
+  const powers = [7,6,5,4,3,2,1,0];
+  powers.forEach(p => {
+    const val = Math.pow(2,p);
+    const cell = document.createElement('div');
+    cell.className = 'bitwert-cell';
+    cell.innerHTML = `<div class="bitwert-top">${val}</div><div class="bitwert-bottom">2<sup>${p}</sup></div>`;
+    cont.appendChild(cell);
+  });
+})();
+
+// ─── CONVERTER ──────────────────────────────────────────────────────────────
+let converting = false;
+function convertDec() {
+  if(converting) return; converting = true;
+  const v = parseInt(document.getElementById('decIn').value);
+  const r = document.getElementById('convResult');
+  if(!isNaN(v) && v >= 0) {
+    document.getElementById('binIn').value = v.toString(2);
+    document.getElementById('hexIn').value = v.toString(16).toUpperCase();
+    r.innerHTML = `<span style="color:var(--knochen)">${v}</span> <span style="color:var(--asche)">= </span><span style="color:var(--gold)">${v.toString(2)}</span><span style="color:var(--asche)"> (bin)  </span><span style="color:var(--eisblau)">${v.toString(16).toUpperCase()}</span><span style="color:var(--asche)"> (hex)</span>`;
+  } else { r.textContent = '— Ungültige Eingabe —'; }
+  converting = false;
+}
+function convertBin() {
+  if(converting) return; converting = true;
+  const s = document.getElementById('binIn').value.trim();
+  const r = document.getElementById('convResult');
+  if(/^[01]+$/.test(s)) {
+    const v = parseInt(s,2);
+    document.getElementById('decIn').value = v;
+    document.getElementById('hexIn').value = v.toString(16).toUpperCase();
+    r.innerHTML = `<span style="color:var(--gold)">${s}</span> <span style="color:var(--asche)">= </span><span style="color:var(--knochen)">${v}</span><span style="color:var(--asche)"> (dez)  </span><span style="color:var(--eisblau)">${v.toString(16).toUpperCase()}</span><span style="color:var(--asche)"> (hex)</span>`;
+  } else { r.textContent = '— Nur 0 und 1 erlaubt —'; }
+  converting = false;
+}
+function convertHex() {
+  if(converting) return; converting = true;
+  const s = document.getElementById('hexIn').value.trim();
+  const r = document.getElementById('convResult');
+  if(/^[0-9a-fA-F]+$/.test(s) && s.length > 0) {
+    const v = parseInt(s,16);
+    document.getElementById('decIn').value = v;
+    document.getElementById('binIn').value = v.toString(2);
+    r.innerHTML = `<span style="color:var(--eisblau)">${s.toUpperCase()}</span> <span style="color:var(--asche)">= </span><span style="color:var(--knochen)">${v}</span><span style="color:var(--asche)"> (dez)  </span><span style="color:var(--gold)">${v.toString(2)}</span><span style="color:var(--asche)"> (bin)</span>`;
+  } else { r.textContent = '— Ungültige Hex-Eingabe —'; }
+  converting = false;
+}
+
+// ─── GATE DATA & RENDER ─────────────────────────────────────────────────────
+const gates = [
+  {
+    name:'NOT', formula:'¬A', glyph:'¬',
+    desc:'Invertiert das Eingangssignal. Aus 0 wird 1, aus 1 wird 0.',
+    table:[{a:0,r:1},{a:1,r:0}],
+    cols:['A','¬A'], hint:'', color:'var(--mystisch)'
+  },
+  {
+    name:'AND', formula:'A · B', glyph:'∧',
+    desc:'Ausgabe 1 nur wenn BEIDE Eingänge 1 sind.',
+    table:[{a:0,b:0,r:0},{a:0,b:1,r:0},{a:1,b:0,r:0},{a:1,b:1,r:1}],
+    cols:['A','B','A AND B'], hint:'', color:'var(--gold)'
+  },
+  {
+    name:'OR', formula:'A + B', glyph:'∨',
+    desc:'Ausgabe 1 wenn MINDESTENS EIN Eingang 1 ist.',
+    table:[{a:0,b:0,r:0},{a:0,b:1,r:1},{a:1,b:0,r:1},{a:1,b:1,r:1}],
+    cols:['A','B','A OR B'], hint:'', color:'var(--eisblau)'
+  },
+  {
+    name:'NAND', formula:'¬(A · B)', glyph:'⊼',
+    desc:'NOT AND – Negation des AND-Gatters.',
+    table:[{a:0,b:0,r:1},{a:0,b:1,r:1},{a:1,b:0,r:1},{a:1,b:1,r:0}],
+    cols:['A','B','NAND'], hint:'💡 Mit NAND allein kann man ALLE anderen Gatter nachbauen (funktional vollständig)!',
+    color:'var(--blutrot)'
+  },
+  {
+    name:'NOR', formula:'¬(A + B)', glyph:'⊽',
+    desc:'NOT OR – Negation des OR-Gatters. Ebenfalls funktional vollständig.',
+    table:[{a:0,b:0,r:1},{a:0,b:1,r:0},{a:1,b:0,r:0},{a:1,b:1,r:0}],
+    cols:['A','B','NOR'], hint:'', color:'var(--kupfer)'
+  },
+  {
+    name:'XOR', formula:'A ⊕ B', glyph:'⊕',
+    desc:'Exklusives ODER – Ausgabe 1 wenn genau EIN Eingang 1 ist.',
+    table:[{a:0,b:0,r:0},{a:0,b:1,r:1},{a:1,b:0,r:1},{a:1,b:1,r:0}],
+    cols:['A','B','XOR'], hint:'Grundbaustein des Halbaddierers. Herzstück der Kryptographie.', color:'var(--giftgrün)'
+  },
+  {
+    name:'XNOR', formula:'¬(A ⊕ B)', glyph:'⊙',
+    desc:'NOT XOR – Ausgabe 1 wenn BEIDE Eingänge gleich sind.',
+    table:[{a:0,b:0,r:1},{a:0,b:1,r:0},{a:1,b:0,r:0},{a:1,b:1,r:1}],
+    cols:['A','B','XNOR'], hint:'Gleichheitskomparator: prüft ob A = B.', color:'var(--türkis)'
+  },
+];
+
+(function renderGates() {
+  const grid = document.getElementById('gatterGrid');
+  gates.forEach(g => {
+    const div = document.createElement('div');
+    div.className = 'gate-card';
+    div.setAttribute('data-glyph', g.glyph);
+
+    const rows = g.table.map(row => {
+      if(g.name === 'NOT') {
+        return `<tr><td class="val-${row.a}">${row.a}</td><td class="val-${row.r}">${row.r}</td></tr>`;
+      } else {
+        return `<tr><td class="val-${row.a}">${row.a}</td><td class="val-${row.b}">${row.b}</td><td class="val-${row.r}">${row.r}</td></tr>`;
+      }
+    }).join('');
+
+    const headers = g.cols.map(c=>`<th>${c}</th>`).join('');
+
+    div.innerHTML = `
+      <div class="gate-name" style="color:${g.color}">${g.name}</div>
+      <div class="gate-formula">${g.formula}</div>
+      <div class="gate-desc">${g.desc}</div>
+      <table class="truth-table"><tr>${headers}</tr>${rows}</table>
+      ${g.hint ? `<div class="gate-highlight" style="margin-top:0.8rem;border-left-color:${g.color}">${g.hint}</div>` : ''}
+    `;
+    grid.appendChild(div);
+  });
+})();
+
+// ─── GATTER ORACLE ──────────────────────────────────────────────────────────
+let bitA = 0, bitB = 0;
+function toggleBit(which) {
+  if(which==='A') { bitA = bitA ? 0 : 1; document.getElementById('btnA').textContent = bitA; document.getElementById('btnA').classList.toggle('on', !!bitA); }
+  else { bitB = bitB ? 0 : 1; document.getElementById('btnB').textContent = bitB; document.getElementById('btnB').classList.toggle('on', !!bitB); }
+  calcOracle();
+}
+function calcOracle() {
+  const gate = document.getElementById('oracleGate').value;
+  const bGrp = document.getElementById('inputBGroup');
+  bGrp.style.display = gate === 'NOT' ? 'none' : '';
+  let result;
+  switch(gate) {
+    case 'NOT':  result = bitA ? 0 : 1; break;
+    case 'AND':  result = bitA & bitB; break;
+    case 'OR':   result = bitA | bitB; break;
+    case 'NAND': result = (bitA & bitB) ? 0 : 1; break;
+    case 'NOR':  result = (bitA | bitB) ? 0 : 1; break;
+    case 'XOR':  result = bitA ^ bitB; break;
+    case 'XNOR': result = (bitA ^ bitB) ? 0 : 1; break;
+  }
+  const el = document.getElementById('oracleResult');
+  const inputStr = gate==='NOT' ? `NOT ${bitA}` : `${bitA} ${gate} ${bitB}`;
+  el.className = `oracle-result res-${result}`;
+  el.innerHTML = `<span style="color:var(--asche);font-size:0.9rem">${inputStr} =</span>&nbsp;<span style="font-size:2rem">${result}</span>`;
+}
+calcOracle();
+
+// ─── BOOLEAN LAWS ────────────────────────────────────────────────────────────
+const laws = [
+  { name:'Kommutativgesetz', f1:'A · B = B · A', f2:'A + B = B + A' },
+  { name:'Assoziativgesetz', f1:'(A·B)·C = A·(B·C)', f2:'(A+B)+C = A+(B+C)' },
+  { name:'Distributivgesetz', f1:'A·(B+C) = A·B + A·C', f2:'A+(B·C) = (A+B)·(A+C)' },
+  { name:'Neutralelement', f1:'A · 1 = A', f2:'A + 0 = A' },
+  { name:'Komplementärgesetz', f1:'A · ¬A = 0', f2:'A + ¬A = 1' },
+  { name:'Absorptionsgesetz', f1:'A · (A+B) = A', f2:'A + A·B = A' },
+  { name:'Doppelnegation', f1:'¬¬A = A', f2:'' },
+];
+(function() {
+  const cont = document.getElementById('boolGesetze');
+  laws.forEach(l => {
+    cont.innerHTML += `
+      <div style="display:flex;gap:1rem;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--mittelgrau)">
+        <div style="min-width:180px;font-family:'Cinzel',serif;font-size:0.75rem;color:var(--asche);letter-spacing:0.05em">${l.name}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.82rem;color:var(--gold);flex:1">${l.f1}</div>
+        ${l.f2 ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.82rem;color:var(--dunklegold);flex:1">${l.f2}</div>` : ''}
+      </div>`;
+  });
+})();
+
+// ─── FORMULA EVALUATOR ──────────────────────────────────────────────────────
+function evalFormula() {
+  const expr = document.getElementById('formulaIn').value.trim();
+  const varEls = document.querySelectorAll('.eval-var-btn');
+  const vars = {};
+  varEls.forEach(el => { vars[el.dataset.name] = parseInt(el.dataset.val); });
+
+  // Extract variable names
+  const names = [...new Set(expr.match(/[A-Z]/g) || [])].sort();
+  if(names.length === 0) {
+    document.getElementById('evalResult').textContent = '— Keine Variablen gefunden —';
+    return;
+  }
+
+  // Build truth table
+  const rows = Math.pow(2, names.length);
+  let out = '';
+  const header = names.join('  ') + '  →  F\n' + '─'.repeat(names.length*4+6) + '\n';
+  out += header;
+
+  for(let i = 0; i < rows; i++) {
+    const assignment = {};
+    names.forEach((n,j) => { assignment[n] = (i >> (names.length-1-j)) & 1; });
+    try {
+      const result = evalExpr(expr, assignment);
+      const row = names.map(n => String(assignment[n]).padEnd(3,' ')).join(' ') + '  →  ' + (result ? '1' : '0');
+      out += row + '\n';
+    } catch(e) {
+      document.getElementById('evalResult').textContent = 'Fehler: ' + e.message;
+      return;
+    }
+  }
+  document.getElementById('evalResult').textContent = out;
+}
+
+function evalExpr(expr, vars) {
+  let e = expr.toUpperCase()
+    .replace(/\bNOT\b/g, '!')
+    .replace(/\bAND\b/g, '&&')
+    .replace(/\bNAND\b/g, '&&&')
+    .replace(/\bNOR\b/g, '|||')
+    .replace(/\bXNOR\b/g, '===')
+    .replace(/\bXOR\b/g, '!==')
+    .replace(/\bOR\b/g, '||');
+
+  // Replace NAND/NOR/XNOR back
+  e = e
+    .replace(/([01])&&&([01])/g, (m,a,b)=> (parseInt(a)&&parseInt(b)?0:1))
+    .replace(/([01])\|\|\|([01])/g, (m,a,b)=> (parseInt(a)||parseInt(b)?0:1));
+
+  Object.keys(vars).forEach(k => { e = e.replace(new RegExp('\\b'+k+'\\b','g'), vars[k]); });
+  return eval(e) ? 1 : 0;
+}
+
+// Build eval var buttons
+document.getElementById('formulaIn').addEventListener('input', buildVarButtons);
+
+function buildVarButtons() {
+  const expr = document.getElementById('formulaIn').value;
+  const names = [...new Set(expr.match(/[A-Z]/g) || [])].sort();
+  const cont = document.getElementById('evalVars');
+  cont.innerHTML = '';
+  names.forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = 'bit-btn eval-var-btn';
+    btn.dataset.name = n;
+    btn.dataset.val = '0';
+    btn.textContent = n + '=0';
+    btn.onclick = function() {
+      const v = this.dataset.val === '0' ? '1' : '0';
+      this.dataset.val = v;
+      this.textContent = n + '=' + v;
+      this.classList.toggle('on', v==='1');
+      evalFormula();
+    };
+    cont.appendChild(btn);
+    const lbl = document.createElement('span');
+    lbl.style.cssText = 'font-size:0.7rem;color:var(--asche);margin-right:0.5rem;align-self:center';
+    cont.appendChild(lbl);
+  });
+  if(names.length > 0) evalFormula();
+}
+buildVarButtons();
+
+// ─── KRYPTO CARDS ───────────────────────────────────────────────────────────
+const kryptoCiphers = [
+  { name:'DES', color:'var(--kupfer)', glyph:'🔑',
+    desc:'Data Encryption Standard, 1977. 56-Bit-Schlüssel, 64-Bit-Blöcke. 16 Runden Feistel-Netzwerk.',
+    tags:['56-Bit Schlüssel','64-Bit Block','16 Runden'], warn:'Veraltet – heute unsicher (brute-force brechbar)' },
+  { name:'3DES (Triple-DES)', color:'var(--rostgold)', glyph:'🔑🔑🔑',
+    desc:'Dreifache Anwendung von DES mit 2–3 verschiedenen Schlüsseln. Erhöht effektive Schlüssellänge auf 112–168 Bit.',
+    tags:['112–168 Bit','Kompatibel mit DES'], warn:'Langsam – durch AES weitgehend abgelöst' },
+  { name:'AES', color:'var(--giftgrün)', glyph:'🛡',
+    desc:'Advanced Encryption Standard, seit 2001. Substituions-Permutations-Netzwerk. Unterstützt 128, 192 und 256 Bit Schlüssellängen.',
+    tags:['128/192/256-Bit Schlüssel','128-Bit Block','10/12/14 Runden'], warn:null },
+];
+
+(function() {
+  const grid = document.getElementById('kryptoGrid');
+  kryptoCiphers.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'gate-card';
+    div.setAttribute('data-glyph', '');
+    div.style.borderTop = `2px solid ${c.color}`;
+    div.innerHTML = `
+      <div class="gate-name" style="color:${c.color}">${c.name}</div>
+      <div class="gate-desc">${c.desc}</div>
+      <div style="margin:0.6rem 0">${c.tags.map(t=>`<span class="tag" style="border-color:${c.color};color:${c.color}">${t}</span>`).join('')}</div>
+      ${c.warn ? `<div style="font-size:0.75rem;color:var(--blutrot);font-family:'Share Tech Mono',monospace;margin-top:0.4rem">⚠ ${c.warn}</div>` : `<div style="font-size:0.75rem;color:var(--giftgrün);font-family:'Share Tech Mono',monospace;margin-top:0.4rem">✔ Aktueller Standard</div>`}
+    `;
+    grid.appendChild(div);
+  });
+})();
+
+// ─── ACCORDION ──────────────────────────────────────────────────────────────
+function toggleAcc(btn) {
+  btn.classList.toggle('open');
+  const body = btn.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+// ─── PROGRESS ───────────────────────────────────────────────────────────────
+(function() {
+  const sections = ['binaer','gatter','schaltterme','schaltungen','krypto'];
+  const visited = new Set();
+  const fill = document.getElementById('progressFill');
+  const count = document.getElementById('progressCount');
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting && e.intersectionRatio > 0.2) {
+        visited.add(e.target.id);
+        const pct = (visited.size / sections.length) * 100;
+        fill.style.width = pct + '%';
+        count.textContent = visited.size + ' / ' + sections.length + ' Kapitel';
+      }
+    });
+  }, { threshold: 0.2 });
+
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) obs.observe(el);
+  });
+})();
+
+// ─── EASTER EGG ─────────────────────────────────────────────────────────────
+(function() {
+  // Konami code: ↑↑↓↓←→←→BA
+  const secret = [38,38,40,40,37,39,37,39,66,65];
+  let pos = 0;
+  document.addEventListener('keydown', e => {
+    if(e.keyCode === secret[pos]) {
+      pos++;
+      if(pos === secret.length) { pos = 0; openEgg(); }
+    } else { pos = 0; }
+  });
+
+  // Title click 5x
+  let clicks = 0, clickTimer;
+  document.querySelector('.grimoire-title').addEventListener('click', () => {
+    clicks++;
+    clearTimeout(clickTimer);
+    clickTimer = setTimeout(() => clicks = 0, 2000);
+    if(clicks >= 5) { clicks = 0; openEgg(); }
+  });
+
+  // Binary in footer: click on ☩
+  document.querySelector('.grimoire-footer').addEventListener('click', e => {
+    if(e.target.closest('footer') && Math.random() < 0.07) openEgg();
+  });
+})();
+
+function openEgg() {
+  const el = document.getElementById('easterEgg');
+  el.style.display = 'flex';
+  setTimeout(() => {
+    document.getElementById('eggDecoded').textContent = '→ "Die Babsi Vom Berg Knallt Bis Die Hanteln Vibrieren"';
+  }, 1200);
+}
+function closeEgg() {
+  document.getElementById('easterEgg').style.display = 'none';
+}
+
+// ─── PRÜFUNG ────────────────────────────────────────────────────────────────
+const examData = [
+  // BINÄR (5 Fragen)
+  {
+    nr: 1, topic: 'Binärsystem',
+    type: 'mc',
+    question: 'Welchen Dezimalwert hat die Binärzahl <code>1011</code>₂?',
+    options: ['9', '11', '13', '10'],
+    answer: 1,
+    explanation: '1·8 + 0·4 + 1·2 + 1·1 = 8 + 2 + 1 = <strong>11</strong>'
+  },
+  {
+    nr: 2, topic: 'Binärsystem',
+    type: 'mc',
+    question: 'Wie lautet die Binärdarstellung von <strong>25</strong>₁₀?',
+    options: ['11001', '10111', '11010', '10011'],
+    answer: 0,
+    explanation: '25 = 16+8+1 = 2⁴+2³+2⁰ = <strong>11001</strong>₂'
+  },
+  {
+    nr: 3, topic: 'Binärsystem',
+    type: 'mc',
+    question: 'Wie viele verschiedene Werte kann man mit <strong>4 Bit</strong> darstellen?',
+    options: ['8', '15', '16', '32'],
+    answer: 2,
+    explanation: '2⁴ = <strong>16</strong> Werte (0 bis 15)'
+  },
+  {
+    nr: 4, topic: 'Hexadezimal',
+    type: 'mc',
+    question: 'Welche Hexadezimalzahl entspricht dem Binärwert <code>1111 0000</code>₂?',
+    options: ['EF', 'F0', 'FF', '0F'],
+    answer: 1,
+    explanation: '1111 = F, 0000 = 0 → <strong>F0</strong>₁₆'
+  },
+  {
+    nr: 5, topic: 'Binärsystem',
+    type: 'input',
+    question: 'Rechne <strong>42</strong>₁₀ in Binär um. Gib nur die Binärzahl ein (ohne Leerzeichen):',
+    answer: '101010',
+    explanation: '42 = 32+8+2 = 2⁵+2³+2¹ = <strong>101010</strong>₂'
+  },
+  // GATTER (6 Fragen)
+  {
+    nr: 6, topic: 'Logische Gatter',
+    type: 'mc',
+    question: 'Was ist das Ergebnis von <code>1 AND 0</code>?',
+    options: ['0', '1', 'unbestimmt', 'abhängig von C'],
+    answer: 0,
+    explanation: 'AND liefert nur 1, wenn BEIDE Eingänge 1 sind. 1 AND 0 = <strong>0</strong>'
+  },
+  {
+    nr: 7, topic: 'Logische Gatter',
+    type: 'mc',
+    question: 'Welches Gatter liefert <strong>1</strong>, wenn genau ein Eingang 1 ist (nicht beide)?',
+    options: ['OR', 'AND', 'XOR', 'NAND'],
+    answer: 2,
+    explanation: '<strong>XOR</strong> (Exklusives ODER) ist genau dann 1, wenn die Eingänge verschieden sind.'
+  },
+  {
+    nr: 8, topic: 'Logische Gatter',
+    type: 'mc',
+    question: 'Was ergibt <code>NOT(1 AND 1)</code>?',
+    options: ['0', '1', '2', 'Fehler'],
+    answer: 0,
+    explanation: '1 AND 1 = 1, NOT(1) = <strong>0</strong>. Das ist das NAND-Gatter.'
+  },
+  {
+    nr: 9, topic: 'Logische Gatter',
+    type: 'mc',
+    question: 'Welche Aussage über das <strong>NAND-Gatter</strong> ist korrekt?',
+    options: [
+      'NAND liefert immer 0',
+      'Mit NAND kann man alle anderen Gatter bauen',
+      'NAND ist dasselbe wie XOR',
+      'NAND hat nur einen Eingang'
+    ],
+    answer: 1,
+    explanation: 'NAND ist <strong>funktional vollständig</strong> – damit lassen sich alle Grundgatter (NOT, AND, OR, …) realisieren.'
+  },
+  {
+    nr: 10, topic: 'Logische Gatter',
+    type: 'mc',
+    question: 'Welchen Wert liefert <code>0 NOR 0</code>?',
+    options: ['0', '1', 'abhängig', 'immer 1 bei zwei Nullen: falsch'],
+    answer: 1,
+    explanation: 'NOR = NOT(OR). 0 OR 0 = 0, NOT(0) = <strong>1</strong>. NOR liefert nur 1 wenn BEIDE Eingänge 0 sind.'
+  },
+  {
+    nr: 11, topic: 'Logische Gatter',
+    type: 'multi',
+    question: 'Welche Gatter liefern bei Eingabe <code>A=1, B=1</code> den Wert <strong>0</strong>? (Mehrere Antworten möglich)',
+    options: ['AND', 'OR', 'XOR', 'NAND', 'NOR'],
+    answer: [2, 3],
+    explanation: 'XOR(1,1)=0 (ungleich?nein), NAND(1,1)=NOT(1)=0. AND=1, OR=1, NOR=NOT(1)=0 – auch NOR! Also XOR und NAND und NOR → hier: <strong>XOR</strong> (0) und <strong>NAND</strong> (0) und <strong>NOR</strong> (0)',
+    correctAnswers: [2,3,4]
+  },
+  // SCHALTTERME (4 Fragen)
+  {
+    nr: 12, topic: 'Schaltterme',
+    type: 'mc',
+    question: 'Was bedeutet der Schalterm <code>F = A · B + ¬C</code>?',
+    options: [
+      'F ist wahr, wenn A oder B und nicht C',
+      'F ist wahr, wenn (A und B) oder (nicht C)',
+      'F ist wahr, wenn A und (B oder nicht C)',
+      'F ist immer 1'
+    ],
+    answer: 1,
+    explanation: 'Der Punkt (·) hat höhere Priorität als Plus (+). Also: <strong>(A AND B) OR (NOT C)</strong>'
+  },
+  {
+    nr: 13, topic: 'De Morgan',
+    type: 'mc',
+    question: 'Welche Umformung ist nach De Morgan korrekt?',
+    options: [
+      '¬(A + B) = ¬A + ¬B',
+      '¬(A · B) = ¬A · ¬B',
+      '¬(A + B) = ¬A · ¬B',
+      '¬(A · B) = A + B'
+    ],
+    answer: 2,
+    explanation: '1. De Morgan: <strong>¬(A + B) = ¬A · ¬B</strong> — das Vorzeichen verteilt sich und aus + wird ·'
+  },
+  {
+    nr: 14, topic: 'Schaltterme',
+    type: 'mc',
+    question: 'Berechne <code>F = A + (A · B)</code> für A=1, B=0.',
+    options: ['0', '1', 'unbestimmt', '2'],
+    answer: 1,
+    explanation: 'A·B = 1·0 = 0. A + 0 = 1. → F = <strong>1</strong>. (Absorptionsgesetz: A + A·B = A)'
+  },
+  {
+    nr: 15, topic: 'Schaltterme',
+    type: 'mc',
+    question: 'Was ist das Ergebnis von <code>¬¬A</code> (doppelte Negation)?',
+    options: ['Immer 0', 'Immer 1', 'Gleich A', '¬A'],
+    answer: 2,
+    explanation: 'Doppelte Negation hebt sich auf: <strong>¬¬A = A</strong>'
+  },
+  // SCHALTUNGEN (2 Fragen)
+  {
+    nr: 16, topic: 'Logische Schaltungen',
+    type: 'mc',
+    question: 'Ein Halbaddierer addiert A=1 und B=1. Was sind Summe (S) und Übertrag (C)?',
+    options: ['S=1, C=0', 'S=0, C=1', 'S=1, C=1', 'S=0, C=0'],
+    answer: 1,
+    explanation: 'S = A XOR B = 1 XOR 1 = 0. C = A AND B = 1 AND 1 = 1. → <strong>S=0, C=1</strong> (entspricht 1+1=10₂)'
+  },
+  {
+    nr: 17, topic: 'Logische Schaltungen',
+    type: 'mc',
+    question: 'Welche Funktion erfüllt ein <strong>Multiplexer</strong> (MUX)?',
+    options: [
+      'Er addiert zwei Binärzahlen',
+      'Er wählt einen von mehreren Eingängen anhand eines Steuersignals aus',
+      'Er verschlüsselt Datenblöcke',
+      'Er negiert alle Eingangsbits'
+    ],
+    answer: 1,
+    explanation: 'Ein MUX leitet genau einen von mehreren Dateneingängen zum Ausgang weiter – gesteuert durch Selektionsleitungen.'
+  },
+  // KRYPTOGRAPHIE (3 Fragen)
+  {
+    nr: 18, topic: 'Kryptographie',
+    type: 'mc',
+    question: 'Welche Blockgröße verwendet <strong>AES</strong> standardmäßig?',
+    options: ['64 Bit', '128 Bit', '256 Bit', '512 Bit'],
+    answer: 1,
+    explanation: 'AES arbeitet immer mit <strong>128-Bit-Blöcken</strong>. Die Schlüssellänge (128/192/256 Bit) ist davon unabhängig.'
+  },
+  {
+    nr: 19, topic: 'Kryptographie',
+    type: 'mc',
+    question: 'Was ist eine Eigenschaft von <strong>Hash-Funktionen</strong>?',
+    options: [
+      'Sie sind einfach umkehrbar',
+      'Gleiches Ergebnis bei verschiedenen Eingaben ist normal',
+      'Kleine Änderung der Eingabe → großes Änderung des Hashwerts (Lawineneffekt)',
+      'Sie verwenden asymmetrische Schlüssel'
+    ],
+    answer: 2,
+    explanation: 'Der <strong>Lawineneffekt</strong>: Eine minimale Änderung der Eingabe führt zu einem völlig anderen Hashwert. Hash-Funktionen sind außerdem nicht umkehrbar.'
+  },
+  {
+    nr: 20, topic: 'Kryptographie',
+    type: 'mc',
+    question: 'Welche Operation liegt der XOR-Verschlüsselung zugrunde?<br><code>C = P ⊕ K</code>. Wie erhält man P zurück?',
+    options: [
+      'P = C + K',
+      'P = C ⊕ K',
+      'P = C · K',
+      'P = NOT(C)'
+    ],
+    answer: 1,
+    explanation: 'XOR ist selbstinvers: <strong>P = C ⊕ K</strong>. Wenn C = P ⊕ K, dann C ⊕ K = P ⊕ K ⊕ K = P ⊕ 0 = P.'
+  },
+];
+
+let examActive = false;
+let examInterval = null;
+let examSeconds = 1200; // 20 min
+let userAnswers = {};
+
+function startExam() {
+  examActive = true;
+  examSeconds = 1200;
+  userAnswers = {};
+  document.getElementById('examStartArea').style.display = 'none';
+  document.getElementById('examTimerBox').style.display = 'block';
+  document.getElementById('examResults').style.display = 'none';
+  renderExamQuestions();
+  document.getElementById('examQuestions').style.display = 'block';
+  document.getElementById('examSubmitArea').style.display = 'block';
+  document.getElementById('examQuestions').scrollIntoView({behavior:'smooth',block:'start'});
+  examInterval = setInterval(tickTimer, 1000);
+}
+
+function tickTimer() {
+  examSeconds--;
+  const m = Math.floor(examSeconds / 60);
+  const s = examSeconds % 60;
+  document.getElementById('examTimer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(examSeconds <= 0) { clearInterval(examInterval); submitExam(true); }
+  if(examSeconds <= 120) document.getElementById('examTimer').style.color = 'var(--blutrot)';
+}
+
+function renderExamQuestions() {
+  const cont = document.getElementById('examQuestions');
+  cont.innerHTML = '';
+  examData.forEach((q, idx) => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.id = `q_${idx}`;
+    div.style.cssText = 'margin-bottom:1.2rem;border-left:3px solid var(--mittelgrau);transition:border-color 0.3s';
+
+    let inputHtml = '';
+    if(q.type === 'mc') {
+      inputHtml = q.options.map((opt, oi) => `
+        <label style="display:flex;align-items:flex-start;gap:0.8rem;padding:0.6rem 0.8rem;cursor:pointer;border:1px solid var(--mittelgrau);margin-bottom:0.4rem;transition:all 0.2s;font-size:0.88rem" 
+          onmouseover="this.style.borderColor='var(--asche)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--mittelgrau)'">
+          <input type="radio" name="q${idx}" value="${oi}" onchange="setAnswer(${idx},'mc',${oi})" style="margin-top:2px;accent-color:var(--gold)">
+          <span>${opt}</span>
+        </label>`).join('');
+    } else if(q.type === 'input') {
+      inputHtml = `<input type="text" class="conv-input" id="qi_${idx}" placeholder="Deine Antwort..." oninput="setAnswer(${idx},'input',this.value)" style="max-width:300px">`;
+    } else if(q.type === 'multi') {
+      inputHtml = '<div style="font-size:0.75rem;color:var(--asche);margin-bottom:0.6rem;font-family:\'Cinzel\',serif;letter-spacing:0.05em">MEHRERE ANTWORTEN MÖGLICH</div>' +
+        q.options.map((opt, oi) => `
+        <label style="display:flex;align-items:flex-start;gap:0.8rem;padding:0.6rem 0.8rem;cursor:pointer;border:1px solid var(--mittelgrau);margin-bottom:0.4rem;transition:all 0.2s;font-size:0.88rem">
+          <input type="checkbox" name="q${idx}" value="${oi}" onchange="setMultiAnswer(${idx})" style="margin-top:2px;accent-color:var(--gold)">
+          <span>${opt}</span>
+        </label>`).join('');
+    }
+
+    div.innerHTML = `
+      <div style="display:flex;gap:0.8rem;align-items:flex-start;margin-bottom:1rem">
+        <div style="font-family:'Cinzel Decorative',serif;font-size:1rem;color:var(--dunkelrot);min-width:32px;opacity:0.6">${String(q.nr).padStart(2,'0')}</div>
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;color:var(--asche);margin-bottom:0.4rem">${q.topic.toUpperCase()}</div>
+          <div style="font-size:0.95rem;color:var(--knochen);line-height:1.6">${q.question}</div>
+        </div>
+      </div>
+      <div style="padding-left:2.5rem">${inputHtml}</div>
+      <div id="feedback_${idx}" style="display:none;margin-top:0.8rem;padding-left:2.5rem"></div>
+    `;
+    cont.appendChild(div);
+  });
+}
+
+function setAnswer(idx, type, val) {
+  if(type === 'input') userAnswers[idx] = val.trim().replace(/\s/g,'');
+  else userAnswers[idx] = val;
+  document.getElementById(`q_${idx}`).style.borderLeftColor = 'var(--gold)';
+}
+
+function setMultiAnswer(idx) {
+  const checked = [...document.querySelectorAll(`input[name="q${idx}"]:checked`)].map(el => parseInt(el.value));
+  userAnswers[idx] = checked;
+  document.getElementById(`q_${idx}`).style.borderLeftColor = 'var(--gold)';
+}
+
+function submitExam(timeUp = false) {
+  clearInterval(examInterval);
+  examActive = false;
+  document.getElementById('examTimerBox').style.display = 'none';
+  document.getElementById('examSubmitArea').style.display = 'none';
+
+  let correct = 0;
+  const results = [];
+
+  examData.forEach((q, idx) => {
+    const ua = userAnswers[idx];
+    let isCorrect = false;
+    let correctAns = '';
+
+    if(q.type === 'mc') {
+      isCorrect = ua === q.answer;
+      correctAns = q.options[q.answer];
+    } else if(q.type === 'input') {
+      isCorrect = (ua || '').toLowerCase() === q.answer.toLowerCase();
+      correctAns = q.answer;
+    } else if(q.type === 'multi') {
+      const ca = q.correctAnswers || [q.answer];
+      const given = ua || [];
+      isCorrect = ca.length === given.length && ca.every(v => given.includes(v));
+      correctAns = ca.map(i => q.options[i]).join(', ');
+    }
+
+    if(isCorrect) correct++;
+    results.push({ q, ua, isCorrect, correctAns });
+
+    // Visual feedback on question
+    const qCard = document.getElementById(`q_${idx}`);
+    qCard.style.borderLeftColor = isCorrect ? 'var(--giftgrün)' : 'var(--blutrot)';
+    const fb = document.getElementById(`feedback_${idx}`);
+    fb.style.display = 'block';
+    fb.innerHTML = `
+      <div style="background:${isCorrect ? 'rgba(64,160,32,0.08)' : 'rgba(92,14,14,0.15)'};border:1px solid ${isCorrect ? 'var(--giftgrün)' : 'var(--blutrot)'};padding:0.7rem 1rem;font-size:0.82rem">
+        <div style="color:${isCorrect ? 'var(--giftgrün)' : 'var(--blutrot)'};font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.1em;margin-bottom:0.3rem">${isCorrect ? '✔ KORREKT' : '✘ FALSCH'}</div>
+        ${!isCorrect ? `<div style="color:var(--staub);margin-bottom:0.3rem">Richtige Antwort: <strong style="color:var(--knochen)">${correctAns}</strong></div>` : ''}
+        <div style="color:var(--asche)">${q.explanation}</div>
+      </div>
+    `;
+
+    // Disable inputs
+    document.querySelectorAll(`#q_${idx} input`).forEach(el => el.disabled = true);
+  });
+
+  const pct = Math.round((correct / examData.length) * 100);
+  const name = document.getElementById('examName').value || 'Schüler';
+  let grade = '', gradeColor = 'var(--gold)';
+  if(pct >= 92) { grade = '1 (Sehr gut)'; gradeColor = 'var(--giftgrün)'; }
+  else if(pct >= 80) { grade = '2 (Gut)'; gradeColor = '#80c040'; }
+  else if(pct >= 67) { grade = '3 (Befriedigend)'; gradeColor = 'var(--gold)'; }
+  else if(pct >= 50) { grade = '4 (Ausreichend)'; gradeColor = 'var(--rostgold)'; }
+  else if(pct >= 30) { grade = '5 (Mangelhaft)'; gradeColor = 'var(--kupfer)'; }
+  else { grade = '6 (Ungenügend)'; gradeColor = 'var(--blutrot)'; }
+
+  const resEl = document.getElementById('examResults');
+  resEl.style.display = 'block';
+  resEl.innerHTML = `
+    <div style="background:rgba(92,14,14,0.12);border:2px solid var(--dunkelrot);padding:2rem;text-align:center;margin-bottom:1.5rem">
+      <div style="font-family:'Cinzel Decorative',serif;font-size:1rem;color:var(--gold);margin-bottom:0.5rem">${timeUp ? '⏱ Zeit abgelaufen — ' : ''}Prüfungsergebnis</div>
+      <div style="font-family:'Cinzel',serif;font-size:0.85rem;color:var(--asche);margin-bottom:1.2rem">${name}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:3rem;color:${gradeColor};text-shadow:0 0 20px ${gradeColor}40;margin-bottom:0.5rem">${correct} / ${examData.length}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:1.2rem;color:${gradeColor};margin-bottom:1rem">${pct}%</div>
+      <div style="font-family:'Cinzel',serif;font-size:1.1rem;color:${gradeColor};margin-bottom:1.2rem">Note: ${grade}</div>
+      <div style="height:6px;background:var(--mittelgrau);margin:0 2rem">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--dunkelrot),${gradeColor});transition:width 1.5s ease"></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <button class="conv-btn" onclick="restartExam()" style="border-color:var(--gold);color:var(--gold);padding:0.7rem 2rem">↺ Prüfung wiederholen</button>
+    </div>
+    <div style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--asche);letter-spacing:0.1em;margin-bottom:1rem">ALLE ANTWORTEN IM DETAIL ↓</div>
+  `;
+
+  // Scroll to results
+  setTimeout(() => resEl.scrollIntoView({behavior:'smooth',block:'start'}), 200);
+}
+
+function restartExam() {
+  document.getElementById('examTimerBox').style.display = 'none';
+  document.getElementById('examTimer').style.color = 'var(--gold)';
+  document.getElementById('examResults').style.display = 'none';
+  document.getElementById('examQuestions').style.display = 'none';
+  document.getElementById('examSubmitArea').style.display = 'none';
+  document.getElementById('examStartArea').style.display = 'block';
+  document.getElementById('examName').value = '';
+  userAnswers = {};
+}
+
+// Extra CSS for exam + egg animations
+const extraStyle = document.createElement('style');
+extraStyle.textContent = `
+  @keyframes egg-appear {
+    from { opacity:0; transform:scale(0.85) translateY(20px); }
+    to { opacity:1; transform:scale(1) translateY(0); }
+  }
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(extraStyle);
+
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+(function() {
+  const btns = document.querySelectorAll('.nav-btn');
+  const sections = ['binaer','gatter','schaltterme','schaltungen','krypto'];
+  window.addEventListener('scroll', () => {
+    let cur = 0;
+    sections.forEach((id,i) => {
+      const el = document.getElementById(id);
+      if(el && window.scrollY >= el.offsetTop - 120) cur = i;
+    });
+    btns.forEach((b,i) => b.classList.toggle('active', i===cur));
+  });
+})();
+</script>
+</body>
+</html>
