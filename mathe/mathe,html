@@ -1,0 +1,543 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;
+  --bg2:#12121a;
+  --bg3:#1a1a26;
+  --accent:#7c6cf8;
+  --accent2:#f87c6c;
+  --accent3:#6cf8c4;
+  --text:#e8e6ff;
+  --muted:#8880bb;
+  --card:#16161f;
+  --border:#2a2840;
+  --mono:'Space Mono',monospace;
+  --sans:'Outfit',sans-serif;
+}
+
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+
+.stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;width:2px;height:2px;background:var(--accent);border-radius:50%;animation:twinkle 3s infinite}
+@keyframes twinkle{0%,100%{opacity:0.2}50%{opacity:0.9}}
+
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:20px 16px 60px}
+
+.hero{text-align:center;padding:40px 0 30px;animation:fadeUp 0.6s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+.hero-tag{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;opacity:0.8}
+.hero h1{font-size:clamp(28px,6vw,52px);font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;margin-bottom:10px}
+.hero p{color:var(--muted);font-size:16px;font-weight:300;max-width:480px;margin:0 auto}
+
+.nav-pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:24px 0 32px}
+.pill{padding:8px 18px;border-radius:999px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.pill:hover,.pill.active{border-color:var(--accent);color:var(--accent);background:rgba(124,108,248,0.1)}
+.pill.active{background:rgba(124,108,248,0.15)}
+
+.section{display:none;animation:fadeUp 0.4s ease}
+.section.active{display:block}
+
+.chapter-tag{font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:22px;font-weight:700;margin-bottom:4px}
+.section-desc{color:var(--muted);font-size:14px;margin-bottom:24px;font-weight:300}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.icon-box{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ib-purple{background:rgba(124,108,248,0.2)}
+.ib-coral{background:rgba(248,124,108,0.2)}
+.ib-teal{background:rgba(108,248,196,0.2)}
+.card-head h3{font-size:15px;font-weight:600;color:var(--text)}
+
+.formula-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:10px 0;font-family:var(--mono);font-size:13px;color:var(--accent3);text-align:center;line-height:1.8}
+.formula-box .comment{color:var(--muted);font-size:11px;font-family:var(--sans);font-style:italic;margin-top:4px;display:block}
+
+.example-box{background:rgba(124,108,248,0.06);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0;font-size:14px;line-height:1.7}
+.example-box strong{color:var(--accent);font-weight:600}
+.example-box .step{color:var(--muted);font-family:var(--mono);font-size:12px;display:block;margin-top:4px}
+
+.tip-box{background:rgba(108,248,196,0.06);border:1px solid rgba(108,248,196,0.25);border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13px;color:#a8f8e0;display:flex;gap:10px;align-items:flex-start}
+.tip-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+
+.calc-section{background:var(--bg3);border-radius:12px;padding:16px;margin-top:14px}
+.calc-title{font-size:12px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.calc-grid.single{grid-template-columns:1fr}
+.inp-wrap{display:flex;flex-direction:column;gap:4px}
+.inp-wrap label{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.inp-wrap input{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;transition:border 0.2s}
+.inp-wrap input:focus{border-color:var(--accent)}
+.calc-btn{width:100%;padding:10px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:4px}
+.calc-btn:hover{background:#9484ff;transform:translateY(-1px)}
+.calc-btn:active{transform:translateY(0)}
+.calc-result{background:var(--bg2);border-radius:8px;padding:12px;margin-top:10px;min-height:44px;font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--accent3)}
+.calc-result.empty{color:var(--muted);font-style:italic;font-family:var(--sans)}
+
+.vis-wrap{margin-top:14px}
+.vis-canvas{width:100%;height:180px;background:var(--bg2);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+canvas{border-radius:10px}
+
+.progress-bar{display:flex;gap:4px;margin-bottom:20px}
+.prog-dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.prog-dot.done{background:var(--accent)}
+.prog-dot.current{background:var(--accent3)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:580px){.grid2{grid-template-columns:1fr}.calc-grid{grid-template-columns:1fr}}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;font-family:var(--mono)}
+.badge-purple{background:rgba(124,108,248,0.15);color:var(--accent)}
+.badge-teal{background:rgba(108,248,196,0.15);color:var(--accent3)}
+.badge-coral{background:rgba(248,124,108,0.15);color:var(--accent2)}
+
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+
+.sub-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.sub-tab{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-family:var(--mono);cursor:pointer;transition:all 0.2s}
+.sub-tab:hover,.sub-tab.active{border-color:var(--accent2);color:var(--accent2);background:rgba(248,124,108,0.08)}
+
+.sub-section{display:none}
+.sub-section.active{display:block}
+
+.var-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+.var-table th{text-align:left;padding:6px 10px;font-family:var(--mono);font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)}
+.var-table td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.var-table td:first-child{font-family:var(--mono);color:var(--accent);font-size:12px}
+.var-table td:last-child{color:var(--muted);font-size:12px}
+
+.quiz-card{background:var(--bg3);border-radius:12px;padding:18px;margin-top:14px}
+.quiz-q{font-size:14px;font-weight:500;margin-bottom:14px;line-height:1.6}
+.quiz-opts{display:flex;flex-direction:column;gap:8px}
+.quiz-opt{padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;cursor:pointer;text-align:left;transition:all 0.2s;font-family:var(--sans)}
+.quiz-opt:hover{border-color:var(--accent);color:var(--accent)}
+.quiz-opt.correct{border-color:var(--accent3);background:rgba(108,248,196,0.1);color:var(--accent3)}
+.quiz-opt.wrong{border-color:var(--accent2);background:rgba(248,124,108,0.1);color:var(--accent2)}
+.quiz-feedback{margin-top:12px;font-size:13px;padding:10px 14px;border-radius:8px;display:none;line-height:1.6}
+.quiz-feedback.show{display:block}
+.qf-correct{background:rgba(108,248,196,0.08);border:1px solid rgba(108,248,196,0.3);color:#a8f8e0}
+.qf-wrong{background:rgba(248,124,108,0.08);border:1px solid rgba(248,124,108,0.3);color:#f8c0b8}
+
+.next-btn{margin-top:12px;padding:8px 18px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);transition:all 0.2s;display:none}
+.next-btn.show{display:inline-block}
+.next-btn:hover{background:rgba(124,108,248,0.15)}
+</style>
+
+<div class="stars" id="stars"></div>
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-tag">▸ Mathe Lernwelt — Klasse 8/9</div>
+    <h1>Mathe. Endlich klar.</h1>
+    <p>Schritt für Schritt erklärt — mit echten Beispielen, Rechnern und Checks.</p>
+  </div>
+
+  <div class="nav-pills">
+    <button class="pill active" onclick="showSection('kreis')">⬤ Kreise</button>
+    <button class="pill" onclick="showSection('sektor')">◔ Kreisausschnitt</button>
+    <button class="pill" onclick="showSection('prisma')">▣ Prismen</button>
+    <button class="pill" onclick="showSection('zylinder')">⬭ Zylinder</button>
+    <button class="pill" onclick="showSection('potenz')">xⁿ Potenzen</button>
+    <button class="pill" onclick="showSection('wurzel')">√ Wurzeln</button>
+  </div>
+
+  <div id="sec-kreis" class="section active">
+    <div class="chapter-tag">Kapitel III · Thema 1</div>
+    <div class="section-title">Umfang & Flächeninhalt eines Kreises</div>
+    <div class="section-desc">Alles dreht sich um π — die magische Zahl 3,14159…</div>
+    <div class="card">
+      <div class="card-head"><div class="icon-box ib-purple">⬤</div><h3>Die zwei wichtigsten Formeln</h3></div>
+      <div class="formula-box">U = 2 · π · r = π · d<span class="comment">Umfang — wie lang ist der Rand?</span></div>
+      <div class="formula-box">A = π · r²<span class="comment">Flächeninhalt — wie groß ist die Fläche?</span></div>
+      <table class="var-table"><tr><th>Variable</th><th>Bedeutung</th></tr><tr><td>r</td><td>Radius (Mittelpunkt bis Rand)</td></tr><tr><td>d</td><td>Durchmesser = 2 · r</td></tr><tr><td>π</td><td>Pi ≈ 3,14159…</td></tr></table>
+      <div class="tip-box"><div class="tip-icon">💡</div><div>Merkhilfe: <strong>Radius</strong> ist immer halb so groß wie der Durchmesser. Wenn du den Durchmesser kennst, teile durch 2!</div></div>
+      <div class="example-box"><strong>Beispiel:</strong> Ein Baum hat einen Stammumfang von 46 m. Wie groß ist sein Durchmesser?<span class="step">U = π · d  →  d = U ÷ π = 46 ÷ 3,14159 ≈ 14,64 m</span></div>
+      <div class="calc-section">
+        <div class="calc-title">Kreis-Rechner</div>
+        <div class="calc-grid single"><div class="inp-wrap"><label>Eingabe (Radius oder Durchmesser)</label><input type="number" id="k-val" placeholder="z.B. 5" oninput="calcKreis()"></div></div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button class="calc-btn" style="background:var(--bg2);color:var(--muted);border:1px solid var(--border)" onclick="setKreisMode('r')">→ Radius eingegeben</button>
+          <button class="calc-btn" style="background:var(--bg2);color:var(--muted);border:1px solid var(--border)" onclick="setKreisMode('d')">→ Durchmesser eingegeben</button>
+        </div>
+        <div class="calc-result empty" id="k-res">Gib oben einen Wert ein ↑</div>
+      </div>
+    </div>
+    <div class="quiz-card">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
+      <div class="quiz-q" id="qk-q"></div>
+      <div class="quiz-opts" id="qk-opts"></div>
+      <div class="quiz-feedback" id="qk-fb"></div>
+      <button class="next-btn" id="qk-next" onclick="nextQ('k')">Nächste Frage →</button>
+    </div>
+  </div>
+
+  <div id="sec-sektor" class="section">
+    <div class="chapter-tag">Kapitel III · Thema 2</div>
+    <div class="section-title">Kreisausschnitt (Sektor)</div>
+    <div class="section-desc">Ein "Tortenstück" des Kreises — mit Winkel α bestimmt.</div>
+    <div class="card">
+      <div class="card-head"><div class="icon-box ib-teal">◔</div><h3>Bogenlänge & Sektorfläche</h3></div>
+      <div class="formula-box">b = (α / 360°) · 2 · π · r<span class="comment">Bogenlänge — der gebogene Rand des Kuchenstücks</span></div>
+      <div class="formula-box">A = (α / 360°) · π · r²<span class="comment">Fläche des Kreisausschnitts</span></div>
+      <div class="tip-box"><div class="tip-icon">🍕</div><div>Stell dir einen Pizza-Kreis vor. Der Winkel α sagt, wie groß dein Stück ist. Bei 360° ist es die ganze Pizza!</div></div>
+      <div class="example-box"><strong>Beispiel:</strong> r = 2,2 cm, α = 70°<span class="step">b = (70/360) · 2 · π · 2,2 = 0,1944 · 13,82 ≈ 2,69 cm</span></div>
+      <div class="calc-section">
+        <div class="calc-title">Sektor-Rechner</div>
+        <div class="calc-grid">
+          <div class="inp-wrap"><label>Radius r (cm)</label><input type="number" id="s-r" placeholder="z.B. 2.2" oninput="calcSektor()"></div>
+          <div class="inp-wrap"><label>Winkel α (Grad)</label><input type="number" id="s-a" placeholder="z.B. 70" oninput="calcSektor()"></div>
+        </div>
+        <div class="calc-result empty" id="s-res">Gib Radius und Winkel ein ↑</div>
+      </div>
+    </div>
+    <div class="quiz-card">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
+      <div class="quiz-q" id="qs-q"></div>
+      <div class="quiz-opts" id="qs-opts"></div>
+      <div class="quiz-feedback" id="qs-fb"></div>
+      <button class="next-btn" id="qs-next" onclick="nextQ('s')">Nächste Frage →</button>
+    </div>
+  </div>
+
+  <div id="sec-prisma" class="section">
+    <div class="chapter-tag">Kapitel III · Thema 3</div>
+    <div class="section-title">Prisma — Oberfläche & Volumen</div>
+    <div class="section-desc">Ein 3D-Körper mit zwei gleichen Grundflächen oben und unten.</div>
+    <div class="card">
+      <div class="card-head"><div class="icon-box ib-purple">▣</div><h3>Die Formeln</h3></div>
+      <div class="formula-box">V = G · h<span class="comment">Volumen = Grundfläche × Höhe</span></div>
+      <div class="formula-box">O = 2 · G + M<span class="comment">Oberfläche = 2× Grundfläche + Mantelfläche</span></div>
+      <div class="tip-box"><div class="tip-icon">📦</div><div>Stell dir eine Schachtel vor: Das Volumen sagt dir, wie viel reinpasst. Die Oberfläche sagt, wie viel Karton du brauchst.</div></div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="showSub('pr','rect')">Quader</button>
+        <button class="sub-tab" onclick="showSub('pr','tri')">Dreiecksprisma</button>
+        <button class="sub-tab" onclick="showSub('pr','oct')">Achteck-Prisma</button>
+      </div>
+      <div id="pr-rect" class="sub-section active">
+        <div class="example-box"><strong>Quader (Rechtecksgrundfl.):</strong> G = l · b, M = Umfang · h<span class="step">Schachtel: l=5 b=3 h=4 → G=15, M=(5+3+5+3)·4=64, O=2·15+64=94 cm²</span></div>
+        <div class="calc-section">
+          <div class="calc-title">Quader-Rechner</div>
+          <div class="calc-grid">
+            <div class="inp-wrap"><label>Länge l</label><input type="number" id="pr-l" placeholder="5" oninput="calcQuader()"></div>
+            <div class="inp-wrap"><label>Breite b</label><input type="number" id="pr-b" placeholder="3" oninput="calcQuader()"></div>
+            <div class="inp-wrap"><label>Höhe h</label><input type="number" id="pr-h" placeholder="4" oninput="calcQuader()"></div>
+          </div>
+          <div class="calc-result empty" id="pr-res">Gib l, b, h ein ↑</div>
+        </div>
+      </div>
+      <div id="pr-tri" class="sub-section">
+        <div class="example-box"><strong>Dreiecksprisma:</strong> G = ½ · a · h_a (Dreieckshöhe), M = (a+b+c) · h_Prisma<span class="step">Drei Seitenflächen + 2× Dreieck</span></div>
+        <div class="calc-section">
+          <div class="calc-title">Dreiecksprisma-Rechner</div>
+          <div class="calc-grid">
+            <div class="inp-wrap"><label>Dreieck Basis a</label><input type="number" id="tr-a" placeholder="6" oninput="calcTri()"></div>
+            <div class="inp-wrap"><label>Dreieck Höhe h_a</label><input type="number" id="tr-ha" placeholder="4" oninput="calcTri()"></div>
+            <div class="inp-wrap"><label>Prisma Höhe h</label><input type="number" id="tr-h" placeholder="10" oninput="calcTri()"></div>
+            <div class="inp-wrap"><label>Seite b (optional)</label><input type="number" id="tr-b" placeholder="5" oninput="calcTri()"></div>
+          </div>
+          <div class="calc-result empty" id="tr-res">Gib Werte ein ↑</div>
+        </div>
+      </div>
+      <div id="pr-oct" class="sub-section">
+        <div class="example-box"><strong>Regelmäßiges Achteck (wie Schoko-Chips Dose):</strong><br>Basis jedes Dreiecks = 6 cm, Dreieckshöhe = 7 cm<span class="step">G = 8 · (½ · 6 · 7) = 168 cm², M = 8 · 6 · 4,4 = 211,2 cm², O = 547,2 cm²</span></div>
+        <div class="calc-section">
+          <div class="calc-title">Achteck-Prisma-Rechner</div>
+          <div class="calc-grid">
+            <div class="inp-wrap"><label>Kantenlänge a</label><input type="number" id="oc-a" placeholder="6" oninput="calcOct()"></div>
+            <div class="inp-wrap"><label>Dreieckshöhe h_D</label><input type="number" id="oc-hd" placeholder="7" oninput="calcOct()"></div>
+            <div class="inp-wrap"><label>Prisma Höhe h</label><input type="number" id="oc-h" placeholder="4.4" oninput="calcOct()"></div>
+          </div>
+          <div class="calc-result empty" id="oc-res">Gib Werte ein ↑</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sec-zylinder" class="section">
+    <div class="chapter-tag">Kapitel III · Thema 4</div>
+    <div class="section-title">Zylinder — Oberfläche & Volumen</div>
+    <div class="section-desc">Wie eine Konservendose — kreisrunde Deckflächen, ein Mantel.</div>
+    <div class="card">
+      <div class="card-head"><div class="icon-box ib-coral">⬭</div><h3>Die Formeln</h3></div>
+      <div class="formula-box">V = π · r² · h<span class="comment">Volumen = Kreisfläche × Höhe</span></div>
+      <div class="formula-box">O = 2 · π · r² + 2 · π · r · h<span class="comment">2 Kreise (oben+unten) + Mantel</span></div>
+      <div class="tip-box"><div class="tip-icon">🥫</div><div>Den Mantel kannst du dir vorstellen, als würdest du das Etikett der Dose abwickeln — es wird ein Rechteck mit Breite 2πr und Höhe h.</div></div>
+      <div class="example-box"><strong>Beispiel Pfirsichdose:</strong> große Dose d=10 cm, h=11,8 cm<span class="step">r=5, V = π·25·11,8 ≈ 926,77 cm³, O = 2π·25 + 2π·5·11,8 ≈ 527,79 cm²</span></div>
+      <div class="calc-section">
+        <div class="calc-title">Zylinder-Rechner</div>
+        <div class="calc-grid">
+          <div class="inp-wrap"><label>Radius r</label><input type="number" id="z-r" placeholder="5" oninput="calcZyl()"></div>
+          <div class="inp-wrap"><label>Höhe h</label><input type="number" id="z-h" placeholder="11.8" oninput="calcZyl()"></div>
+        </div>
+        <div class="calc-result empty" id="z-res">Gib r und h ein ↑</div>
+      </div>
+    </div>
+    <div class="quiz-card">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
+      <div class="quiz-q" id="qz-q"></div>
+      <div class="quiz-opts" id="qz-opts"></div>
+      <div class="quiz-feedback" id="qz-fb"></div>
+      <button class="next-btn" id="qz-next" onclick="nextQ('z')">Nächste Frage →</button>
+    </div>
+  </div>
+
+  <div id="sec-potenz" class="section">
+    <div class="chapter-tag">Kapitel IV · Thema 1–4</div>
+    <div class="section-title">Potenzen & Potenzgesetze</div>
+    <div class="section-desc">xⁿ bedeutet: x wird n-mal mit sich selbst multipliziert.</div>
+    <div class="card">
+      <div class="card-head"><div class="icon-box ib-purple">xⁿ</div><h3>Grundlagen</h3></div>
+      <div class="formula-box">aⁿ = a · a · a · … (n-mal)<span class="comment">Basis a, Exponent n</span></div>
+      <div class="formula-box">a⁻ⁿ = 1 / aⁿ<span class="comment">Negativer Exponent = Kehrwert</span></div>
+      <div class="formula-box">a⁰ = 1 (für a ≠ 0)<span class="comment">Jede Basis hoch 0 ergibt 1!</span></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="icon-box ib-teal">⚡</div><h3>Die 4 Potenzgesetze</h3></div>
+      <div class="formula-box">aⁿ · aᵐ = aⁿ⁺ᵐ<span class="comment">Gleiches Basis: Exponenten addieren</span></div>
+      <div class="formula-box">aⁿ ÷ aᵐ = aⁿ⁻ᵐ<span class="comment">Gleiches Basis: Exponenten subtrahieren</span></div>
+      <div class="formula-box">(aⁿ)ᵐ = aⁿ·ᵐ<span class="comment">Potenz einer Potenz: Exponenten multiplizieren</span></div>
+      <div class="formula-box">(a · b)ⁿ = aⁿ · bⁿ<span class="comment">Produkt: Jede Basis einzeln potenzieren</span></div>
+      <div class="tip-box"><div class="tip-icon">🎯</div><div>Merke: Die Gesetze gelten NUR wenn die Basis gleich ist (bei Gesetz 1+2). Bei Gesetz 3+4 ist es egal!</div></div>
+      <div class="calc-section">
+        <div class="calc-title">Potenz-Rechner</div>
+        <div class="calc-grid">
+          <div class="inp-wrap"><label>Basis a</label><input type="number" id="p-base" placeholder="z.B. 3" oninput="calcPot()"></div>
+          <div class="inp-wrap"><label>Exponent n</label><input type="number" id="p-exp" placeholder="z.B. 4" oninput="calcPot()"></div>
+        </div>
+        <div class="calc-result empty" id="p-res">Gib Basis und Exponent ein ↑</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="icon-box ib-coral">10ⁿ</div><h3>Wissenschaftliche Schreibweise</h3></div>
+      <div class="formula-box">a · 10ⁿ (wobei 1 ≤ a &lt; 10)<span class="comment">Immer eine Stelle vor dem Komma!</span></div>
+      <div class="example-box"><strong>Beispiele:</strong><br>6800 = 6,8 · 10³<br>0,0072 = 7,2 · 10⁻³<br>4 · 10⁸ = 400 000 000</div>
+      <div class="tip-box"><div class="tip-icon">💡</div><div>Positiver Exponent → Komma nach rechts schieben. Negativer Exponent → Komma nach links schieben.</div></div>
+    </div>
+    <div class="quiz-card">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
+      <div class="quiz-q" id="qp-q"></div>
+      <div class="quiz-opts" id="qp-opts"></div>
+      <div class="quiz-feedback" id="qp-fb"></div>
+      <button class="next-btn" id="qp-next" onclick="nextQ('p')">Nächste Frage →</button>
+    </div>
+  </div>
+
+  <div id="sec-wurzel" class="section">
+    <div class="chapter-tag">Kapitel IV · Thema 5</div>
+    <div class="section-title">Wurzeln & rationale Exponenten</div>
+    <div class="section-desc">Wurzeln sind umgekehrte Potenzen — sie "rückgängig machen".</div>
+    <div class="card">
+      <div class="card-head"><div class="icon-box ib-teal">√</div><h3>Grundlagen</h3></div>
+      <div class="formula-box">ⁿ√a = a^(1/n)<span class="comment">n-te Wurzel = Potenz mit Bruchexponent</span></div>
+      <div class="formula-box">a^(m/n) = ⁿ√(aᵐ) = (ⁿ√a)ᵐ<span class="comment">Erst potenzieren, dann Wurzel — oder umgekehrt</span></div>
+      <div class="tip-box"><div class="tip-icon">🔄</div><div>√9 = 9^(1/2) = 3, weil 3² = 9. Die Wurzel fragt: "Welche Zahl, mit sich selbst malgenommen, ergibt das?"</div></div>
+      <div class="example-box"><strong>Beispiele aus dem Check-out:</strong><br>⁴√3¹² = 3^(12/4) = 3³ = 27<br>64^(2/3) = (64^(1/3))² = 4² = 16<br>⁴√(16/81) = 2/3</div>
+      <div class="calc-section">
+        <div class="calc-title">Wurzel-Rechner</div>
+        <div class="calc-grid">
+          <div class="inp-wrap"><label>Basis a</label><input type="number" id="w-a" placeholder="z.B. 64" oninput="calcWurzel()"></div>
+          <div class="inp-wrap"><label>Exponent m/n (als Dezimal)</label><input type="number" id="w-e" placeholder="z.B. 0.5" oninput="calcWurzel()"></div>
+        </div>
+        <div class="calc-result empty" id="w-res">Gib a und m/n ein ↑</div>
+      </div>
+    </div>
+    <div class="quiz-card">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
+      <div class="quiz-q" id="qw-q"></div>
+      <div class="quiz-opts" id="qw-opts"></div>
+      <div class="quiz-feedback" id="qw-fb"></div>
+      <button class="next-btn" id="qw-next" onclick="nextQ('w')">Nächste Frage →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const PI=Math.PI;
+function r(n,d=2){return Math.round(n*Math.pow(10,d))/Math.pow(10,d)}
+
+// Stars
+const starsEl=document.getElementById('stars');
+for(let i=0;i<60;i++){
+  const s=document.createElement('div');s.className='star';
+  s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+  s.style.animationDelay=Math.random()*3+'s';s.style.opacity=Math.random()*0.6+0.1;
+  starsEl.appendChild(s);
+}
+
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function showSub(prefix,id){
+  document.querySelectorAll('#sec-prisma .sub-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#sec-prisma .sub-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(prefix+'-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Kreis Rechner
+let kreisMode='r';
+function setKreisMode(m){kreisMode=m;calcKreis();}
+function calcKreis(){
+  const v=parseFloat(document.getElementById('k-val').value);
+  const el=document.getElementById('k-res');
+  if(isNaN(v)||v<=0){el.className='calc-result empty';el.textContent='Gib einen positiven Wert ein ↑';return;}
+  let radius=kreisMode==='r'?v:v/2;
+  el.className='calc-result';
+  el.innerHTML=`Radius r = ${r(radius)} | Durchmesser d = ${r(radius*2)}\nUmfang U = 2 · π · ${r(radius)} = ${r(2*PI*radius)} ${kreisMode==='r'?'(Einheiten)':''}\nFläche A = π · ${r(radius)}² = ${r(PI*radius*radius)}`;
+}
+
+// Sektor
+function calcSektor(){
+  const rv=parseFloat(document.getElementById('s-r').value);
+  const av=parseFloat(document.getElementById('s-a').value);
+  const el=document.getElementById('s-res');
+  if(isNaN(rv)||isNaN(av)||rv<=0||av<=0){el.className='calc-result empty';el.textContent='Gib Radius und Winkel ein ↑';return;}
+  const b=r((av/360)*2*PI*rv);
+  const a2=r((av/360)*PI*rv*rv);
+  el.className='calc-result';
+  el.innerHTML=`Bogenlänge b = (${av}°/360°) · 2π · ${rv} = ${b}\nFläche A = (${av}°/360°) · π · ${rv}² = ${a2}`;
+}
+
+// Quader
+function calcQuader(){
+  const l=parseFloat(document.getElementById('pr-l').value);
+  const b=parseFloat(document.getElementById('pr-b').value);
+  const h=parseFloat(document.getElementById('pr-h').value);
+  const el=document.getElementById('pr-res');
+  if([l,b,h].some(isNaN)){el.className='calc-result empty';el.textContent='Gib l, b, h ein ↑';return;}
+  const G=r(l*b);const M=r(2*(l+b)*h);const O=r(2*G+M);const V=r(l*b*h);
+  el.className='calc-result';
+  el.innerHTML=`Grundfläche G = ${l} · ${b} = ${G}\nMantelfläche M = 2·(${l}+${b})·${h} = ${M}\nOberfläche O = 2·${G}+${M} = ${O}\nVolumen V = ${G} · ${h} = ${V}`;
+}
+
+// Dreiecksprisma
+function calcTri(){
+  const a=parseFloat(document.getElementById('tr-a').value);
+  const ha=parseFloat(document.getElementById('tr-ha').value);
+  const h=parseFloat(document.getElementById('tr-h').value);
+  const b=parseFloat(document.getElementById('tr-b').value)||a;
+  const el=document.getElementById('tr-res');
+  if([a,ha,h].some(isNaN)){el.className='calc-result empty';el.textContent='Gib Werte ein ↑';return;}
+  const G=r(0.5*a*ha);const M=r((a+b+b)*h);const O=r(2*G+M);const V=r(G*h);
+  el.className='calc-result';
+  el.innerHTML=`Dreiecksfläche G = ½ · ${a} · ${ha} = ${G}\nMantelfläche M ≈ ${M} (vereinfacht)\nOberfläche O ≈ ${O}\nVolumen V = ${G} · ${h} = ${V}`;
+}
+
+// Achteck
+function calcOct(){
+  const a=parseFloat(document.getElementById('oc-a').value);
+  const hd=parseFloat(document.getElementById('oc-hd').value);
+  const h=parseFloat(document.getElementById('oc-h').value);
+  const el=document.getElementById('oc-res');
+  if([a,hd,h].some(isNaN)){el.className='calc-result empty';el.textContent='Gib Werte ein ↑';return;}
+  const G=r(8*0.5*a*hd);const M=r(8*a*h);const O=r(2*G+M);const V=r(G*h);
+  el.className='calc-result';
+  el.innerHTML=`Grundfläche G = 8 · ½ · ${a} · ${hd} = ${G} cm²\nMantelfläche M = 8 · ${a} · ${h} = ${M} cm²\nOberfläche O = 2·${G}+${M} = ${O} cm²\nVolumen V = ${G} · ${h} = ${V} cm³`;
+}
+
+// Zylinder
+function calcZyl(){
+  const rv=parseFloat(document.getElementById('z-r').value);
+  const h=parseFloat(document.getElementById('z-h').value);
+  const el=document.getElementById('z-res');
+  if(isNaN(rv)||isNaN(h)){el.className='calc-result empty';el.textContent='Gib r und h ein ↑';return;}
+  const G=r(PI*rv*rv);const M=r(2*PI*rv*h);const O=r(2*G+M);const V=r(PI*rv*rv*h);
+  el.className='calc-result';
+  el.innerHTML=`Kreisfläche G = π·${rv}² = ${G}\nMantelfläche M = 2π·${rv}·${h} = ${M}\nOberfläche O = 2·${G}+${M} = ${O}\nVolumen V = π·${rv}²·${h} = ${V}`;
+}
+
+// Potenz
+function calcPot(){
+  const base=parseFloat(document.getElementById('p-base').value);
+  const exp=parseFloat(document.getElementById('p-exp').value);
+  const el=document.getElementById('p-res');
+  if(isNaN(base)||isNaN(exp)){el.className='calc-result empty';el.textContent='Gib Basis und Exponent ein ↑';return;}
+  const res=Math.pow(base,exp);
+  el.className='calc-result';
+  let steps='';
+  if(Number.isInteger(exp)&&exp>0&&exp<=6){const arr=[];for(let i=0;i<exp;i++)arr.push(base);steps='\n= '+arr.join(' × ');}
+  el.innerHTML=`${base}^${exp}${steps}\n= ${r(res,6)}`;
+}
+
+// Wurzel
+function calcWurzel(){
+  const a=parseFloat(document.getElementById('w-a').value);
+  const e=parseFloat(document.getElementById('w-e').value);
+  const el=document.getElementById('w-res');
+  if(isNaN(a)||isNaN(e)){el.className='calc-result empty';el.textContent='Gib a und m/n ein ↑';return;}
+  const res=Math.pow(a,e);
+  el.className='calc-result';
+  el.innerHTML=`${a}^(${e}) = ${r(res,6)}\nBeispiel: 64^(2/3) → gib 64 und 0.667 ein → ergibt ${r(Math.pow(64,2/3),4)}`;
+}
+
+// Quiz system
+const quizzes={
+  k:[
+    {q:'Ein Kreis hat den Radius r = 7 cm. Wie groß ist der Umfang (gerundet)?',opts:['43,98 cm','21,99 cm','153,94 cm','14 cm'],correct:0,exp:'U = 2·π·r = 2·3,14159·7 ≈ 43,98 cm. Nicht vergessen: Umfang ist der Rand, nicht die Fläche!'},
+    {q:'Der Stammdurchmesser eines Baumes beträgt 4,6 m. Was ist der Radius?',opts:['9,2 m','2,3 m','4,6 m','1,15 m'],correct:1,exp:'Radius = Durchmesser ÷ 2 = 4,6 ÷ 2 = 2,3 m'},
+    {q:'Welche Formel berechnet die Kreisfläche?',opts:['A = π · d','A = 2 · π · r','A = π · r²','A = π · r · h'],correct:2,exp:'A = π · r² — der Radius wird quadriert und mit π multipliziert!'},
+  ],
+  s:[
+    {q:'Ein Kreisausschnitt hat α = 90° und r = 4 cm. Welcher Anteil der gesamten Kreisfläche ist das?',opts:['Ein Viertel','Die Hälfte','Ein Drittel','Drei Viertel'],correct:0,exp:'90° von 360° = 1/4. Also ist ein Kreisausschnitt von 90° genau ein Viertel des gesamten Kreises!'},
+    {q:'Was passiert mit der Bogenlänge, wenn man den Winkel verdoppelt (bei gleichem Radius)?',opts:['Sie bleibt gleich','Sie verdoppelt sich','Sie halbiert sich','Sie wird 4-fach'],correct:1,exp:'b = (α/360°)·2πr — wenn α sich verdoppelt, verdoppelt sich auch b linear!'},
+  ],
+  z:[
+    {q:'Ein Zylinder hat r = 3 cm und h = 10 cm. Wie groß ist das Volumen?',opts:['94,25 cm³','282,74 cm³','188,5 cm³','30 cm³'],correct:1,exp:'V = π·r²·h = π·9·10 = 90π ≈ 282,74 cm³'},
+    {q:'Was ist die Mantelfläche eines Zylinders?',opts:['π · r²','2 · π · r · h','π · r² · h','2 · π · r'],correct:1,exp:'Mantel = 2·π·r·h. Rolle das Etikett ab — es ist ein Rechteck mit Breite 2πr und Höhe h!'},
+  ],
+  p:[
+    {q:'Was ergibt 6⁻²?',opts:['−36','1/36','36','−1/36'],correct:1,exp:'6⁻² = 1/6² = 1/36. Negativer Exponent = Kehrwert der Potenz!'},
+    {q:'Was ergibt 5⁻⁵ · 5 nach Vereinfachung?',opts:['5⁻⁴','5⁻⁶','1','5⁻⁵'],correct:0,exp:'5⁻⁵ · 5¹ = 5^(−5+1) = 5^(−4). Gleiche Basis → Exponenten addieren!'},
+    {q:'Wie lautet 6800 in wissenschaftlicher Schreibweise?',opts:['68 · 10²','6,8 · 10³','0,68 · 10⁴','6,8 · 10²'],correct:1,exp:'6800 = 6,8 · 1000 = 6,8 · 10³. Immer eine Stelle vor dem Komma!'},
+  ],
+  w:[
+    {q:'Was ergibt ⁴√3¹²?',opts:['3²','3³','3⁴','3¹²'],correct:1,exp:'⁴√3¹² = 3^(12/4) = 3³ = 27'},
+    {q:'Was bedeutet a^(1/2)?',opts:['a²','2a','√a','a/2'],correct:2,exp:'a^(1/2) = √a. Der Exponent 1/2 ist dasselbe wie die Quadratwurzel!'},
+  ]
+};
+const qState={};
+['k','s','z','p','w'].forEach(id=>{qState[id]={idx:0,answered:false};loadQ(id);});
+
+function loadQ(id){
+  const qs=quizzes[id];const st=qState[id];
+  if(st.idx>=qs.length){
+    document.getElementById('q'+id+'-q').textContent='🎉 Alle Fragen beantwortet! Du hast das Thema durchgearbeitet.';
+    document.getElementById('q'+id+'-opts').innerHTML='';
+    document.getElementById('q'+id+'-fb').className='quiz-feedback';
+    document.getElementById('q'+id+'-next').className='next-btn';
+    return;
+  }
+  const q=qs[st.idx];st.answered=false;
+  document.getElementById('q'+id+'-q').textContent=q.q;
+  const optsEl=document.getElementById('q'+id+'-opts');
+  optsEl.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');btn.className='quiz-opt';btn.textContent=o;
+    btn.onclick=()=>answerQ(id,i);optsEl.appendChild(btn);
+  });
+  document.getElementById('q'+id+'-fb').className='quiz-feedback';
+  document.getElementById('q'+id+'-next').className='next-btn';
+}
+
+function answerQ(id,chosen){
+  const st=qState[id];if(st.answered)return;st.answered=true;
+  const q=quizzes[id][st.idx];
+  const opts=document.querySelectorAll('#q'+id+'-opts .quiz-opt');
+  opts.forEach((o,i)=>{o.disabled=true;if(i===q.correct)o.classList.add('correct');else if(i===chosen&&chosen!==q.correct)o.classList.add('wrong');});
+  const fb=document.getElementById('q'+id+'-fb');
+  fb.className='quiz-feedback show '+(chosen===q.correct?'qf-correct':'qf-wrong');
+  fb.textContent=(chosen===q.correct?'✓ Richtig! ':'✗ Leider falsch. ')+q.exp;
+  document.getElementById('q'+id+'-next').className='next-btn show';
+}
+
+function nextQ(id){
+  qState[id].idx++;loadQ(id);
+}
+</script>
