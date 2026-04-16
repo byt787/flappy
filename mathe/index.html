@@ -1,543 +1,641 @@
-
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Formeln gecheckt.</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap');
-
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0a0f;
-  --bg2:#12121a;
-  --bg3:#1a1a26;
-  --accent:#7c6cf8;
-  --accent2:#f87c6c;
-  --accent3:#6cf8c4;
-  --text:#e8e6ff;
-  --muted:#8880bb;
-  --card:#16161f;
-  --border:#2a2840;
-  --mono:'Space Mono',monospace;
-  --sans:'Outfit',sans-serif;
+  --bg:#060a12;--bg2:#0b1020;
+  --glass:rgba(255,255,255,0.055);
+  --gb:rgba(80,160,255,0.2);
+  --gbs:rgba(120,190,255,0.12);
+  --shadow:rgba(0,60,200,0.25);
+  --blue:#4ab8f8;--blue2:#2880d8;
+  --green:#38e07a;--teal:#28e0c8;
+  --text:#c8e8ff;--muted:#5a90b8;--light:#2a5878;
+  --accent:#f09050;
 }
+body{font-family:'Nunito',sans-serif;min-height:100vh;background:var(--bg);color:var(--text);overflow-x:hidden;
+  background-image:radial-gradient(ellipse 90% 55% at 18% -5%,rgba(20,70,200,0.22) 0%,transparent 58%),radial-gradient(ellipse 65% 45% at 82% 105%,rgba(15,130,190,0.18) 0%,transparent 55%),radial-gradient(ellipse 50% 35% at 52% 52%,rgba(8,42,120,0.1) 0%,transparent 65%)}
 
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+.glass{background:linear-gradient(148deg,rgba(255,255,255,0.07) 0%,rgba(60,140,255,0.04) 50%,rgba(255,255,255,0.025) 100%);border:1px solid var(--gb);border-radius:22px;backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);box-shadow:0 8px 42px var(--shadow),inset 0 1px 0 rgba(180,220,255,0.14),inset 0 -1px 0 rgba(0,30,100,0.2);position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,0.08),transparent);pointer-events:none;border-radius:22px 22px 0 0;z-index:0}
+.glass>*{position:relative;z-index:1}
 
-.stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
-.star{position:absolute;width:2px;height:2px;background:var(--accent);border-radius:50%;animation:twinkle 3s infinite}
-@keyframes twinkle{0%,100%{opacity:0.2}50%{opacity:0.9}}
+.bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bub{position:absolute;border-radius:50%;background:radial-gradient(circle at 28% 24%,rgba(100,190,255,0.16) 0%,rgba(30,100,255,0.05) 58%,transparent 100%);border:1px solid rgba(80,170,255,0.15);animation:rise linear infinite}
+@keyframes rise{0%{transform:translateY(110vh) scale(.72);opacity:0}7%{opacity:.55}86%{opacity:.32}100%{transform:translateY(-14vh) scale(1.1);opacity:0}}
+.orb{position:fixed;pointer-events:none;border-radius:50%;filter:blur(90px);z-index:0}
+.orb1{width:540px;height:540px;top:-200px;left:-160px;background:radial-gradient(circle,rgba(22,75,220,0.2),transparent 70%)}
+.orb2{width:420px;height:420px;bottom:-130px;right:-110px;background:radial-gradient(circle,rgba(15,145,195,0.18),transparent 70%)}
 
-.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:20px 16px 60px}
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:28px 14px 90px}
 
-.hero{text-align:center;padding:40px 0 30px;animation:fadeUp 0.6s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+/* HEADER */
+.header{text-align:center;padding:40px 0 22px}
+.badge-top{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(148deg,rgba(255,255,255,0.08),rgba(60,140,255,0.06));border:1px solid rgba(90,170,255,0.28);border-radius:999px;padding:7px 22px;font-size:10.5px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:#70b8f0;margin-bottom:18px;backdrop-filter:blur(12px);box-shadow:0 2px 18px rgba(20,80,255,0.18),inset 0 1px 0 rgba(180,220,255,0.1)}
+.badge-top::before{content:'📐';font-size:14px}
+.header h1{font-family:'Baloo 2',sans-serif;font-size:clamp(36px,8vw,64px);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#c0e8ff 0%,#70c8f8 32%,#40d8e8 65%,#80c8ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 32px rgba(60,170,240,0.38))}
+.header p{color:var(--muted);font-size:15px;font-weight:700;margin-top:10px}
 
-.hero-tag{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;opacity:0.8}
-.hero h1{font-size:clamp(28px,6vw,52px);font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;margin-bottom:10px}
-.hero p{color:var(--muted);font-size:16px;font-weight:300;max-width:480px;margin:0 auto}
+/* NAV */
+.nav{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:22px 0 30px}
+.ntab{position:relative;overflow:hidden;padding:9px 18px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;border:1px solid rgba(80,160,255,0.2);background:linear-gradient(158deg,rgba(255,255,255,0.055),rgba(50,120,255,0.04));color:#7ab8d8;transition:all .22s;box-shadow:0 3px 14px rgba(0,50,180,0.12),inset 0 1px 0 rgba(200,230,255,0.08);backdrop-filter:blur(10px)}
+.ntab::after{content:'';position:absolute;top:0;left:0;right:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,0.09),transparent);border-radius:999px 999px 0 0;pointer-events:none}
+.ntab:hover{transform:translateY(-2px);border-color:rgba(90,175,255,0.36);color:#b0d8f8;box-shadow:0 6px 22px rgba(20,90,255,0.22),inset 0 1px 0 rgba(200,230,255,0.12)}
+.ntab.act{background:linear-gradient(158deg,rgba(42,130,240,0.48),rgba(18,88,225,0.58));border-color:rgba(100,190,255,0.48);color:#d8f0ff;box-shadow:0 5px 22px rgba(35,130,220,0.5),0 0 0 1px rgba(90,175,255,0.14),inset 0 1px 0 rgba(200,235,255,0.2)}
 
-.nav-pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:24px 0 32px}
-.pill{padding:8px 18px;border-radius:999px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;white-space:nowrap}
-.pill:hover,.pill.active{border-color:var(--accent);color:var(--accent);background:rgba(124,108,248,0.1)}
-.pill.active{background:rgba(124,108,248,0.15)}
+/* SECTIONS */
+.sec{display:none;animation:fadeUp .36s ease}
+.sec.act{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.ttag{font-size:10.5px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+.ttitle{font-family:'Baloo 2',sans-serif;font-size:28px;font-weight:800;background:linear-gradient(135deg,#c8e8ff,#70c8f8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.tdesc{font-size:13.5px;font-weight:700;color:var(--muted);margin-bottom:18px}
 
-.section{display:none;animation:fadeUp 0.4s ease}
-.section.active{display:block}
+/* LEHRER SCHMIDT */
+.ls-wrap{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.ls-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:11px;background:linear-gradient(148deg,rgba(255,25,25,0.13),rgba(190,8,8,0.08));border:1px solid rgba(255,70,70,0.26);color:#ff8888;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 3px 14px rgba(220,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.07);backdrop-filter:blur(8px)}
+.ls-btn::before{content:'▶';font-size:10px}
+.ls-btn:hover{background:linear-gradient(148deg,rgba(255,25,25,0.22),rgba(190,8,8,0.14));border-color:rgba(255,90,90,0.4);color:#ffaaaa;transform:translateY(-1px);box-shadow:0 6px 20px rgba(220,0,0,0.22)}
 
-.chapter-tag{font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
-.section-title{font-size:22px;font-weight:700;margin-bottom:4px}
-.section-desc{color:var(--muted);font-size:14px;margin-bottom:24px;font-weight:300}
+/* CARD */
+.card{padding:20px;margin-bottom:14px}
+.card-h{display:flex;align-items:center;gap:11px;margin-bottom:15px}
+.ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 3px 12px rgba(0,60,200,0.28),inset 0 1px 0 rgba(200,230,255,0.15)}
+.ico-b{background:linear-gradient(148deg,rgba(50,150,255,0.38),rgba(16,90,220,0.48))}
+.ico-g{background:linear-gradient(148deg,rgba(36,210,120,0.32),rgba(16,150,95,0.42))}
+.ico-o{background:linear-gradient(148deg,rgba(248,152,50,0.3),rgba(210,112,16,0.42))}
+.card-h h3{font-size:16px;font-weight:900;color:#b8e0ff}
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
-.card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.icon-box{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.ib-purple{background:rgba(124,108,248,0.2)}
-.ib-coral{background:rgba(248,124,108,0.2)}
-.ib-teal{background:rgba(108,248,196,0.2)}
-.card-head h3{font-size:15px;font-weight:600;color:var(--text)}
+/* FORMULA */
+.formula{background:linear-gradient(148deg,rgba(22,90,220,0.13),rgba(14,72,185,0.07));border:1px solid rgba(70,145,255,0.22);border-radius:14px;padding:14px 18px;font-family:'Courier New',monospace;font-size:15px;font-weight:bold;color:#98ccff;text-align:center;margin:9px 0;position:relative;overflow:hidden;box-shadow:0 2px 14px rgba(14,68,220,0.12),inset 0 1px 0 rgba(90,175,255,0.1)}
+.formula::before{content:'';position:absolute;top:0;left:0;right:0;height:44%;background:linear-gradient(180deg,rgba(255,255,255,0.07),transparent);border-radius:14px 14px 0 0;pointer-events:none}
+.formula .fl{font-family:'Nunito',sans-serif;font-size:11px;color:#5898b8;font-weight:700;display:block;margin-top:5px;font-style:italic}
 
-.formula-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:10px 0;font-family:var(--mono);font-size:13px;color:var(--accent3);text-align:center;line-height:1.8}
-.formula-box .comment{color:var(--muted);font-size:11px;font-family:var(--sans);font-style:italic;margin-top:4px;display:block}
+/* EXAMPLE */
+.ex{background:linear-gradient(135deg,rgba(36,190,112,0.09),rgba(16,155,135,0.05));border-left:2.5px solid rgba(48,210,115,0.5);border-radius:0 12px 12px 0;padding:11px 14px;margin:10px 0;font-size:13.5px;line-height:1.72;color:#a0ccb8}
+.ex strong{color:#58e090;font-weight:900}
+.ex .st{display:block;font-family:'Courier New',monospace;font-size:11.5px;color:#3a9860;margin-top:5px}
 
-.example-box{background:rgba(124,108,248,0.06);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0;font-size:14px;line-height:1.7}
-.example-box strong{color:var(--accent);font-weight:600}
-.example-box .step{color:var(--muted);font-family:var(--mono);font-size:12px;display:block;margin-top:4px}
+/* TIP */
+.tip{background:linear-gradient(135deg,rgba(235,190,45,0.1),rgba(230,135,26,0.06));border:1px solid rgba(235,185,48,0.22);border-radius:12px;padding:10px 14px;font-size:13px;color:#c0a035;display:flex;gap:9px;align-items:flex-start;margin:10px 0}
+.tip span{color:#c8a840;font-weight:600}
 
-.tip-box{background:rgba(108,248,196,0.06);border:1px solid rgba(108,248,196,0.25);border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13px;color:#a8f8e0;display:flex;gap:10px;align-items:flex-start}
-.tip-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+/* CALC */
+.cbox{background:linear-gradient(155deg,rgba(18,72,200,0.1),rgba(10,54,165,0.06));border:1px solid rgba(72,138,255,0.18);border-radius:16px;padding:16px;margin-top:14px;box-shadow:inset 0 1px 0 rgba(90,175,255,0.07)}
+.clbl{font-size:10.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#4085b8;margin-bottom:12px}
+.inpr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.inpr.s1{grid-template-columns:1fr}
+.ing{display:flex;flex-direction:column;gap:4px}
+.ing label{font-size:11px;font-weight:800;color:#426880}
+.ing input,.ing select{background:linear-gradient(180deg,rgba(255,255,255,0.055),rgba(22,68,175,0.09));border:1px solid rgba(72,140,255,0.2);border-radius:11px;padding:9px 13px;font-family:'Courier New',monospace;font-size:14px;color:#90c8e8;outline:none;box-shadow:inset 0 2px 6px rgba(0,18,75,0.18),inset 0 1px 0 rgba(200,230,255,0.04);transition:border .2s,box-shadow .2s;backdrop-filter:blur(4px)}
+.ing input:focus,.ing select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(70,170,240,0.15),inset 0 2px 6px rgba(0,18,75,0.18)}
+.ing select option{background:#0b1525;color:#90c8e8}
+.rbox{background:linear-gradient(180deg,rgba(255,255,255,0.048),rgba(18,55,160,0.08));border:1px solid rgba(72,138,255,0.17);border-radius:11px;padding:12px 14px;font-family:'Courier New',monospace;font-size:13px;line-height:1.9;color:#7ab8e0;min-height:50px;white-space:pre-line;box-shadow:inset 0 2px 8px rgba(0,18,75,0.14)}
+.rbox.em{color:#2e5870;font-family:'Nunito',sans-serif;font-size:13px;font-style:italic}
 
-.calc-section{background:var(--bg3);border-radius:12px;padding:16px;margin-top:14px}
-.calc-title{font-size:12px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
-.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.calc-grid.single{grid-template-columns:1fr}
-.inp-wrap{display:flex;flex-direction:column;gap:4px}
-.inp-wrap label{font-size:11px;color:var(--muted);font-family:var(--mono)}
-.inp-wrap input{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;transition:border 0.2s}
-.inp-wrap input:focus{border-color:var(--accent)}
-.calc-btn{width:100%;padding:10px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:4px}
-.calc-btn:hover{background:#9484ff;transform:translateY(-1px)}
-.calc-btn:active{transform:translateY(0)}
-.calc-result{background:var(--bg2);border-radius:8px;padding:12px;margin-top:10px;min-height:44px;font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--accent3)}
-.calc-result.empty{color:var(--muted);font-style:italic;font-family:var(--sans)}
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.viz{display:flex;justify-content:center;align-items:center;min-height:168px;padding:10px}
+canvas{border-radius:12px;display:block}
 
-.vis-wrap{margin-top:14px}
-.vis-canvas{width:100%;height:180px;background:var(--bg2);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-canvas{border-radius:10px}
+/* QUIZ */
+.quiz{padding:18px;margin-top:14px}
+.qnum{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.qq{font-size:15px;font-weight:800;color:#b8e0ff;margin-bottom:14px;line-height:1.55}
+.qopts{display:flex;flex-direction:column;gap:8px}
+.qo{padding:11px 16px;border-radius:11px;border:1px solid rgba(70,135,255,0.2);background:linear-gradient(160deg,rgba(255,255,255,0.048),rgba(34,88,220,0.055));font-size:13.5px;font-weight:700;color:#90b8d8;cursor:pointer;text-align:left;transition:all .18s;box-shadow:0 2px 8px rgba(0,35,160,0.1),inset 0 1px 0 rgba(200,230,255,0.06);backdrop-filter:blur(6px);font-family:'Nunito',sans-serif}
+.qo:hover{border-color:rgba(70,155,255,0.38);transform:translateX(5px);color:#c8e8ff;background:linear-gradient(160deg,rgba(255,255,255,0.085),rgba(34,110,255,0.1))}
+.qo.ok{border-color:rgba(48,210,115,0.5);background:linear-gradient(160deg,rgba(36,195,95,0.12),rgba(16,155,80,0.08));color:#78e0a0}
+.qo.no{border-color:rgba(255,95,75,0.44);background:linear-gradient(160deg,rgba(255,75,55,0.1),rgba(198,38,18,0.08));color:#e88878}
+.qfb{margin-top:12px;padding:11px 14px;border-radius:11px;font-size:13px;line-height:1.65;display:none}
+.qfb.show{display:block}
+.qfb.ok{background:rgba(36,175,98,0.1);border:1px solid rgba(48,210,115,0.26);color:#80c898}
+.qfb.no{background:rgba(215,78,58,0.09);border:1px solid rgba(255,95,75,0.26);color:#d88878}
+.qnext{margin-top:10px;padding:8px 22px;border-radius:999px;border:1px solid rgba(70,155,255,0.33);background:linear-gradient(160deg,rgba(48,135,255,0.14),rgba(24,95,225,0.1));color:#82b8e0;font-size:13px;font-weight:800;cursor:pointer;display:none;transition:all .2s;box-shadow:inset 0 1px 0 rgba(200,230,255,0.07);font-family:'Nunito',sans-serif}
+.qnext.show{display:inline-block}
+.qnext:hover{background:linear-gradient(160deg,rgba(48,135,255,0.24),rgba(24,95,225,0.18));transform:translateX(3px)}
+.prog{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}
+.pd{width:9px;height:9px;border-radius:50%;background:rgba(50,110,200,0.18);transition:all .3s}
+.pd.done{background:var(--green);box-shadow:0 0 6px rgba(48,220,115,0.5)}
+.pd.cur{background:var(--blue);transform:scale(1.38);box-shadow:0 0 8px rgba(70,185,248,0.5)}
 
-.progress-bar{display:flex;gap:4px;margin-bottom:20px}
-.prog-dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
-.prog-dot.done{background:var(--accent)}
-.prog-dot.current{background:var(--accent3)}
+/* SUBTABS */
+.stabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.stab{padding:6px 15px;border-radius:9px;font-size:12px;font-weight:800;cursor:pointer;border:1px solid rgba(70,135,255,0.17);background:rgba(255,255,255,0.028);color:var(--muted);transition:all .18s;font-family:'Nunito',sans-serif}
+.stab.act,.stab:hover{border-color:rgba(255,155,50,0.36);color:#d89848;background:rgba(245,138,40,0.1)}
+.subc{display:none}
+.subc.act{display:block}
 
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:580px){.grid2{grid-template-columns:1fr}.calc-grid{grid-template-columns:1fr}}
+/* ===== MODALS ===== */
+.overlay{position:fixed;inset:0;background:rgba(2,6,24,0.75);backdrop-filter:blur(14px);z-index:500;display:none;align-items:center;justify-content:center}
+.overlay.show{display:flex}
+.mbox{background:linear-gradient(155deg,rgba(14,22,52,0.97),rgba(8,15,38,0.98));border:1px solid rgba(70,148,255,0.26);border-radius:26px;padding:32px;max-width:390px;width:92%;box-shadow:0 28px 72px rgba(0,25,115,0.58),0 0 0 1px rgba(90,175,255,0.07),inset 0 1px 0 rgba(90,175,255,0.13);animation:popIn .32s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(.66);opacity:0}to{transform:scale(1);opacity:1}}
+.mclose{float:right;background:none;border:none;font-size:18px;cursor:pointer;color:var(--light);padding:0 0 8px 8px;font-weight:900}
+.mclose:hover{color:var(--muted)}
+.mtitle{font-family:'Baloo 2',sans-serif;font-size:23px;font-weight:800;background:linear-gradient(135deg,#c0e8ff,#70c8f8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.msub{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:20px}
+.minp{width:100%;background:linear-gradient(180deg,rgba(255,255,255,0.056),rgba(16,55,165,0.1));border:1px solid rgba(70,138,255,0.24);border-radius:11px;padding:11px 14px;font-size:14px;color:#90c8e8;margin-bottom:12px;outline:none;font-family:'Nunito',sans-serif;font-weight:600;transition:border .2s}
+.minp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(70,175,240,0.15)}
+.mbtn{width:100%;padding:13px;border-radius:12px;border:1px solid rgba(90,175,255,0.27);background:linear-gradient(160deg,rgba(50,140,255,0.48),rgba(16,96,230,0.62));color:#d0eeff;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 5px 20px rgba(22,95,255,0.3),inset 0 1px 0 rgba(200,230,255,0.14);transition:all .2s;font-family:'Nunito',sans-serif}
+.mbtn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(22,95,255,0.42),inset 0 1px 0 rgba(200,230,255,0.18)}
 
-.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;font-family:var(--mono)}
-.badge-purple{background:rgba(124,108,248,0.15);color:var(--accent)}
-.badge-teal{background:rgba(108,248,196,0.15);color:var(--accent3)}
-.badge-coral{background:rgba(248,124,108,0.15);color:var(--accent2)}
+/* ADMIN STAGES */
+.loader-ring{width:50px;height:50px;border-radius:50%;border:3px solid rgba(70,155,255,0.14);border-top:3px solid var(--blue);animation:spin .88s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress-bar-fake{width:100%;height:6px;background:rgba(70,138,255,0.12);border-radius:999px;overflow:hidden;margin:14px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:999px;width:0%;transition:width .06s linear}
+.s3-check{font-size:50px;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);text-align:center;margin-bottom:10px}
+.s4-glyph{font-size:56px;animation:wobble .5s cubic-bezier(.34,1.56,.64,1);text-align:center;margin-bottom:10px}
+@keyframes wobble{0%{transform:scale(.5) rotate(-20deg)}60%{transform:scale(1.12) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.lol-text{font-family:'Baloo 2',sans-serif;font-size:27px;font-weight:800;background:linear-gradient(135deg,#ff8080,#ffaa50);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;margin-bottom:8px}
+.lol-sub{font-size:13px;color:var(--muted);text-align:center;font-weight:600;margin-top:4px}
+.mbtn-red{background:linear-gradient(160deg,rgba(255,80,50,0.4),rgba(195,30,12,0.48));border-color:rgba(255,100,70,0.35)}
+.mbtn-red:hover{box-shadow:0 8px 28px rgba(220,50,20,0.35),inset 0 1px 0 rgba(255,200,180,0.14)}
 
-.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+/* TOAST */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(90px);background:linear-gradient(158deg,rgba(14,25,60,0.97),rgba(8,18,45,0.98));border:1px solid rgba(70,148,255,0.26);border-radius:999px;padding:12px 28px;font-size:14px;font-weight:800;color:#98c8f0;box-shadow:0 12px 36px rgba(0,35,185,0.38),inset 0 1px 0 rgba(90,175,255,0.08);z-index:600;transition:transform .32s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:92vw;text-align:center;backdrop-filter:blur(16px)}
+.toast.show{transform:translateX(-50%) translateY(0)}
 
-.sub-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
-.sub-tab{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-family:var(--mono);cursor:pointer;transition:all 0.2s}
-.sub-tab:hover,.sub-tab.active{border-color:var(--accent2);color:var(--accent2);background:rgba(248,124,108,0.08)}
-
-.sub-section{display:none}
-.sub-section.active{display:block}
-
-.var-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
-.var-table th{text-align:left;padding:6px 10px;font-family:var(--mono);font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)}
-.var-table td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04)}
-.var-table td:first-child{font-family:var(--mono);color:var(--accent);font-size:12px}
-.var-table td:last-child{color:var(--muted);font-size:12px}
-
-.quiz-card{background:var(--bg3);border-radius:12px;padding:18px;margin-top:14px}
-.quiz-q{font-size:14px;font-weight:500;margin-bottom:14px;line-height:1.6}
-.quiz-opts{display:flex;flex-direction:column;gap:8px}
-.quiz-opt{padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;cursor:pointer;text-align:left;transition:all 0.2s;font-family:var(--sans)}
-.quiz-opt:hover{border-color:var(--accent);color:var(--accent)}
-.quiz-opt.correct{border-color:var(--accent3);background:rgba(108,248,196,0.1);color:var(--accent3)}
-.quiz-opt.wrong{border-color:var(--accent2);background:rgba(248,124,108,0.1);color:var(--accent2)}
-.quiz-feedback{margin-top:12px;font-size:13px;padding:10px 14px;border-radius:8px;display:none;line-height:1.6}
-.quiz-feedback.show{display:block}
-.qf-correct{background:rgba(108,248,196,0.08);border:1px solid rgba(108,248,196,0.3);color:#a8f8e0}
-.qf-wrong{background:rgba(248,124,108,0.08);border:1px solid rgba(248,124,108,0.3);color:#f8c0b8}
-
-.next-btn{margin-top:12px;padding:8px 18px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);transition:all 0.2s;display:none}
-.next-btn.show{display:inline-block}
-.next-btn:hover{background:rgba(124,108,248,0.15)}
+@media(max-width:560px){.g2{grid-template-columns:1fr}.inpr{grid-template-columns:1fr}}
 </style>
-
-<div class="stars" id="stars"></div>
+</head>
+<body>
+<div class="orb orb1"></div><div class="orb orb2"></div>
+<div class="bubbles" id="bubs"></div>
 <div class="wrap">
-  <div class="hero">
-    <div class="hero-tag">▸ Mathe Lernwelt — Klasse 8/9</div>
-    <h1>Mathe. Endlich klar.</h1>
-    <p>Schritt für Schritt erklärt — mit echten Beispielen, Rechnern und Checks.</p>
-  </div>
 
-  <div class="nav-pills">
-    <button class="pill active" onclick="showSection('kreis')">⬤ Kreise</button>
-    <button class="pill" onclick="showSection('sektor')">◔ Kreisausschnitt</button>
-    <button class="pill" onclick="showSection('prisma')">▣ Prismen</button>
-    <button class="pill" onclick="showSection('zylinder')">⬭ Zylinder</button>
-    <button class="pill" onclick="showSection('potenz')">xⁿ Potenzen</button>
-    <button class="pill" onclick="showSection('wurzel')">√ Wurzeln</button>
-  </div>
+<div class="header">
+  <div class="badge-top">Formel Workshop · Klasse 8/9</div>
+  <h1>Formeln. Gecheckt.</h1>
+  <p>Kreise · Prismen · Zylinder · Potenzen — klar erklärt, nicht hingekleistert.</p>
+</div>
 
-  <div id="sec-kreis" class="section active">
-    <div class="chapter-tag">Kapitel III · Thema 1</div>
-    <div class="section-title">Umfang & Flächeninhalt eines Kreises</div>
-    <div class="section-desc">Alles dreht sich um π — die magische Zahl 3,14159…</div>
-    <div class="card">
-      <div class="card-head"><div class="icon-box ib-purple">⬤</div><h3>Die zwei wichtigsten Formeln</h3></div>
-      <div class="formula-box">U = 2 · π · r = π · d<span class="comment">Umfang — wie lang ist der Rand?</span></div>
-      <div class="formula-box">A = π · r²<span class="comment">Flächeninhalt — wie groß ist die Fläche?</span></div>
-      <table class="var-table"><tr><th>Variable</th><th>Bedeutung</th></tr><tr><td>r</td><td>Radius (Mittelpunkt bis Rand)</td></tr><tr><td>d</td><td>Durchmesser = 2 · r</td></tr><tr><td>π</td><td>Pi ≈ 3,14159…</td></tr></table>
-      <div class="tip-box"><div class="tip-icon">💡</div><div>Merkhilfe: <strong>Radius</strong> ist immer halb so groß wie der Durchmesser. Wenn du den Durchmesser kennst, teile durch 2!</div></div>
-      <div class="example-box"><strong>Beispiel:</strong> Ein Baum hat einen Stammumfang von 46 m. Wie groß ist sein Durchmesser?<span class="step">U = π · d  →  d = U ÷ π = 46 ÷ 3,14159 ≈ 14,64 m</span></div>
-      <div class="calc-section">
-        <div class="calc-title">Kreis-Rechner</div>
-        <div class="calc-grid single"><div class="inp-wrap"><label>Eingabe (Radius oder Durchmesser)</label><input type="number" id="k-val" placeholder="z.B. 5" oninput="calcKreis()"></div></div>
-        <div style="display:flex;gap:8px;margin-bottom:8px">
-          <button class="calc-btn" style="background:var(--bg2);color:var(--muted);border:1px solid var(--border)" onclick="setKreisMode('r')">→ Radius eingegeben</button>
-          <button class="calc-btn" style="background:var(--bg2);color:var(--muted);border:1px solid var(--border)" onclick="setKreisMode('d')">→ Durchmesser eingegeben</button>
-        </div>
-        <div class="calc-result empty" id="k-res">Gib oben einen Wert ein ↑</div>
-      </div>
-    </div>
-    <div class="quiz-card">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
-      <div class="quiz-q" id="qk-q"></div>
-      <div class="quiz-opts" id="qk-opts"></div>
-      <div class="quiz-feedback" id="qk-fb"></div>
-      <button class="next-btn" id="qk-next" onclick="nextQ('k')">Nächste Frage →</button>
-    </div>
-  </div>
+<div class="nav" id="nav"></div>
 
-  <div id="sec-sektor" class="section">
-    <div class="chapter-tag">Kapitel III · Thema 2</div>
-    <div class="section-title">Kreisausschnitt (Sektor)</div>
-    <div class="section-desc">Ein "Tortenstück" des Kreises — mit Winkel α bestimmt.</div>
-    <div class="card">
-      <div class="card-head"><div class="icon-box ib-teal">◔</div><h3>Bogenlänge & Sektorfläche</h3></div>
-      <div class="formula-box">b = (α / 360°) · 2 · π · r<span class="comment">Bogenlänge — der gebogene Rand des Kuchenstücks</span></div>
-      <div class="formula-box">A = (α / 360°) · π · r²<span class="comment">Fläche des Kreisausschnitts</span></div>
-      <div class="tip-box"><div class="tip-icon">🍕</div><div>Stell dir einen Pizza-Kreis vor. Der Winkel α sagt, wie groß dein Stück ist. Bei 360° ist es die ganze Pizza!</div></div>
-      <div class="example-box"><strong>Beispiel:</strong> r = 2,2 cm, α = 70°<span class="step">b = (70/360) · 2 · π · 2,2 = 0,1944 · 13,82 ≈ 2,69 cm</span></div>
-      <div class="calc-section">
-        <div class="calc-title">Sektor-Rechner</div>
-        <div class="calc-grid">
-          <div class="inp-wrap"><label>Radius r (cm)</label><input type="number" id="s-r" placeholder="z.B. 2.2" oninput="calcSektor()"></div>
-          <div class="inp-wrap"><label>Winkel α (Grad)</label><input type="number" id="s-a" placeholder="z.B. 70" oninput="calcSektor()"></div>
-        </div>
-        <div class="calc-result empty" id="s-res">Gib Radius und Winkel ein ↑</div>
-      </div>
+<!-- KREISE -->
+<div id="s-kreis" class="sec act">
+  <div class="ttag">Kapitel III · Thema 1</div>
+  <div class="ttitle">Kreis — Umfang & Fläche</div>
+  <div class="tdesc">π ist deine beste Freundin. Einmal gecheckt, nie vergessen.</div>
+  <div class="ls-wrap">
+    <a class="ls-btn" href="https://www.youtube.com/results?search_query=lehrer+schmidt+kreisumfang+kreisfläche+berechnen" target="_blank" rel="noopener">Lehrer Schmidt: Kreisumfang & Fläche</a>
+  </div>
+  <div class="g2">
+    <div class="glass card">
+      <div class="card-h"><div class="ico ico-b">⬤</div><h3>Die Formeln</h3></div>
+      <div class="formula">U = 2 · π · r = π · d<span class="fl">Umfang — der komplette Rand</span></div>
+      <div class="formula">A = π · r²<span class="fl">Flächeninhalt — die Fläche innen</span></div>
+      <div class="tip">💡 <span><b>d = 2·r</b> — Durchmesser durch 2 = Radius!</span></div>
     </div>
-    <div class="quiz-card">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
-      <div class="quiz-q" id="qs-q"></div>
-      <div class="quiz-opts" id="qs-opts"></div>
-      <div class="quiz-feedback" id="qs-fb"></div>
-      <button class="next-btn" id="qs-next" onclick="nextQ('s')">Nächste Frage →</button>
+    <div class="glass card"><div class="viz"><canvas id="cv-kr" width="165" height="165"></canvas></div></div>
+  </div>
+  <div class="glass card">
+    <div class="card-h"><div class="ico ico-g">✎</div><h3>Echte Beispiele</h3></div>
+    <div class="ex"><strong>Baum von Tule — Stammumfang = 46 m. Welcher Durchmesser?</strong><span class="st">d = U÷π = 46÷3,14159 ≈ 14,64 m (≈3× dicker als der Hyperion!)</span></div>
+    <div class="ex"><strong>Europaplatz Aachen: Brunnen ⌀=100 m + 13 m Rasenstreifen. Fläche?</strong><span class="st">A_außen=π·63²≈12469 m² | A_innen=π·50²≈7854 m²</span><span class="st">A_Rasen = 12469−7854 ≈ 4615 m²</span></div>
+    <div class="cbox">
+      <div class="clbl">Kreis-Rechner</div>
+      <div class="inpr">
+        <div class="ing"><label>Wert eingeben</label><input type="number" id="kr-v" placeholder="z.B. 5" oninput="calcKr()"></div>
+        <div class="ing"><label>Das ist...</label>
+          <select id="kr-t" onchange="calcKr()">
+            <option value="r">Radius r</option><option value="d">Durchmesser d</option>
+            <option value="u">Umfang U</option><option value="a">Fläche A</option>
+          </select>
+        </div>
+      </div>
+      <div class="rbox em" id="kr-res">Oben einen Wert eingeben ↑</div>
     </div>
   </div>
+  <div class="quiz glass" id="qz-k"></div>
+</div>
 
-  <div id="sec-prisma" class="section">
-    <div class="chapter-tag">Kapitel III · Thema 3</div>
-    <div class="section-title">Prisma — Oberfläche & Volumen</div>
-    <div class="section-desc">Ein 3D-Körper mit zwei gleichen Grundflächen oben und unten.</div>
-    <div class="card">
-      <div class="card-head"><div class="icon-box ib-purple">▣</div><h3>Die Formeln</h3></div>
-      <div class="formula-box">V = G · h<span class="comment">Volumen = Grundfläche × Höhe</span></div>
-      <div class="formula-box">O = 2 · G + M<span class="comment">Oberfläche = 2× Grundfläche + Mantelfläche</span></div>
-      <div class="tip-box"><div class="tip-icon">📦</div><div>Stell dir eine Schachtel vor: Das Volumen sagt dir, wie viel reinpasst. Die Oberfläche sagt, wie viel Karton du brauchst.</div></div>
-      <div class="sub-tabs">
-        <button class="sub-tab active" onclick="showSub('pr','rect')">Quader</button>
-        <button class="sub-tab" onclick="showSub('pr','tri')">Dreiecksprisma</button>
-        <button class="sub-tab" onclick="showSub('pr','oct')">Achteck-Prisma</button>
+<!-- KREISAUSSCHNITT -->
+<div id="s-sek" class="sec">
+  <div class="ttag">Kapitel III · Thema 2</div>
+  <div class="ttitle">Kreisausschnitt</div>
+  <div class="tdesc">Ein Kuchenstück aus dem Kreis — α bestimmt wie groß dein Stück ist.</div>
+  <div class="ls-wrap">
+    <a class="ls-btn" href="https://www.youtube.com/results?search_query=lehrer+schmidt+kreisausschnitt+bogenlaenge+flächeninhalt" target="_blank" rel="noopener">Lehrer Schmidt: Kreisausschnitt</a>
+  </div>
+  <div class="glass card">
+    <div class="card-h"><div class="ico ico-b">◔</div><h3>Formeln</h3></div>
+    <div class="formula">b = (α / 360°) · 2 · π · r<span class="fl">Bogenlänge (der gebogene Rand)</span></div>
+    <div class="formula">A = (α / 360°) · π · r²<span class="fl">Fläche des Ausschnitts</span></div>
+    <div class="tip">🍕 <span>360° = ganze Pizza. α/360° = dein Anteil. 90° = genau ¼!</span></div>
+    <div class="ex"><strong>Check-out: r=2,2 cm, α=70°</strong><span class="st">b=(70/360)·2π·2,2 ≈ 2,69 cm | A=(70/360)·π·2,2² ≈ 2,96 cm²</span></div>
+    <div class="ex"><strong>Lückenlos auslegen:</strong> 360°÷70°≈5,14 → 5 Stücke lassen Lücke!<span class="st">Für lückenlose 5 Stücke: 360°÷5=72° Mittelpunktswinkel</span></div>
+    <div class="cbox">
+      <div class="clbl">Sektor-Rechner</div>
+      <div class="inpr">
+        <div class="ing"><label>Radius r</label><input type="number" id="sk-r" placeholder="2.2" oninput="calcSk()"></div>
+        <div class="ing"><label>Winkel α (°)</label><input type="number" id="sk-a" placeholder="70" oninput="calcSk()"></div>
       </div>
-      <div id="pr-rect" class="sub-section active">
-        <div class="example-box"><strong>Quader (Rechtecksgrundfl.):</strong> G = l · b, M = Umfang · h<span class="step">Schachtel: l=5 b=3 h=4 → G=15, M=(5+3+5+3)·4=64, O=2·15+64=94 cm²</span></div>
-        <div class="calc-section">
-          <div class="calc-title">Quader-Rechner</div>
-          <div class="calc-grid">
-            <div class="inp-wrap"><label>Länge l</label><input type="number" id="pr-l" placeholder="5" oninput="calcQuader()"></div>
-            <div class="inp-wrap"><label>Breite b</label><input type="number" id="pr-b" placeholder="3" oninput="calcQuader()"></div>
-            <div class="inp-wrap"><label>Höhe h</label><input type="number" id="pr-h" placeholder="4" oninput="calcQuader()"></div>
-          </div>
-          <div class="calc-result empty" id="pr-res">Gib l, b, h ein ↑</div>
-        </div>
-      </div>
-      <div id="pr-tri" class="sub-section">
-        <div class="example-box"><strong>Dreiecksprisma:</strong> G = ½ · a · h_a (Dreieckshöhe), M = (a+b+c) · h_Prisma<span class="step">Drei Seitenflächen + 2× Dreieck</span></div>
-        <div class="calc-section">
-          <div class="calc-title">Dreiecksprisma-Rechner</div>
-          <div class="calc-grid">
-            <div class="inp-wrap"><label>Dreieck Basis a</label><input type="number" id="tr-a" placeholder="6" oninput="calcTri()"></div>
-            <div class="inp-wrap"><label>Dreieck Höhe h_a</label><input type="number" id="tr-ha" placeholder="4" oninput="calcTri()"></div>
-            <div class="inp-wrap"><label>Prisma Höhe h</label><input type="number" id="tr-h" placeholder="10" oninput="calcTri()"></div>
-            <div class="inp-wrap"><label>Seite b (optional)</label><input type="number" id="tr-b" placeholder="5" oninput="calcTri()"></div>
-          </div>
-          <div class="calc-result empty" id="tr-res">Gib Werte ein ↑</div>
-        </div>
-      </div>
-      <div id="pr-oct" class="sub-section">
-        <div class="example-box"><strong>Regelmäßiges Achteck (wie Schoko-Chips Dose):</strong><br>Basis jedes Dreiecks = 6 cm, Dreieckshöhe = 7 cm<span class="step">G = 8 · (½ · 6 · 7) = 168 cm², M = 8 · 6 · 4,4 = 211,2 cm², O = 547,2 cm²</span></div>
-        <div class="calc-section">
-          <div class="calc-title">Achteck-Prisma-Rechner</div>
-          <div class="calc-grid">
-            <div class="inp-wrap"><label>Kantenlänge a</label><input type="number" id="oc-a" placeholder="6" oninput="calcOct()"></div>
-            <div class="inp-wrap"><label>Dreieckshöhe h_D</label><input type="number" id="oc-hd" placeholder="7" oninput="calcOct()"></div>
-            <div class="inp-wrap"><label>Prisma Höhe h</label><input type="number" id="oc-h" placeholder="4.4" oninput="calcOct()"></div>
-          </div>
-          <div class="calc-result empty" id="oc-res">Gib Werte ein ↑</div>
-        </div>
-      </div>
+      <div class="rbox em" id="sk-res">Radius und Winkel eingeben ↑</div>
     </div>
   </div>
+  <div class="quiz glass" id="qz-s"></div>
+</div>
 
-  <div id="sec-zylinder" class="section">
-    <div class="chapter-tag">Kapitel III · Thema 4</div>
-    <div class="section-title">Zylinder — Oberfläche & Volumen</div>
-    <div class="section-desc">Wie eine Konservendose — kreisrunde Deckflächen, ein Mantel.</div>
-    <div class="card">
-      <div class="card-head"><div class="icon-box ib-coral">⬭</div><h3>Die Formeln</h3></div>
-      <div class="formula-box">V = π · r² · h<span class="comment">Volumen = Kreisfläche × Höhe</span></div>
-      <div class="formula-box">O = 2 · π · r² + 2 · π · r · h<span class="comment">2 Kreise (oben+unten) + Mantel</span></div>
-      <div class="tip-box"><div class="tip-icon">🥫</div><div>Den Mantel kannst du dir vorstellen, als würdest du das Etikett der Dose abwickeln — es wird ein Rechteck mit Breite 2πr und Höhe h.</div></div>
-      <div class="example-box"><strong>Beispiel Pfirsichdose:</strong> große Dose d=10 cm, h=11,8 cm<span class="step">r=5, V = π·25·11,8 ≈ 926,77 cm³, O = 2π·25 + 2π·5·11,8 ≈ 527,79 cm²</span></div>
-      <div class="calc-section">
-        <div class="calc-title">Zylinder-Rechner</div>
-        <div class="calc-grid">
-          <div class="inp-wrap"><label>Radius r</label><input type="number" id="z-r" placeholder="5" oninput="calcZyl()"></div>
-          <div class="inp-wrap"><label>Höhe h</label><input type="number" id="z-h" placeholder="11.8" oninput="calcZyl()"></div>
+<!-- PRISMA -->
+<div id="s-pri" class="sec">
+  <div class="ttag">Kapitel III · Thema 3</div>
+  <div class="ttitle">Prisma</div>
+  <div class="tdesc">Zwei gleiche Grundflächen oben+unten, rechteckige Seiten dazwischen.</div>
+  <div class="ls-wrap">
+    <a class="ls-btn" href="https://www.youtube.com/results?search_query=lehrer+schmidt+prisma+volumen+oberfläche+berechnen" target="_blank" rel="noopener">Lehrer Schmidt: Prisma</a>
+  </div>
+  <div class="g2">
+    <div class="glass card">
+      <div class="card-h"><div class="ico ico-b">▣</div><h3>Formeln</h3></div>
+      <div class="formula">V = G · h<span class="fl">Volumen = Grundfläche × Höhe</span></div>
+      <div class="formula">O = 2 · G + M<span class="fl">2 Grundflächen + Mantelfläche</span></div>
+      <div class="tip">📦 <span>M = Umfang der Grundfläche × h — gilt immer!</span></div>
+    </div>
+    <div class="glass card"><div class="viz"><canvas id="cv-pr" width="160" height="160"></canvas></div></div>
+  </div>
+  <div class="glass card">
+    <div class="stabs">
+      <button class="stab act" onclick="showSub('pr','q',this)">Quader</button>
+      <button class="stab" onclick="showSub('pr','t',this)">Dreieck</button>
+      <button class="stab" onclick="showSub('pr','o',this)">Achteck</button>
+    </div>
+    <div id="pr-q" class="subc act">
+      <div class="ex"><strong>Quader:</strong> G=l·b, M=2·(l+b)·h<span class="st">l=5,b=3,h=4 → G=15, M=64, O=94, V=60</span></div>
+      <div class="cbox"><div class="clbl">Quader</div>
+        <div class="inpr">
+          <div class="ing"><label>Länge l</label><input type="number" id="qd-l" placeholder="5" oninput="calcQd()"></div>
+          <div class="ing"><label>Breite b</label><input type="number" id="qd-b" placeholder="3" oninput="calcQd()"></div>
+          <div class="ing"><label>Höhe h</label><input type="number" id="qd-h" placeholder="4" oninput="calcQd()"></div>
         </div>
-        <div class="calc-result empty" id="z-res">Gib r und h ein ↑</div>
+        <div class="rbox em" id="qd-res">l, b, h eingeben ↑</div>
       </div>
     </div>
-    <div class="quiz-card">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
-      <div class="quiz-q" id="qz-q"></div>
-      <div class="quiz-opts" id="qz-opts"></div>
-      <div class="quiz-feedback" id="qz-fb"></div>
-      <button class="next-btn" id="qz-next" onclick="nextQ('z')">Nächste Frage →</button>
+    <div id="pr-t" class="subc">
+      <div class="ex"><strong>Dreiecksprisma:</strong> G=½·a·h_a, M=(a+b+c)·h<span class="st">3 Rechtecksflächen + 2 Dreiecksflächen</span></div>
+      <div class="cbox"><div class="clbl">Dreiecksprisma</div>
+        <div class="inpr">
+          <div class="ing"><label>Basis a</label><input type="number" id="tr-a" placeholder="6" oninput="calcTr()"></div>
+          <div class="ing"><label>Dreieckshöhe h_a</label><input type="number" id="tr-ha" placeholder="4" oninput="calcTr()"></div>
+          <div class="ing"><label>Prisma-Höhe h</label><input type="number" id="tr-h" placeholder="10" oninput="calcTr()"></div>
+          <div class="ing"><label>Seiten b=c</label><input type="number" id="tr-bc" placeholder="5" oninput="calcTr()"></div>
+        </div>
+        <div class="rbox em" id="tr-res">Werte eingeben ↑</div>
+      </div>
+    </div>
+    <div id="pr-o" class="subc">
+      <div class="ex"><strong>Achteck (Schoko-Chips Dose):</strong> 8 gleichschenk. Dreiecke<span class="st">Basis=6, h_D=7, h=4,4 → G=168, M=211,2, O=547,2 cm², V=739,2 cm³</span><span class="st">739,2 cm³ × 1,3 g/cm³ ≈ 961 g Schokolade 🍫</span></div>
+      <div class="cbox"><div class="clbl">Achteck-Prisma</div>
+        <div class="inpr">
+          <div class="ing"><label>Kantenlänge a</label><input type="number" id="oc-a" placeholder="6" oninput="calcOc()"></div>
+          <div class="ing"><label>Dreieckshöhe h_D</label><input type="number" id="oc-hd" placeholder="7" oninput="calcOc()"></div>
+          <div class="ing"><label>Prisma-Höhe h</label><input type="number" id="oc-h" placeholder="4.4" oninput="calcOc()"></div>
+        </div>
+        <div class="rbox em" id="oc-res">Werte eingeben ↑</div>
+      </div>
     </div>
   </div>
+  <div class="quiz glass" id="qz-pr"></div>
+</div>
 
-  <div id="sec-potenz" class="section">
-    <div class="chapter-tag">Kapitel IV · Thema 1–4</div>
-    <div class="section-title">Potenzen & Potenzgesetze</div>
-    <div class="section-desc">xⁿ bedeutet: x wird n-mal mit sich selbst multipliziert.</div>
-    <div class="card">
-      <div class="card-head"><div class="icon-box ib-purple">xⁿ</div><h3>Grundlagen</h3></div>
-      <div class="formula-box">aⁿ = a · a · a · … (n-mal)<span class="comment">Basis a, Exponent n</span></div>
-      <div class="formula-box">a⁻ⁿ = 1 / aⁿ<span class="comment">Negativer Exponent = Kehrwert</span></div>
-      <div class="formula-box">a⁰ = 1 (für a ≠ 0)<span class="comment">Jede Basis hoch 0 ergibt 1!</span></div>
+<!-- ZYLINDER -->
+<div id="s-zyl" class="sec">
+  <div class="ttag">Kapitel III · Thema 4</div>
+  <div class="ttitle">Zylinder</div>
+  <div class="tdesc">Pfirsichdose, Wasserrohr, Münze — immer dieselben Formeln.</div>
+  <div class="ls-wrap">
+    <a class="ls-btn" href="https://www.youtube.com/results?search_query=lehrer+schmidt+zylinder+volumen+oberfläche+berechnen" target="_blank" rel="noopener">Lehrer Schmidt: Zylinder</a>
+  </div>
+  <div class="g2">
+    <div class="glass card">
+      <div class="card-h"><div class="ico ico-o">⬭</div><h3>Formeln</h3></div>
+      <div class="formula">V = π · r² · h<span class="fl">Volumen</span></div>
+      <div class="formula">O = 2·π·r² + 2·π·r·h<span class="fl">2 Kreise + Mantel</span></div>
+      <div class="tip">🥫 <span>Mantel aufgerollt = Rechteck: Breite=2πr, Höhe=h!</span></div>
     </div>
-    <div class="card">
-      <div class="card-head"><div class="icon-box ib-teal">⚡</div><h3>Die 4 Potenzgesetze</h3></div>
-      <div class="formula-box">aⁿ · aᵐ = aⁿ⁺ᵐ<span class="comment">Gleiches Basis: Exponenten addieren</span></div>
-      <div class="formula-box">aⁿ ÷ aᵐ = aⁿ⁻ᵐ<span class="comment">Gleiches Basis: Exponenten subtrahieren</span></div>
-      <div class="formula-box">(aⁿ)ᵐ = aⁿ·ᵐ<span class="comment">Potenz einer Potenz: Exponenten multiplizieren</span></div>
-      <div class="formula-box">(a · b)ⁿ = aⁿ · bⁿ<span class="comment">Produkt: Jede Basis einzeln potenzieren</span></div>
-      <div class="tip-box"><div class="tip-icon">🎯</div><div>Merke: Die Gesetze gelten NUR wenn die Basis gleich ist (bei Gesetz 1+2). Bei Gesetz 3+4 ist es egal!</div></div>
-      <div class="calc-section">
-        <div class="calc-title">Potenz-Rechner</div>
-        <div class="calc-grid">
-          <div class="inp-wrap"><label>Basis a</label><input type="number" id="p-base" placeholder="z.B. 3" oninput="calcPot()"></div>
-          <div class="inp-wrap"><label>Exponent n</label><input type="number" id="p-exp" placeholder="z.B. 4" oninput="calcPot()"></div>
-        </div>
-        <div class="calc-result empty" id="p-res">Gib Basis und Exponent ein ↑</div>
+    <div class="glass card"><div class="viz"><canvas id="cv-zy" width="148" height="178"></canvas></div></div>
+  </div>
+  <div class="glass card">
+    <div class="card-h"><div class="ico ico-b">✎</div><h3>Pfirsichdosen-Aufgabe</h3></div>
+    <div class="ex"><strong>Große Dose:</strong> d=10, h=11,8 → r=5<span class="st">V=π·25·11,8≈926,8 cm³ | O≈527,8 cm²</span></div>
+    <div class="ex"><strong>Kleine Dose, ½ Volumen, h=10,8:</strong><span class="st">V_kl=463,4 → r=√(463,4/(π·10,8))≈3,7 cm | O≈337,1 cm²</span><span class="st">Große Dose effizienter: 2× Volumen, aber &lt;2× Oberfläche!</span></div>
+    <div class="cbox">
+      <div class="clbl">Zylinder-Rechner</div>
+      <div class="inpr">
+        <div class="ing"><label>Radius r</label><input type="number" id="zy-r" placeholder="5" oninput="calcZy()"></div>
+        <div class="ing"><label>Höhe h</label><input type="number" id="zy-h" placeholder="11.8" oninput="calcZy()"></div>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div class="icon-box ib-coral">10ⁿ</div><h3>Wissenschaftliche Schreibweise</h3></div>
-      <div class="formula-box">a · 10ⁿ (wobei 1 ≤ a &lt; 10)<span class="comment">Immer eine Stelle vor dem Komma!</span></div>
-      <div class="example-box"><strong>Beispiele:</strong><br>6800 = 6,8 · 10³<br>0,0072 = 7,2 · 10⁻³<br>4 · 10⁸ = 400 000 000</div>
-      <div class="tip-box"><div class="tip-icon">💡</div><div>Positiver Exponent → Komma nach rechts schieben. Negativer Exponent → Komma nach links schieben.</div></div>
-    </div>
-    <div class="quiz-card">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
-      <div class="quiz-q" id="qp-q"></div>
-      <div class="quiz-opts" id="qp-opts"></div>
-      <div class="quiz-feedback" id="qp-fb"></div>
-      <button class="next-btn" id="qp-next" onclick="nextQ('p')">Nächste Frage →</button>
+      <div class="rbox em" id="zy-res">r und h eingeben ↑</div>
     </div>
   </div>
+  <div class="quiz glass" id="qz-z"></div>
+</div>
 
-  <div id="sec-wurzel" class="section">
-    <div class="chapter-tag">Kapitel IV · Thema 5</div>
-    <div class="section-title">Wurzeln & rationale Exponenten</div>
-    <div class="section-desc">Wurzeln sind umgekehrte Potenzen — sie "rückgängig machen".</div>
-    <div class="card">
-      <div class="card-head"><div class="icon-box ib-teal">√</div><h3>Grundlagen</h3></div>
-      <div class="formula-box">ⁿ√a = a^(1/n)<span class="comment">n-te Wurzel = Potenz mit Bruchexponent</span></div>
-      <div class="formula-box">a^(m/n) = ⁿ√(aᵐ) = (ⁿ√a)ᵐ<span class="comment">Erst potenzieren, dann Wurzel — oder umgekehrt</span></div>
-      <div class="tip-box"><div class="tip-icon">🔄</div><div>√9 = 9^(1/2) = 3, weil 3² = 9. Die Wurzel fragt: "Welche Zahl, mit sich selbst malgenommen, ergibt das?"</div></div>
-      <div class="example-box"><strong>Beispiele aus dem Check-out:</strong><br>⁴√3¹² = 3^(12/4) = 3³ = 27<br>64^(2/3) = (64^(1/3))² = 4² = 16<br>⁴√(16/81) = 2/3</div>
-      <div class="calc-section">
-        <div class="calc-title">Wurzel-Rechner</div>
-        <div class="calc-grid">
-          <div class="inp-wrap"><label>Basis a</label><input type="number" id="w-a" placeholder="z.B. 64" oninput="calcWurzel()"></div>
-          <div class="inp-wrap"><label>Exponent m/n (als Dezimal)</label><input type="number" id="w-e" placeholder="z.B. 0.5" oninput="calcWurzel()"></div>
-        </div>
-        <div class="calc-result empty" id="w-res">Gib a und m/n ein ↑</div>
+<!-- CAVALIERI -->
+<div id="s-cav" class="sec">
+  <div class="ttag">Kapitel III · Thema 5</div>
+  <div class="ttitle">Cavalieri-Prinzip</div>
+  <div class="tdesc">Schief oder gerade — gleiches Volumen wenn Höhe und Querschnitt stimmen.</div>
+  <div class="ls-wrap">
+    <a class="ls-btn" href="https://www.youtube.com/results?search_query=lehrer+schmidt+cavalieri+prinzip" target="_blank" rel="noopener">Lehrer Schmidt: Cavalieri-Prinzip</a>
+  </div>
+  <div class="glass card">
+    <div class="card-h"><div class="ico ico-b">⟂</div><h3>Prinzip</h3></div>
+    <div class="formula">V_schief = V_gerade &nbsp;(bei gleicher h und G)<span class="fl">Das Cavalieri-Prinzip</span></div>
+    <div class="tip">📚 <span>Bücherstapel schief schieben → Volumen bleibt gleich! Alle Scheiben auf gleicher Höhe haben gleiche Fläche.</span></div>
+    <div class="ex"><strong>Check-out: Quader 9,2×7×13 cm</strong><span class="st">V=837,2 cm³ | Schiefer Zylinder (h=13): r=√(837,2/(π·13))≈4,5 cm</span></div>
+    <div class="cbox">
+      <div class="clbl">Quader → gleichvolumiger Zylinder</div>
+      <div class="inpr">
+        <div class="ing"><label>Länge l</label><input type="number" id="ca-l" placeholder="9.2" oninput="calcCa()"></div>
+        <div class="ing"><label>Breite b</label><input type="number" id="ca-b" placeholder="7" oninput="calcCa()"></div>
+        <div class="ing"><label>Höhe h</label><input type="number" id="ca-h" placeholder="13" oninput="calcCa()"></div>
       </div>
-    </div>
-    <div class="quiz-card">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">MINI-CHECK</div>
-      <div class="quiz-q" id="qw-q"></div>
-      <div class="quiz-opts" id="qw-opts"></div>
-      <div class="quiz-feedback" id="qw-fb"></div>
-      <button class="next-btn" id="qw-next" onclick="nextQ('w')">Nächste Frage →</button>
+      <div class="rbox em" id="ca-res">l, b, h eingeben ↑</div>
     </div>
   </div>
+</div>
+
+<!-- POTENZEN -->
+<div id="s-pot" class="sec">
+  <div class="ttag">Kapitel IV · Themen 1–4</div>
+  <div class="ttitle">Potenzen & Potenzgesetze</div>
+  <div class="tdesc">xⁿ — erstmal komisch, dann dein liebstes Werkzeug.</div>
+  <div class="ls-wrap">
+    <a class="ls-btn" href="https://www.youtube.com/results?search_query=lehrer+schmidt+potenzen+potenzgesetze" target="_blank" rel="noopener">Lehrer Schmidt: Potenzen</a>
+    <a class="ls-btn" href="https://www.youtube.com/results?search_query=lehrer+schmidt+wissenschaftliche+schreibweise+zehnerpotenzen" target="_blank" rel="noopener">Lehrer Schmidt: Wiss. Schreibweise</a>
+  </div>
+  <div class="glass card">
+    <div class="card-h"><div class="ico ico-b" style="font-size:13px;font-weight:900">xⁿ</div><h3>Grundlagen</h3></div>
+    <div class="formula">aⁿ = a · a · a · … (n-mal)<span class="fl">Basis a, n-mal mit sich selbst multipliziert</span></div>
+    <div class="formula">a⁻ⁿ = 1 / aⁿ<span class="fl">Negativer Exponent → Kehrwert bilden</span></div>
+    <div class="formula">a⁰ = 1 &nbsp;(für a ≠ 0)<span class="fl">Jede Basis hoch 0 = 1. Immer!</span></div>
+    <div class="ex"><strong>Check-out:</strong><span class="st">5³=125 | 2·(−4)⁴=512 | 6⁻²=1/36 | 4²/6⁻¹=96 | 3⁴−4·5²=−19</span></div>
+    <div class="cbox">
+      <div class="clbl">Potenz-Rechner</div>
+      <div class="inpr">
+        <div class="ing"><label>Basis a</label><input type="number" id="pt-b" placeholder="5" oninput="calcPt()"></div>
+        <div class="ing"><label>Exponent n</label><input type="number" id="pt-e" placeholder="3" oninput="calcPt()"></div>
+      </div>
+      <div class="rbox em" id="pt-res">Basis und Exponent eingeben ↑</div>
+    </div>
+  </div>
+  <div class="glass card">
+    <div class="card-h"><div class="ico ico-g">⚡</div><h3>Die 4 Potenzgesetze</h3></div>
+    <div class="formula">aⁿ · aᵐ = aⁿ⁺ᵐ<span class="fl">Gleiche Basis ·  →  Exponenten addieren</span></div>
+    <div class="formula">aⁿ ÷ aᵐ = aⁿ⁻ᵐ<span class="fl">Gleiche Basis ÷  →  Exponenten subtrahieren</span></div>
+    <div class="formula">(aⁿ)ᵐ = aⁿ·ᵐ<span class="fl">Potenz einer Potenz → Exponenten multiplizieren</span></div>
+    <div class="formula">(a · b)ⁿ = aⁿ · bⁿ<span class="fl">Produkt hoch n → jeden Faktor einzeln</span></div>
+    <div class="tip">🎯 <span>Gesetze 1+2 nur bei <b>gleicher Basis</b>! 3+4 immer. Nicht verwechseln!</span></div>
+    <div class="ex"><strong>Trick-Beispiel:</strong> 36²·5⁵=(6²)²·5⁵=6⁴·5⁴·5=(6·5)⁴·5=4050000</div>
+  </div>
+  <div class="glass card">
+    <div class="card-h"><div class="ico ico-o" style="font-size:12px;font-weight:900">10ⁿ</div><h3>Wissenschaftliche Schreibweise</h3></div>
+    <div class="formula">a · 10ⁿ &nbsp;(mit 1 ≤ a &lt; 10)<span class="fl">Immer genau 1 Stelle vor dem Komma!</span></div>
+    <div class="ex"><strong>Planeten:</strong><span class="st">Mars ⌀ 6800=6,8·10³ | Entfernung 4·10⁸=400.000.000 km</span><span class="st">Saturn: 1,658·10⁹=1.658.000.000 | Neptun: 4,689·10⁹ km</span></div>
+    <div class="tip">🚀 <span>Positiver Exponent → Komma nach rechts (größer). Negativer → nach links (kleiner).</span></div>
+  </div>
+  <div class="quiz glass" id="qz-p"></div>
+</div>
+
+<!-- WURZELN -->
+<div id="s-wur" class="sec">
+  <div class="ttag">Kapitel IV · Thema 5</div>
+  <div class="ttitle">Wurzeln & rationale Exponenten</div>
+  <div class="tdesc">Wurzeln sind umgekehrte Potenzen — als Bruchexponent viel eleganter.</div>
+  <div class="ls-wrap">
+    <a class="ls-btn" href="https://www.youtube.com/results?search_query=lehrer+schmidt+wurzeln+rationale+exponenten+n-te+wurzel" target="_blank" rel="noopener">Lehrer Schmidt: Wurzeln</a>
+  </div>
+  <div class="glass card">
+    <div class="card-h"><div class="ico ico-g" style="font-size:18px;font-weight:900">√</div><h3>Formeln</h3></div>
+    <div class="formula">ⁿ√a = a^(1/n)<span class="fl">n-te Wurzel = Potenz mit Bruchexponent</span></div>
+    <div class="formula">a^(m/n) = (ⁿ√a)ᵐ = ⁿ√(aᵐ)<span class="fl">Reihenfolge egal — erst Wurzel dann Potenz ist oft einfacher!</span></div>
+    <div class="tip">🔄 <span>√9=3 weil 3²=9. ³√8=2 weil 2³=8. Die Frage: welche Zahl, n-mal malgenommen, ergibt a?</span></div>
+    <div class="ex"><strong>Check-out:</strong><span class="st">⁴√3¹²=3³=27 | ³√2⁻⁶=2⁻²=¼ | 64^(2/3)=16 | 144^(½)=12</span></div>
+    <div class="cbox">
+      <div class="clbl">Rechner: a^(m/n)</div>
+      <div class="inpr">
+        <div class="ing"><label>Basis a</label><input type="number" id="wu-a" placeholder="64" oninput="calcWu()"></div>
+        <div class="ing"><label>Zähler m</label><input type="number" id="wu-m" placeholder="2" oninput="calcWu()"></div>
+        <div class="ing"><label>Nenner n (≠0)</label><input type="number" id="wu-n" placeholder="3" oninput="calcWu()"></div>
+      </div>
+      <div class="rbox em" id="wu-res">a, m, n eingeben ↑</div>
+    </div>
+  </div>
+  <div class="quiz glass" id="qz-w"></div>
+</div>
 
 </div>
 
+<!-- ADMIN MODAL -->
+<div class="overlay" id="mo-admin">
+  <div class="mbox">
+    <div id="adm-s1">
+      <button class="mclose" onclick="closeM('mo-admin')">✕</button>
+      <div style="text-align:center;margin-bottom:18px">
+        <div style="font-size:44px;margin-bottom:10px">🔐</div>
+        <div class="mtitle">Admin-Bereich</div>
+        <div class="msub">Nur für autorisierte Nutzer. Bitte einloggen.</div>
+      </div>
+      <input class="minp" id="adm-u" placeholder="Benutzername" type="text" autocomplete="off">
+      <input class="minp" id="adm-p" placeholder="Passwort" type="password" autocomplete="off">
+      <button class="mbtn" onclick="tryAdmin()">Anmelden →</button>
+    </div>
+    <div id="adm-s2" style="display:none;text-align:center;padding:10px 0">
+      <div class="loader-ring"></div>
+      <div style="font-size:14px;font-weight:700;color:#88c0e0;margin-bottom:8px">Authentifizierung läuft...</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px" id="adm-status">Verbinde mit Server...</div>
+      <div class="progress-bar-fake"><div class="progress-fill" id="adm-pbar"></div></div>
+    </div>
+    <div id="adm-s3" style="display:none;text-align:center;padding:8px 0">
+      <div class="s3-check">✅</div>
+      <div class="mtitle" style="margin-bottom:8px">Zugriff gewährt!</div>
+      <div class="msub">Willkommen, Administrator. Lade Dashboard...</div>
+      <button class="mbtn" onclick="adminReveal()" style="margin-top:18px">Zum Dashboard →</button>
+    </div>
+    <div id="adm-s4" style="display:none;text-align:center;padding:8px 0">
+      <div class="s4-glyph">🗿</div>
+      <div class="lol-text">Dachtest du —<br>leck eier</div>
+      <div class="lol-sub">kein Dashboard für dich heute</div>
+      <button class="mbtn mbtn-red" onclick="closeM('mo-admin')" style="margin-top:20px">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-const PI=Math.PI;
-function r(n,d=2){return Math.round(n*Math.pow(10,d))/Math.pow(10,d)}
+const PI=Math.PI,rd=(n,d=2)=>Math.round(n*10**d)/10**d;
 
-// Stars
-const starsEl=document.getElementById('stars');
-for(let i=0;i<60;i++){
-  const s=document.createElement('div');s.className='star';
-  s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
-  s.style.animationDelay=Math.random()*3+'s';s.style.opacity=Math.random()*0.6+0.1;
-  starsEl.appendChild(s);
-}
+// Bubbles
+const bc=document.getElementById('bubs');
+for(let i=0;i<16;i++){const b=document.createElement('div');b.className='bub';const sz=14+Math.random()*105;b.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${10+Math.random()*17}s;animation-delay:${-Math.random()*20}s`;bc.appendChild(b);}
 
-function showSection(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('active');
-  event.target.classList.add('active');
-}
+// NAV
+const TABS=[{id:'kreis',lbl:'⬤ Kreise'},{id:'sek',lbl:'◔ Ausschnitt'},{id:'pri',lbl:'▣ Prisma'},{id:'zyl',lbl:'⬭ Zylinder'},{id:'cav',lbl:'⟂ Cavalieri'},{id:'pot',lbl:'xⁿ Potenzen'},{id:'wur',lbl:'√ Wurzeln'}];
+const nav=document.getElementById('nav');
+TABS.forEach(t=>{const b=document.createElement('button');b.className='ntab'+(t.id==='kreis'?' act':'');b.textContent=t.lbl;b.onclick=()=>showSec(t.id,b);nav.appendChild(b);});
+function showSec(id,btn){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('act'));document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('act'));document.getElementById('s-'+id).classList.add('act');if(btn)btn.classList.add('act');setTimeout(drawAll,60);}
+function showSub(pre,id,btn){document.querySelectorAll('#s-pri .subc').forEach(s=>s.classList.remove('act'));document.querySelectorAll('#s-pri .stab').forEach(t=>t.classList.remove('act'));document.getElementById(pre+'-'+id).classList.add('act');btn.classList.add('act');}
 
-function showSub(prefix,id){
-  document.querySelectorAll('#sec-prisma .sub-section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('#sec-prisma .sub-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(prefix+'-'+id).classList.add('active');
-  event.target.classList.add('active');
-}
+// CALCULATORS
+function calcKr(){const v=parseFloat(document.getElementById('kr-v').value),t=document.getElementById('kr-t').value,el=document.getElementById('kr-res');if(isNaN(v)||v<=0){el.className='rbox em';el.textContent='Oben einen Wert eingeben ↑';return;}let r;if(t==='r')r=v;else if(t==='d')r=v/2;else if(t==='u')r=v/(2*PI);else r=Math.sqrt(v/PI);el.className='rbox';el.textContent=`r = ${rd(r)} | d = ${rd(r*2)}\nU = ${rd(2*PI*r)}\nA = ${rd(PI*r*r)}`;}
+function calcSk(){const r=parseFloat(document.getElementById('sk-r').value),a=parseFloat(document.getElementById('sk-a').value),el=document.getElementById('sk-res');if([r,a].some(isNaN)){el.className='rbox em';el.textContent='Radius und Winkel eingeben ↑';return;}el.className='rbox';el.textContent=`b = (${a}/360)·2π·${r} = ${rd((a/360)*2*PI*r)}\nA = (${a}/360)·π·${r}² = ${rd((a/360)*PI*r*r)}`;}
+function calcQd(){const l=parseFloat(document.getElementById('qd-l').value),b=parseFloat(document.getElementById('qd-b').value),h=parseFloat(document.getElementById('qd-h').value),el=document.getElementById('qd-res');if([l,b,h].some(isNaN)){el.className='rbox em';el.textContent='l, b, h eingeben ↑';return;}const G=rd(l*b),M=rd(2*(l+b)*h),O=rd(2*G+M),V=rd(l*b*h);el.className='rbox';el.textContent=`G=${G} | M=${M}\nO=${O} | V=${V}`;}
+function calcTr(){const a=parseFloat(document.getElementById('tr-a').value),ha=parseFloat(document.getElementById('tr-ha').value),h=parseFloat(document.getElementById('tr-h').value),bc2=parseFloat(document.getElementById('tr-bc').value)||0,el=document.getElementById('tr-res');if([a,ha,h].some(isNaN)){el.className='rbox em';el.textContent='Werte eingeben ↑';return;}const s=bc2||a,G=rd(.5*a*ha),M=rd((a+s+s)*h),O=rd(2*G+M),V=rd(G*h);el.className='rbox';el.textContent=`G=½·${a}·${ha}=${G}\nM=${M} | O=${O}\nV=${V}`;}
+function calcOc(){const a=parseFloat(document.getElementById('oc-a').value),hd=parseFloat(document.getElementById('oc-hd').value),h=parseFloat(document.getElementById('oc-h').value),el=document.getElementById('oc-res');if([a,hd,h].some(isNaN)){el.className='rbox em';el.textContent='Werte eingeben ↑';return;}const G=rd(8*.5*a*hd),M=rd(8*a*h),O=rd(2*G+M),V=rd(G*h);el.className='rbox';el.textContent=`G=${G} cm² | M=${M} cm²\nO=${O} cm² | V=${V} cm³\n→ ${rd(V*1.3)} g Schokolade 🍫`;}
+function calcZy(){const r=parseFloat(document.getElementById('zy-r').value),h=parseFloat(document.getElementById('zy-h').value),el=document.getElementById('zy-res');if([r,h].some(isNaN)){el.className='rbox em';el.textContent='r und h eingeben ↑';return;}const G=rd(PI*r*r),M=rd(2*PI*r*h),O=rd(2*G+M),V=rd(PI*r*r*h);el.className='rbox';el.textContent=`G=π·${r}²=${G}\nM=2π·${r}·${h}=${M}\nO=${O} | V=${V}`;}
+function calcCa(){const l=parseFloat(document.getElementById('ca-l').value),b=parseFloat(document.getElementById('ca-b').value),h=parseFloat(document.getElementById('ca-h').value),el=document.getElementById('ca-res');if([l,b,h].some(isNaN)){el.className='rbox em';el.textContent='l, b, h eingeben ↑';return;}const V=rd(l*b*h),r2=rd(Math.sqrt(V/(PI*h)));el.className='rbox';el.textContent=`V=${l}·${b}·${h}=${V} cm³\nSchiefer Zylinder (h=${h}):\nr=√(${V}/(π·${h}))≈${r2} cm`;}
+function calcPt(){const base=parseFloat(document.getElementById('pt-b').value),exp=parseFloat(document.getElementById('pt-e').value),el=document.getElementById('pt-res');if([base,exp].some(isNaN)){el.className='rbox em';el.textContent='Basis und Exponent eingeben ↑';return;}const res=Math.pow(base,exp);let s='';if(Number.isInteger(exp)&&exp>0&&exp<=6){const a=[];for(let i=0;i<exp;i++)a.push(base);s='\n= '+a.join('·');}el.className='rbox';el.textContent=`${base}^${exp}${s}\n= ${rd(res,8)}`;}
+function calcWu(){const a=parseFloat(document.getElementById('wu-a').value),m=parseFloat(document.getElementById('wu-m').value),n=parseFloat(document.getElementById('wu-n').value),el=document.getElementById('wu-res');if([a,m,n].some(isNaN)||n===0){el.className='rbox em';el.textContent='a, m, n eingeben ↑';return;}const inner=Math.pow(Math.abs(a),1/n),res=Math.pow(inner,m)*(a<0&&m%2!==0?-1:1);el.className='rbox';el.textContent=`${a}^(${m}/${n})\n=(ⁿ√${a})ᵐ=${rd(inner,4)}^${m}\n= ${rd(res,6)}`;}
 
-// Kreis Rechner
-let kreisMode='r';
-function setKreisMode(m){kreisMode=m;calcKreis();}
-function calcKreis(){
-  const v=parseFloat(document.getElementById('k-val').value);
-  const el=document.getElementById('k-res');
-  if(isNaN(v)||v<=0){el.className='calc-result empty';el.textContent='Gib einen positiven Wert ein ↑';return;}
-  let radius=kreisMode==='r'?v:v/2;
-  el.className='calc-result';
-  el.innerHTML=`Radius r = ${r(radius)} | Durchmesser d = ${r(radius*2)}\nUmfang U = 2 · π · ${r(radius)} = ${r(2*PI*radius)} ${kreisMode==='r'?'(Einheiten)':''}\nFläche A = π · ${r(radius)}² = ${r(PI*radius*radius)}`;
-}
+// CANVAS
+function drawKreis(){const c=document.getElementById('cv-kr');if(!c)return;const ctx=c.getContext('2d'),CX=82,CY=82,R=64;ctx.clearRect(0,0,165,165);ctx.beginPath();ctx.arc(CX,CY,R,0,2*PI);const gf=ctx.createRadialGradient(CX-18,CY-18,4,CX,CY,R);gf.addColorStop(0,'rgba(70,175,255,0.26)');gf.addColorStop(.55,'rgba(32,115,240,0.16)');gf.addColorStop(1,'rgba(10,55,200,0.08)');ctx.fillStyle=gf;ctx.fill();ctx.strokeStyle='rgba(70,175,255,0.42)';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(CX,CY,R*.95,0,2*PI);const sh=ctx.createLinearGradient(CX-R,CY-R,CX+R*.3,CY+R*.3);sh.addColorStop(0,'rgba(160,225,255,0.16)');sh.addColorStop(.5,'rgba(255,255,255,0)');ctx.fillStyle=sh;ctx.fill();ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(CX+R*.74,CY-R*.5);ctx.strokeStyle='rgba(255,85,85,0.8)';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='rgba(255,95,95,.88)';ctx.font='bold 12px Nunito,sans-serif';ctx.fillText('r',CX+R*.3,CY-R*.18);ctx.beginPath();ctx.arc(CX,CY,4,0,2*PI);ctx.fillStyle='rgba(255,85,85,.9)';ctx.fill();ctx.beginPath();ctx.moveTo(CX-R+5,CY+R*.74);ctx.lineTo(CX+R-5,CY+R*.74);ctx.strokeStyle='rgba(50,215,135,0.62)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='rgba(45,200,118,.85)';ctx.fillText('d',CX+5,CY+R*.74-7);}
+function drawPrisma(){const c=document.getElementById('cv-pr');if(!c)return;const ctx=c.getContext('2d');ctx.clearRect(0,0,160,160);const ox=22,oy=64,w=76,h=64,dx=30,dy=-22;ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+w,oy);ctx.lineTo(ox+w,oy+h);ctx.lineTo(ox,oy+h);ctx.closePath();const gf=ctx.createLinearGradient(ox,oy,ox+w,oy+h);gf.addColorStop(0,'rgba(50,145,255,0.22)');gf.addColorStop(1,'rgba(16,75,220,0.12)');ctx.fillStyle=gf;ctx.fill();ctx.strokeStyle='rgba(72,158,255,0.38)';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+dx,oy+dy);ctx.lineTo(ox+w+dx,oy+dy);ctx.lineTo(ox+w,oy);ctx.closePath();const gt=ctx.createLinearGradient(ox,oy,ox+w+dx,oy+dy);gt.addColorStop(0,'rgba(110,195,255,0.28)');gt.addColorStop(1,'rgba(50,155,255,0.15)');ctx.fillStyle=gt;ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(ox+w,oy);ctx.lineTo(ox+w+dx,oy+dy);ctx.lineTo(ox+w+dx,oy+dy+h);ctx.lineTo(ox+w,oy+h);ctx.closePath();const gr=ctx.createLinearGradient(ox+w,oy,ox+w+dx,oy+h);gr.addColorStop(0,'rgba(36,115,240,0.2)');gr.addColorStop(1,'rgba(12,65,200,0.1)');ctx.fillStyle=gr;ctx.fill();ctx.stroke();ctx.fillStyle='rgba(128,205,255,0.85)';ctx.font='bold 11px Nunito,sans-serif';ctx.fillText('G',ox+28,oy+36);ctx.fillText('h',ox+w+dx/2+5,oy+h/2+5);}
+function drawZylinder(){const c=document.getElementById('cv-zy');if(!c)return;const ctx=c.getContext('2d'),CX=74,CR=44,CT=36,CB=136,RY=14;ctx.clearRect(0,0,148,178);ctx.beginPath();ctx.moveTo(CX-CR,CT);ctx.lineTo(CX-CR,CB);ctx.ellipse(CX,CB,CR,RY,0,PI,0,false);ctx.lineTo(CX+CR,CT);ctx.closePath();const gb=ctx.createLinearGradient(CX-CR,CT,CX+CR,CB);gb.addColorStop(0,'rgba(52,152,255,0.22)');gb.addColorStop(.5,'rgba(26,115,240,0.28)');gb.addColorStop(1,'rgba(8,65,200,0.15)');ctx.fillStyle=gb;ctx.fill();ctx.strokeStyle='rgba(72,168,255,0.38)';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.ellipse(CX,CB,CR,RY,0,0,2*PI);const gbot=ctx.createRadialGradient(CX,CB,3,CX,CB,CR);gbot.addColorStop(0,'rgba(72,165,255,0.18)');gbot.addColorStop(1,'rgba(16,85,220,0.08)');ctx.fillStyle=gbot;ctx.fill();ctx.stroke();ctx.beginPath();ctx.ellipse(CX,CT,CR,RY,0,0,2*PI);const gt=ctx.createRadialGradient(CX-10,CT-4,3,CX,CT,CR);gt.addColorStop(0,'rgba(175,228,255,0.45)');gt.addColorStop(.45,'rgba(92,188,255,0.26)');gt.addColorStop(1,'rgba(44,135,240,0.14)');ctx.fillStyle=gt;ctx.fill();ctx.stroke();ctx.beginPath();ctx.ellipse(CX-10,CT-2,CR*.36,RY*.32,0,0,2*PI);ctx.fillStyle='rgba(195,238,255,0.28)';ctx.fill();ctx.strokeStyle='rgba(255,85,85,.72)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(CX,CT);ctx.lineTo(CX+CR-3,CT);ctx.stroke();ctx.fillStyle='rgba(255,100,100,.88)';ctx.font='bold 11px Nunito,sans-serif';ctx.fillText('r',CX+CR/2-3,CT-6);ctx.strokeStyle='rgba(45,215,132,.62)';ctx.beginPath();ctx.moveTo(CX+CR+10,CT);ctx.lineTo(CX+CR+10,CB);ctx.stroke();ctx.fillStyle='rgba(45,200,118,.85)';ctx.fillText('h',CX+CR+13,(CT+CB)/2+4);}
+function drawAll(){drawKreis();drawPrisma();drawZylinder();}
+setTimeout(drawAll,100);
 
-// Sektor
-function calcSektor(){
-  const rv=parseFloat(document.getElementById('s-r').value);
-  const av=parseFloat(document.getElementById('s-a').value);
-  const el=document.getElementById('s-res');
-  if(isNaN(rv)||isNaN(av)||rv<=0||av<=0){el.className='calc-result empty';el.textContent='Gib Radius und Winkel ein ↑';return;}
-  const b=r((av/360)*2*PI*rv);
-  const a2=r((av/360)*PI*rv*rv);
-  el.className='calc-result';
-  el.innerHTML=`Bogenlänge b = (${av}°/360°) · 2π · ${rv} = ${b}\nFläche A = (${av}°/360°) · π · ${rv}² = ${a2}`;
-}
-
-// Quader
-function calcQuader(){
-  const l=parseFloat(document.getElementById('pr-l').value);
-  const b=parseFloat(document.getElementById('pr-b').value);
-  const h=parseFloat(document.getElementById('pr-h').value);
-  const el=document.getElementById('pr-res');
-  if([l,b,h].some(isNaN)){el.className='calc-result empty';el.textContent='Gib l, b, h ein ↑';return;}
-  const G=r(l*b);const M=r(2*(l+b)*h);const O=r(2*G+M);const V=r(l*b*h);
-  el.className='calc-result';
-  el.innerHTML=`Grundfläche G = ${l} · ${b} = ${G}\nMantelfläche M = 2·(${l}+${b})·${h} = ${M}\nOberfläche O = 2·${G}+${M} = ${O}\nVolumen V = ${G} · ${h} = ${V}`;
-}
-
-// Dreiecksprisma
-function calcTri(){
-  const a=parseFloat(document.getElementById('tr-a').value);
-  const ha=parseFloat(document.getElementById('tr-ha').value);
-  const h=parseFloat(document.getElementById('tr-h').value);
-  const b=parseFloat(document.getElementById('tr-b').value)||a;
-  const el=document.getElementById('tr-res');
-  if([a,ha,h].some(isNaN)){el.className='calc-result empty';el.textContent='Gib Werte ein ↑';return;}
-  const G=r(0.5*a*ha);const M=r((a+b+b)*h);const O=r(2*G+M);const V=r(G*h);
-  el.className='calc-result';
-  el.innerHTML=`Dreiecksfläche G = ½ · ${a} · ${ha} = ${G}\nMantelfläche M ≈ ${M} (vereinfacht)\nOberfläche O ≈ ${O}\nVolumen V = ${G} · ${h} = ${V}`;
-}
-
-// Achteck
-function calcOct(){
-  const a=parseFloat(document.getElementById('oc-a').value);
-  const hd=parseFloat(document.getElementById('oc-hd').value);
-  const h=parseFloat(document.getElementById('oc-h').value);
-  const el=document.getElementById('oc-res');
-  if([a,hd,h].some(isNaN)){el.className='calc-result empty';el.textContent='Gib Werte ein ↑';return;}
-  const G=r(8*0.5*a*hd);const M=r(8*a*h);const O=r(2*G+M);const V=r(G*h);
-  el.className='calc-result';
-  el.innerHTML=`Grundfläche G = 8 · ½ · ${a} · ${hd} = ${G} cm²\nMantelfläche M = 8 · ${a} · ${h} = ${M} cm²\nOberfläche O = 2·${G}+${M} = ${O} cm²\nVolumen V = ${G} · ${h} = ${V} cm³`;
-}
-
-// Zylinder
-function calcZyl(){
-  const rv=parseFloat(document.getElementById('z-r').value);
-  const h=parseFloat(document.getElementById('z-h').value);
-  const el=document.getElementById('z-res');
-  if(isNaN(rv)||isNaN(h)){el.className='calc-result empty';el.textContent='Gib r und h ein ↑';return;}
-  const G=r(PI*rv*rv);const M=r(2*PI*rv*h);const O=r(2*G+M);const V=r(PI*rv*rv*h);
-  el.className='calc-result';
-  el.innerHTML=`Kreisfläche G = π·${rv}² = ${G}\nMantelfläche M = 2π·${rv}·${h} = ${M}\nOberfläche O = 2·${G}+${M} = ${O}\nVolumen V = π·${rv}²·${h} = ${V}`;
-}
-
-// Potenz
-function calcPot(){
-  const base=parseFloat(document.getElementById('p-base').value);
-  const exp=parseFloat(document.getElementById('p-exp').value);
-  const el=document.getElementById('p-res');
-  if(isNaN(base)||isNaN(exp)){el.className='calc-result empty';el.textContent='Gib Basis und Exponent ein ↑';return;}
-  const res=Math.pow(base,exp);
-  el.className='calc-result';
-  let steps='';
-  if(Number.isInteger(exp)&&exp>0&&exp<=6){const arr=[];for(let i=0;i<exp;i++)arr.push(base);steps='\n= '+arr.join(' × ');}
-  el.innerHTML=`${base}^${exp}${steps}\n= ${r(res,6)}`;
-}
-
-// Wurzel
-function calcWurzel(){
-  const a=parseFloat(document.getElementById('w-a').value);
-  const e=parseFloat(document.getElementById('w-e').value);
-  const el=document.getElementById('w-res');
-  if(isNaN(a)||isNaN(e)){el.className='calc-result empty';el.textContent='Gib a und m/n ein ↑';return;}
-  const res=Math.pow(a,e);
-  el.className='calc-result';
-  el.innerHTML=`${a}^(${e}) = ${r(res,6)}\nBeispiel: 64^(2/3) → gib 64 und 0.667 ein → ergibt ${r(Math.pow(64,2/3),4)}`;
-}
-
-// Quiz system
-const quizzes={
+// QUIZ
+const QD={
   k:[
-    {q:'Ein Kreis hat den Radius r = 7 cm. Wie groß ist der Umfang (gerundet)?',opts:['43,98 cm','21,99 cm','153,94 cm','14 cm'],correct:0,exp:'U = 2·π·r = 2·3,14159·7 ≈ 43,98 cm. Nicht vergessen: Umfang ist der Rand, nicht die Fläche!'},
-    {q:'Der Stammdurchmesser eines Baumes beträgt 4,6 m. Was ist der Radius?',opts:['9,2 m','2,3 m','4,6 m','1,15 m'],correct:1,exp:'Radius = Durchmesser ÷ 2 = 4,6 ÷ 2 = 2,3 m'},
-    {q:'Welche Formel berechnet die Kreisfläche?',opts:['A = π · d','A = 2 · π · r','A = π · r²','A = π · r · h'],correct:2,exp:'A = π · r² — der Radius wird quadriert und mit π multipliziert!'},
+    {q:'Kreis r=7 cm. Umfang?',o:['43,98 cm','21,99 cm','153,94 cm','28 cm'],c:0,e:'U=2·π·7≈43,98 cm. Umfang=Rand, Fläche wäre π·r²≈153,94!'},
+    {q:'Stammdurchmesser 4,6 m. Was ist der Radius?',o:['9,2 m','2,3 m','4,6 m','1,15 m'],c:1,e:'r=d/2=4,6/2=2,3 m'},
+    {q:'Welche Formel gibt die Kreisfläche?',o:['A=π·d','A=2·π·r','A=π·r²','A=π·r·h'],c:2,e:'A=π·r² — Radius quadrieren, dann mal π!'},
+    {q:'Kreis U=31,42 cm. Welcher Radius?',o:['10 cm','5 cm','2,5 cm','15,71 cm'],c:1,e:'r=U/(2π)=31,42/6,283≈5 cm'},
+    {q:'Rasenstreifen: r_außen=63 m, r_innen=50 m. Fläche?',o:['4615 m²','12469 m²','7854 m²','1000 m²'],c:0,e:'A=π·63²−π·50²≈12469−7854=4615 m²'},
+    {q:'Radius wird doppelt so groß. Wie ändert sich die Fläche?',o:['Doppelt','Dreifach','Vierfach','Gleich'],c:2,e:'A=π·r². Bei 2r: π·(2r)²=4·π·r² → 4-fach!'},
+    {q:'Was ergibt π·0²?',o:['π','1','0','Fehler'],c:2,e:'π·0²=0. Kein Radius = kein Kreis.'},
+    {q:'r=10 cm → Durchmesser?',o:['5 cm','10 cm','20 cm','31,42 cm'],c:2,e:'d=2·r=20 cm'},
+    {q:'A=200 cm². r=?',o:['7,98 cm','14,14 cm','100 cm','63,66 cm'],c:0,e:'r=√(A/π)=√(200/π)≈7,98 cm'},
+    {q:'Radius halbiert. Fläche wird...?',o:['Halb','Viertel','Gleich','Doppelt'],c:1,e:'Bei r/2: π·(r/2)²=π·r²/4 → Viertel!'},
   ],
   s:[
-    {q:'Ein Kreisausschnitt hat α = 90° und r = 4 cm. Welcher Anteil der gesamten Kreisfläche ist das?',opts:['Ein Viertel','Die Hälfte','Ein Drittel','Drei Viertel'],correct:0,exp:'90° von 360° = 1/4. Also ist ein Kreisausschnitt von 90° genau ein Viertel des gesamten Kreises!'},
-    {q:'Was passiert mit der Bogenlänge, wenn man den Winkel verdoppelt (bei gleichem Radius)?',opts:['Sie bleibt gleich','Sie verdoppelt sich','Sie halbiert sich','Sie wird 4-fach'],correct:1,exp:'b = (α/360°)·2πr — wenn α sich verdoppelt, verdoppelt sich auch b linear!'},
+    {q:'α=90°, r=4 cm. Anteil der Kreisfläche?',o:['¼','½','⅓','¾'],c:0,e:'90°/360°=1/4. 90° = Viertel des Vollkreises!'},
+    {q:'Winkel verdoppeln, r gleich. Bogenlänge?',o:['Gleich','Verdoppelt','Halbiert','4-fach'],c:1,e:'b=(α/360°)·2πr — linear. Doppelter Winkel = doppelte Bogenlänge.'},
+    {q:'r=2,2 cm, α=70°. Bogenlänge b?',o:['2,69 cm','1,35 cm','4,40 cm','6,91 cm'],c:0,e:'b=(70/360)·2π·2,2≈2,69 cm'},
+    {q:'5 lückenlose Stücke. Welcher Winkel?',o:['70°','72°','75°','68°'],c:1,e:'360°÷5=72°. 5 Ausschnitte à 72° bedecken genau alles.'},
+    {q:'Halbkreis = Winkel?',o:['90°','180°','270°','360°'],c:1,e:'180°/360°=½. Halbkreis!'},
+    {q:'r=5 cm, α=120°. Fläche?',o:['26,18 cm²','78,54 cm²','15,71 cm²','31,42 cm²'],c:0,e:'A=(120/360)·π·25≈26,18 cm²'},
+    {q:'Formel Bogenlänge?',o:['b=α·r','b=(α/360)·2πr','b=π·r²·α','b=2πr/α'],c:1,e:'b=(α/360°)·2·π·r — Anteil des Vollkreisumfangs!'},
+    {q:'α=360°. Was ergibt die Fläche des Ausschnitts?',o:['Halber Kreis','Ganzer Kreis','Null','2πr²'],c:1,e:'360°/360°=1 → volle Kreisfläche π·r²!'},
+  ],
+  pr:[
+    {q:'Quader l=4,b=3,h=5. Volumen?',o:['60','47','70','24'],c:0,e:'V=l·b·h=4·3·5=60'},
+    {q:'G=168 cm², h=4,4 cm. Volumen?',o:['739,2 cm³','840 cm³','168 cm³','361 cm³'],c:0,e:'V=G·h=168·4,4=739,2 cm³'},
+    {q:'Was bedeutet O=2G+M?',o:['2 Grundfl.+Mantel','2 Grundfl.','Mantel allein','G+Höhe'],c:0,e:'2 Grundflächen (oben+unten) + Mantelfläche (alle Seiten).'},
+    {q:'Dreieck a=6, Höhe=5,2. G=?',o:['15,6 cm²','31,2 cm²','36 cm²','18 cm²'],c:0,e:'G=½·a·h=½·6·5,2=15,6 cm²'},
+    {q:'Dreiecksprisma: wie viele Flächen?',o:['3','4','5','6'],c:2,e:'2 Dreiecke + 3 Rechtecke = 5 Flächen'},
+    {q:'G=50 cm², h=8. V=?',o:['400 cm³','58 cm³','800 cm³','100 cm³'],c:0,e:'V=G·h=50·8=400 cm³'},
+    {q:'V=739,2 cm³, 1cm³=1,3g. Gewicht?',o:['961 g','739 g','569 g','1000 g'],c:0,e:'739,2·1,3≈961 g 🍫'},
+    {q:'Mantelfläche bei Prismen?',o:['G·h','Umfang(G)·h','2·G','G²'],c:1,e:'M=Umfang·h — gilt für alle Prismen!'},
+    {q:'Würfel l=3. Oberfläche?',o:['54 cm²','27 cm²','9 cm²','18 cm²'],c:0,e:'O=6·l²=6·9=54 cm²'},
   ],
   z:[
-    {q:'Ein Zylinder hat r = 3 cm und h = 10 cm. Wie groß ist das Volumen?',opts:['94,25 cm³','282,74 cm³','188,5 cm³','30 cm³'],correct:1,exp:'V = π·r²·h = π·9·10 = 90π ≈ 282,74 cm³'},
-    {q:'Was ist die Mantelfläche eines Zylinders?',opts:['π · r²','2 · π · r · h','π · r² · h','2 · π · r'],correct:1,exp:'Mantel = 2·π·r·h. Rolle das Etikett ab — es ist ein Rechteck mit Breite 2πr und Höhe h!'},
+    {q:'Zylinder r=5, h=11,8. Volumen?',o:['926,8 cm³','370,7 cm³','185,4 cm³','2945 cm³'],c:0,e:'V=π·25·11,8≈926,8 cm³'},
+    {q:'Mantelfläche eines Zylinders?',o:['π·r²','2·π·r·h','π·r²·h','2·π·r'],c:1,e:'M=2·π·r·h. Aufgerollt = Rechteck mit Breite 2πr!'},
+    {q:'h=10,8, V≈463,4 cm³. Radius?',o:['3,7 cm','5 cm','2,6 cm','4,2 cm'],c:0,e:'r=√(463,4/(π·10,8))≈3,7 cm'},
+    {q:'Radius verdoppeln, h gleich. Volumenfaktor?',o:['2×','3×','4×','8×'],c:2,e:'(2r)²=4r² → 4× Volumen!'},
+    {q:'r=3, h=10. Oberfläche?',o:['245,0 cm²','188,5 cm²','219,9 cm²','282,7 cm²'],c:0,e:'O=2π·9+2π·3·10≈245 cm²'},
+    {q:'Wer ist materialeffizienter: Groß (r=5,h=11,8) oder Klein (r=3,7,h=10,8)?',o:['Große Dose','Kleine Dose','Gleich','Unbekannt'],c:0,e:'Groß: O≈528 für 2× Volumen. Klein: O≈337. Pro Volumen effizienter!'},
+    {q:'r=4, h=0. Volumen?',o:['16π','0','8π','Fehler'],c:1,e:'V=π·r²·h=π·16·0=0. Kein Zylinder ohne Höhe!'},
+    {q:'Zylindervolumen = ?',o:['Kreisfläche·h','Umfang·h','r²·h','π·d²·h'],c:0,e:'V=G·h=Kreisfläche·Höhe — Prinzip wie Prisma!'},
+    {q:'Kleine Dose = ½ Volumen der großen. h gleich. r wird...?',o:['Halbiert','×0,71 (1/√2)','×0,5','Verdoppelt'],c:1,e:'V=π·r²·h → r=√(V/πh). Bei halbem V: r×1/√2≈0,71'},
   ],
   p:[
-    {q:'Was ergibt 6⁻²?',opts:['−36','1/36','36','−1/36'],correct:1,exp:'6⁻² = 1/6² = 1/36. Negativer Exponent = Kehrwert der Potenz!'},
-    {q:'Was ergibt 5⁻⁵ · 5 nach Vereinfachung?',opts:['5⁻⁴','5⁻⁶','1','5⁻⁵'],correct:0,exp:'5⁻⁵ · 5¹ = 5^(−5+1) = 5^(−4). Gleiche Basis → Exponenten addieren!'},
-    {q:'Wie lautet 6800 in wissenschaftlicher Schreibweise?',opts:['68 · 10²','6,8 · 10³','0,68 · 10⁴','6,8 · 10²'],correct:1,exp:'6800 = 6,8 · 1000 = 6,8 · 10³. Immer eine Stelle vor dem Komma!'},
+    {q:'6⁻² = ?',o:['−36','1/36','36','−1/36'],c:1,e:'6⁻²=1/6²=1/36 — negativer Exponent = Kehrwert!'},
+    {q:'5⁻⁵ · 5 = ?',o:['5⁻⁴','5⁻⁶','5⁰','5⁻⁵'],c:0,e:'5⁻⁵·5¹=5^(−5+1)=5⁻⁴ — gleiche Basis: addieren!'},
+    {q:'6800 in wiss. Schreibweise?',o:['68·10²','6,8·10³','0,68·10⁴','6,8·10²'],c:1,e:'6800=6,8·10³ — 1 Stelle vor dem Komma!'},
+    {q:'(3³)⁻¹ = ?',o:['3³','3⁻³','27','3⁻³ und 1/27 (beides)'],c:3,e:'3^(3·(−1))=3⁻³=1/27. Beides korrekt!'},
+    {q:'7⁰ = ?',o:['0','7','1','Undefiniert'],c:2,e:'Jede Zahl (≠0) hoch 0 = 1!'},
+    {q:'27⁻² ÷ 9⁻² = ?',o:['1/9','9','3⁻²','1/3'],c:0,e:'(27÷9)⁻²=3⁻²=1/9'},
+    {q:'0,000345 = ?',o:['3,45·10⁻³','3,45·10⁻⁴','34,5·10⁻⁵','0,345·10⁻³'],c:1,e:'0,000345=3,45·10⁻⁴'},
+    {q:'4² / 6⁻¹ = ?',o:['16/6','96','8/6','4/6'],c:1,e:'4²/6⁻¹=16·6=96'},
+    {q:'2·(−4)⁴ = ?',o:['−512','512','−128','128'],c:1,e:'(−4)⁴=256 (gerade Exp.=positiv!), 2·256=512'},
+    {q:'5,6·10⁶ · 7⁷/7⁸ = ?',o:['800.000','0,8','80.000','5,6·10⁷'],c:0,e:'7⁷/7⁸=7⁻¹. 5,6·10⁶/7=0,8·10⁶=800.000'},
+    {q:'3⁴ − 4·5² = ?',o:['−19','81','−100','−200'],c:0,e:'3⁴=81, 4·5²=100. 81−100=−19'},
+    {q:'Mars ⌀=6800 km. Wiss. Schreibweise?',o:['6,8·10⁴','6,8·10³','68·10²','0,68·10⁴'],c:1,e:'6800=6,8·10³. 1 Stelle vor dem Komma!'},
   ],
   w:[
-    {q:'Was ergibt ⁴√3¹²?',opts:['3²','3³','3⁴','3¹²'],correct:1,exp:'⁴√3¹² = 3^(12/4) = 3³ = 27'},
-    {q:'Was bedeutet a^(1/2)?',opts:['a²','2a','√a','a/2'],correct:2,exp:'a^(1/2) = √a. Der Exponent 1/2 ist dasselbe wie die Quadratwurzel!'},
+    {q:'⁴√3¹² = ?',o:['3²','3³','3⁴','81'],c:1,e:'3^(12/4)=3³=27 ✓'},
+    {q:'64^(2/3) = ?',o:['8','12','16','4'],c:2,e:'64^(1/3)=4, dann 4²=16 ✓'},
+    {q:'a^(1/2) = ?',o:['a²','2·a','√a','a/2'],c:2,e:'a^(1/2)=√a — Exponent 1/2 = Quadratwurzel!'},
+    {q:'⁸√z⁴ vereinfacht?',o:['z²','z^(1/2)','√z','z^(4/8)'],c:2,e:'z^(4/8)=z^(1/2)=√z ✓'},
+    {q:'144^(1/2) = ?',o:['72','12','24','√144 unverein.'],c:1,e:'√144=12, da 12²=144 ✓'},
+    {q:'(32z)^(1/5) ÷ z^(1/5) = ?',o:['32','2','z','16'],c:1,e:'(32z÷z)^(1/5)=32^(1/5)=(2⁵)^(1/5)=2 ✓'},
+    {q:'³√2⁻⁶ = ?',o:['1/4','2⁻²','1/8','−2'],c:0,e:'2^(−6/3)=2⁻²=1/4 ✓'},
+    {q:'⁴√(16/81) = ?',o:['2/3','4/9','2/9','4/3'],c:0,e:'⁴√16=2, ⁴√81=3 → 2/3 ✓'},
+    {q:'512^(1/3) = ?',o:['16','8','32','64'],c:1,e:'8³=512 → ³√512=8 ✓'},
+    {q:'ⁿ√a = ?',o:['a^n','a^(1/n)','n·a','a/n'],c:1,e:'ⁿ√a=a^(1/n) — Definition des Bruchexponenten!'},
   ]
 };
-const qState={};
-['k','s','z','p','w'].forEach(id=>{qState[id]={idx:0,answered:false};loadQ(id);});
+const QM={k:'qz-k',s:'qz-s',pr:'qz-pr',z:'qz-z',p:'qz-p',w:'qz-w'};
+const QS={};
+Object.keys(QD).forEach(id=>{QS[id]={i:0,ans:false};renderQ(id);});
+function renderQ(id){const wrap=document.getElementById(QM[id]);if(!wrap)return;const qs=QD[id],st=QS[id];if(st.i>=qs.length){wrap.innerHTML=`<div class="qnum">MINI-CHECK</div><div class="qq" style="color:#58d888">🎉 Alle ${qs.length} Fragen durch!</div>`;return;}const q=qs[st.i];st.ans=false;const dots=qs.map((_,i)=>`<div class="pd ${i<st.i?'done':i===st.i?'cur':''}"></div>`).join('');wrap.innerHTML=`<div class="prog">${dots}</div><div class="qnum">MINI-CHECK · ${st.i+1} / ${qs.length}</div><div class="qq">${q.q}</div><div class="qopts">${q.o.map((o,i)=>`<button class="qo" onclick="ansQ('${id}',${i})">${o}</button>`).join('')}</div><div class="qfb" id="qfb-${id}"></div><button class="qnext" id="qnext-${id}" onclick="nextQ('${id}')">Weiter →</button>`;}
+function ansQ(id,ch){const st=QS[id];if(st.ans)return;st.ans=true;const q=QD[id][st.i];document.querySelectorAll(`#${QM[id]} .qo`).forEach((o,i)=>{o.disabled=true;if(i===q.c)o.classList.add('ok');else if(i===ch&&ch!==q.c)o.classList.add('no');});const fb=document.getElementById('qfb-'+id);fb.className='qfb show '+(ch===q.c?'ok':'no');fb.textContent=(ch===q.c?'✓ Richtig! ':'✗ Falsch. ')+q.e;document.getElementById('qnext-'+id).className='qnext show';}
+function nextQ(id){QS[id].i++;QS[id].ans=false;renderQ(id);}
 
-function loadQ(id){
-  const qs=quizzes[id];const st=qState[id];
-  if(st.idx>=qs.length){
-    document.getElementById('q'+id+'-q').textContent='🎉 Alle Fragen beantwortet! Du hast das Thema durchgearbeitet.';
-    document.getElementById('q'+id+'-opts').innerHTML='';
-    document.getElementById('q'+id+'-fb').className='quiz-feedback';
-    document.getElementById('q'+id+'-next').className='next-btn';
-    return;
-  }
-  const q=qs[st.idx];st.answered=false;
-  document.getElementById('q'+id+'-q').textContent=q.q;
-  const optsEl=document.getElementById('q'+id+'-opts');
-  optsEl.innerHTML='';
-  q.opts.forEach((o,i)=>{
-    const btn=document.createElement('button');btn.className='quiz-opt';btn.textContent=o;
-    btn.onclick=()=>answerQ(id,i);optsEl.appendChild(btn);
-  });
-  document.getElementById('q'+id+'-fb').className='quiz-feedback';
-  document.getElementById('q'+id+'-next').className='next-btn';
-}
+// MODAL
+function showM(id){document.getElementById(id).classList.add('show');}
+function closeM(id){document.getElementById(id).classList.remove('show');if(id==='mo-admin'){['adm-s1','adm-s2','adm-s3','adm-s4'].forEach((s,i)=>{document.getElementById(s).style.display=i===0?'':'none';});document.getElementById('adm-u').value='';document.getElementById('adm-p').value='';document.getElementById('adm-pbar').style.width='0%';}}
+document.getElementById('mo-admin').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('mo-admin');});
+['adm-u','adm-p'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')tryAdmin();}));
 
-function answerQ(id,chosen){
-  const st=qState[id];if(st.answered)return;st.answered=true;
-  const q=quizzes[id][st.idx];
-  const opts=document.querySelectorAll('#q'+id+'-opts .quiz-opt');
-  opts.forEach((o,i)=>{o.disabled=true;if(i===q.correct)o.classList.add('correct');else if(i===chosen&&chosen!==q.correct)o.classList.add('wrong');});
-  const fb=document.getElementById('q'+id+'-fb');
-  fb.className='quiz-feedback show '+(chosen===q.correct?'qf-correct':'qf-wrong');
-  fb.textContent=(chosen===q.correct?'✓ Richtig! ':'✗ Leider falsch. ')+q.exp;
-  document.getElementById('q'+id+'-next').className='next-btn show';
+function tryAdmin(){
+  document.getElementById('adm-s1').style.display='none';
+  document.getElementById('adm-s2').style.display='';
+  const bar=document.getElementById('adm-pbar'),stat=document.getElementById('adm-status');
+  const msgs=['Verbinde mit Server...','Prüfe Zugangsdaten...','Verifiziere Identität...','Erstelle sichere Session...','Lade Berechtigungen...'];
+  let pct=0,si=0;
+  const iv=setInterval(()=>{
+    pct+=Math.random()*10+3;if(pct>100)pct=100;
+    bar.style.width=pct+'%';
+    const ni=Math.min(Math.floor(pct/22),msgs.length-1);
+    if(ni>si){si=ni;stat.textContent=msgs[si];}
+    if(pct>=100){clearInterval(iv);setTimeout(()=>{document.getElementById('adm-s2').style.display='none';document.getElementById('adm-s3').style.display='';},400);}
+  },70);
 }
+function adminReveal(){document.getElementById('adm-s3').style.display='none';document.getElementById('adm-s4').style.display='';}
 
-function nextQ(id){
-  qState[id].idx++;loadQ(id);
-}
+// TOAST
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3600);}
+
+// EASTER EGGS
+let egBuf='';
+const EGGS={
+  'papaplatte':()=>window.open('https://youtube.com/shorts/m4mbFo__OvA?si=PLMWURR3KS8nYz_o','_blank'),
+  'rewi':()=>window.open('https://youtube.com/shorts/1mdE6g7sHI8?si=clZX3_-1WE4EJJW9','_blank'),
+  'admin':()=>showM('mo-admin'),
+  'energie':()=>window.open('https://youtu.be/7x98WmPsJl4?si=JGksYcELsagL17ID','_blank'),
+  'der mainy':()=>window.open('https://youtu.be/zQ3dWMtvnns?si=1EfMO_jnfq_IDmKn','_blank'),
+  'gg':()=>toast('gg ez — Mathe-Session gewonnen 👑'),
+  'yolo':()=>toast('YOLO — und trotzdem π lernen 😤'),
+  '1337':()=>toast('l33t hax0r erkannt 🖥️ — kein Zugriff'),
+  'hilfe':()=>toast('Keine Panik! Formel → Beispiel → nachrechnen ✌️'),
+  'streber':()=>toast('Streber is the new cool 🤓 — weiter so!'),
+  'kein bock':()=>toast('auch kein bock aber wir ziehen das durch 💪'),
+  'mama':()=>toast('Deine Mama wäre stolz 👩'),
+  'schule':()=>toast('Schule ist temporär — Wissen ist für immer 🧠'),
+  'fortnite':()=>toast('Erstmal Mathe, dann Fortnite. Deal? 🎮'),
+  'nerd':()=>toast('Nerd sein ist eine Lebenseinstellung 🔬'),
+  'pi':()=>toast('π = 3,14159265358979… — du liebst es 🥧'),
+  'leck eier':()=>toast('du weißt was du getan hast 🗿'),
+  'lehrer':()=>toast('Lehrer Schmidt > alle anderen Lehrer 🎓'),
+  'mathe ist schön':()=>toast('genau das ist die richtige einstellung ✨'),
+};
+document.addEventListener('keyup',e=>{
+  if(e.key.length===1)egBuf+=e.key.toLowerCase();
+  else if(e.key===' ')egBuf+=' ';
+  if(egBuf.length>44)egBuf=egBuf.slice(-44);
+  for(const[k,fn] of Object.entries(EGGS)){if(egBuf.endsWith(k)){egBuf='';fn();break;}}
+});
 </script>
+</body>
+</html>
