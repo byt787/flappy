@@ -1,14 +1,527 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Flappy Bird</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, #16213e 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, #0f3460 0%, transparent 60%);
+    }
+
+    #gameWrapper {
+      position: relative;
+      box-shadow:
+        0 0 0 2px rgba(255,255,255,0.08),
+        0 0 40px rgba(0,0,0,0.8),
+        0 20px 60px rgba(0,0,0,0.5);
+      border-radius: 3px;
+    }
+
+    canvas {
+      display: block;
+      border-radius: 3px;
+    }
+
+    #scoreDisplay {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 28px;
+      color: #fff;
+      text-shadow:
+        2px 2px 0 #000,
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        0 0 20px rgba(255,255,255,0.4);
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+      display: none;
+    }
+    #scoreDisplay.pop {
+      animation: scorePop 0.15s ease forwards;
+    }
+    @keyframes scorePop {
+      0%   { transform: translateX(-50%) scale(1); }
+      50%  { transform: translateX(-50%) scale(1.5); }
+      100% { transform: translateX(-50%) scale(1); }
+    }
+
+    #flash {
+      position: absolute;
+      inset: 0;
+      background: white;
+      border-radius: 3px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 20;
+      transition: opacity 0.05s;
+    }
+    #flash.active { opacity: 0.7; }
+
+    #vignette {
+      position: absolute;
+      inset: 0;
+      border-radius: 3px;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.45) 100%);
+      pointer-events: none;
+      z-index: 5;
+    }
+  </style>
 </head>
 <body>
-    <canvas id="canvas" width="320" height="480"></canvas>
-    <script src="script.js"></script>
+<div id="gameWrapper">
+  <canvas id="canvas"></canvas>
+  <div id="scoreDisplay"></div>
+  <div id="flash"></div>
+  <div id="vignette"></div>
+</div>
+
+<script>
+const canvas   = document.getElementById('canvas');
+const cx       = canvas.getContext('2d');
+const wrapper  = document.getElementById('gameWrapper');
+const scoreDom = document.getElementById('scoreDisplay');
+const flashDom = document.getElementById('flash');
+
+const GAME_W = 320;
+const GAME_H = 480;
+canvas.width  = GAME_W;
+canvas.height = GAME_H;
+
+function resize() {
+  const scale = Math.min(
+    (window.innerWidth  * 0.96) / GAME_W,
+    (window.innerHeight * 0.96) / GAME_H
+  );
+  const w = GAME_W * scale + 'px';
+  const h = GAME_H * scale + 'px';
+  canvas.style.width   = w; canvas.style.height  = h;
+  wrapper.style.width  = w; wrapper.style.height = h;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── Assets ───────────────────────────────────────────────────────
+const image = new Image();
+image.src = 'assets/pics/image-pack.png';
+
+const sounds = {
+  SCORE : new Audio('assets/sounds/score.wav'),
+  FLAP  : new Audio('assets/sounds/flap.wav'),
+  HIT   : new Audio('assets/sounds/hit.wav'),
+  DIE   : new Audio('assets/sounds/die.wav'),
+  START : new Audio('assets/sounds/start.wav'),
+};
+function playSound(s) {
+  try { sounds[s].currentTime = 0; sounds[s].play(); } catch(e) {}
+}
+
+// ── Config ───────────────────────────────────────────────────────
+const DEGREE     = Math.PI / 180;
+const PIPE_GAP   = 130;   // was 80 – much more playable
+const PIPE_DX    = 2.2;
+const PIPE_SPAWN = 90;    // frames between pipe spawns
+
+// ── State ────────────────────────────────────────────────────────
+const ST = { READY: 0, GAME: 1, OVER: 2 };
+let state  = ST.READY;
+let frames = 0;
+
+// ── Screen shake ─────────────────────────────────────────────────
+let shake = { x: 0, y: 0, frames: 0, strength: 0 };
+function triggerShake(str, dur) { shake.strength = str; shake.frames = dur; }
+function triggerFlash() {
+  flashDom.classList.add('active');
+  setTimeout(() => flashDom.classList.remove('active'), 60);
+}
+function updateShake() {
+  if (shake.frames > 0) {
+    const s = shake.strength * (shake.frames / 12);
+    shake.x = (Math.random() - 0.5) * s * 2;
+    shake.y = (Math.random() - 0.5) * s * 2;
+    shake.frames--;
+  } else { shake.x = 0; shake.y = 0; }
+}
+
+// ── Particles ────────────────────────────────────────────────────
+let particles = [];
+function spawnParticles(x, y, count, colors, speed) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const spd   = speed * (0.4 + Math.random() * 0.8);
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd - 1,
+      life: 1,
+      decay: 0.025 + Math.random() * 0.03,
+      r: 2 + Math.random() * 3,
+      color: colors[Math.floor(Math.random() * colors.length)]
+    });
+  }
+}
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.vy += 0.12; p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+function drawParticles() {
+  for (const p of particles) {
+    cx.save();
+    cx.globalAlpha = p.life * 0.9;
+    cx.fillStyle   = p.color;
+    cx.shadowColor = p.color;
+    cx.shadowBlur  = 6;
+    cx.beginPath();
+    cx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+    cx.fill();
+    cx.restore();
+  }
+}
+
+// ── Background sprite ────────────────────────────────────────────
+function drawBg() {
+  const h = 226, w = 275;
+  for (let i = 0; i < GAME_W + w; i += w)
+    cx.drawImage(image, 0, 0, w, h, i, GAME_H - h, w, h);
+}
+
+// ── Foreground (scrolling ground) ────────────────────────────────
+const fg = {
+  sX: 276, sY: 0, w: 224, h: 112,
+  x: 0,
+  update() { if (state === ST.GAME) this.x = (this.x - PIPE_DX) % (this.w / 2); },
+  draw() {
+    for (let i = 0; i < GAME_W + this.w; i += this.w / 2)
+      cx.drawImage(image, this.sX, this.sY, this.w, this.h,
+        this.x + i, GAME_H - this.h, this.w / 2, this.h);
+  }
+};
+
+// ── Pipes ────────────────────────────────────────────────────────
+const pipes = {
+  top    : { sX: 553, sY: 0 },
+  bottom : { sX: 502, sY: 0 },
+  w: 53, h: 400,
+  position: [],
+
+  spawn() {
+    const minY = -this.h + 60;
+    const maxY = -this.h + (GAME_H - fg.h - PIPE_GAP - 60);
+    this.position.push({
+      x: GAME_W + 10,
+      y: minY + Math.random() * (maxY - minY),
+      scored: false
+    });
+  },
+
+  draw() {
+    for (const p of this.position) {
+      const botY = p.y + this.h + PIPE_GAP;
+
+      cx.save();
+      cx.shadowColor = 'rgba(0,180,70,0.4)';
+      cx.shadowBlur  = 10;
+      cx.drawImage(image, this.top.sX,    this.top.sY,    this.w, this.h, p.x, p.y,  this.w, this.h);
+      cx.drawImage(image, this.bottom.sX, this.bottom.sY, this.w, this.h, p.x, botY, this.w, this.h);
+      cx.restore();
+
+      // Subtle danger gradient in gap
+      const g = cx.createLinearGradient(p.x, p.y + this.h, p.x, botY);
+      g.addColorStop(0,   'rgba(255,50,50,0.10)');
+      g.addColorStop(0.5, 'rgba(255,50,50,0)');
+      g.addColorStop(1,   'rgba(255,50,50,0.10)');
+      cx.fillStyle = g;
+      cx.fillRect(p.x, p.y + this.h, this.w, PIPE_GAP);
+    }
+  },
+
+  update() {
+    if (state !== ST.GAME) return;
+    if (frames % PIPE_SPAWN === 0) this.spawn();
+
+    for (let i = this.position.length - 1; i >= 0; i--) {
+      const p   = this.position[i];
+      p.x      -= PIPE_DX;
+      const botY = p.y + this.h + PIPE_GAP;
+
+      // Collision (3px forgiveness)
+      const bx = bird.x, by = bird.y, br = bird.radius - 3;
+      if (bx + br > p.x && bx - br < p.x + this.w) {
+        if (by - br < p.y + this.h || by + br > botY) {
+          hitPipe(); return;
+        }
+      }
+
+      // Score
+      if (!p.scored && p.x + this.w < bird.x - bird.radius) {
+        p.scored = true;
+        score.value++;
+        score.best = Math.max(score.value, score.best);
+        localStorage.setItem('best', score.best);
+        playSound('SCORE');
+        spawnParticles(bird.x, bird.y, 12, ['#ffe600','#fff','#ffcc00'], 3);
+        updateScoreDom();
+      }
+
+      if (p.x + this.w < -10) this.position.splice(i, 1);
+    }
+  },
+
+  reset() { this.position = []; }
+};
+
+// ── Bird ─────────────────────────────────────────────────────────
+const bird = {
+  animation: [
+    { sX: 276, sY: 112 }, { sX: 276, sY: 139 },
+    { sX: 276, sY: 164 }, { sX: 276, sY: 139 },
+  ],
+  w: 34, h: 26,
+  x: 60, y: 150,
+  speed: 0, gravity: 0.28, jump: 5.2,
+  animIdx: 0, rotation: 0, radius: 12,
+  scaleX: 1, scaleY: 1,
+
+  reset() {
+    this.x = 60; this.y = 150;
+    this.speed = 0; this.rotation = 0;
+    this.scaleX = 1; this.scaleY = 1;
+  },
+
+  flap() {
+    this.speed  = -this.jump;
+    this.scaleX = 0.75; this.scaleY = 1.3;
+    spawnParticles(this.x - 12, this.y + 6, 5, ['#70C5CE','#b0e8ff','#fff'], 2);
+  },
+
+  update() {
+    const period = state === ST.READY ? 10 : 5;
+    this.animIdx = (this.animIdx + (frames % period === 0 ? 1 : 0)) % 4;
+
+    // Squish recovery
+    this.scaleX += (1 - this.scaleX) * 0.2;
+    this.scaleY += (1 - this.scaleY) * 0.2;
+
+    if (state === ST.READY) {
+      this.y = 150 + Math.sin(frames * 0.07) * 5;
+      this.rotation = Math.sin(frames * 0.07) * 0.12;
+      return;
+    }
+
+    this.speed    += this.gravity;
+    this.y        += this.speed;
+
+    const targetRot = this.speed < 0
+      ? -25 * DEGREE
+      : Math.min(this.speed * 4 * DEGREE, 90 * DEGREE);
+    this.rotation += (targetRot - this.rotation) * 0.15;
+
+    if (this.y + this.h / 2 >= GAME_H - fg.h) {
+      this.y = GAME_H - fg.h - this.h / 2;
+      if (state === ST.GAME) hitFloor();
+    }
+    if (this.y - this.h / 2 < 0) { this.y = this.h / 2; this.speed = 0; }
+  },
+
+  draw() {
+    const frame = this.animation[this.animIdx];
+    cx.save();
+    cx.translate(this.x, this.y);
+    cx.rotate(this.rotation);
+    cx.scale(this.scaleX, this.scaleY);
+
+    // Shadow under bird
+    cx.save();
+    cx.globalAlpha = 0.22;
+    cx.filter = 'blur(2px)';
+    cx.drawImage(image, frame.sX, frame.sY, this.w, this.h,
+      -this.w / 2 + 4, -this.h / 2 + 6, this.w, this.h);
+    cx.restore();
+
+    cx.drawImage(image, frame.sX, frame.sY, this.w, this.h,
+      -this.w / 2, -this.h / 2, this.w, this.h);
+    cx.restore();
+  }
+};
+
+// ── Animated overlays (from spritesheet) ─────────────────────────
+function makeOverlay(sX, sY, w, h, targetY) {
+  return {
+    sX, sY, w, h, targetY,
+    y: targetY - 30, alpha: 0,
+    reset() { this.y = this.targetY - 30; this.alpha = 0; },
+    update() {
+      this.alpha += (1 - this.alpha) * 0.12;
+      this.y     += (this.targetY - this.y) * 0.15;
+    },
+    draw() {
+      cx.save();
+      cx.globalAlpha = this.alpha;
+      cx.drawImage(image, this.sX, this.sY, this.w, this.h,
+        GAME_W / 2 - this.w / 2, this.y, this.w, this.h);
+      cx.restore();
+    }
+  };
+}
+const overlayReady = makeOverlay(0,   228, 173, 152, 75);
+const overlayOver  = makeOverlay(175, 228, 225, 202, 85);
+
+// ── Score ────────────────────────────────────────────────────────
+const score = {
+  value: 0,
+  best : parseInt(localStorage.getItem('best')) || 0,
+  reset() { this.value = 0; },
+  drawGameOver() {
+    cx.save();
+    cx.textAlign    = 'center';
+    cx.textBaseline = 'middle';
+    cx.font         = 'bold 16px "Press Start 2P", monospace';
+    cx.fillStyle    = '#fff';
+    cx.strokeStyle  = '#543847';
+    cx.lineWidth    = 3;
+    const midX = GAME_W / 2 + 42;
+    const y1   = overlayOver.y + 118;
+    const y2   = overlayOver.y + 158;
+    cx.strokeText(this.value, midX, y1); cx.fillText(this.value, midX, y1);
+    cx.strokeText(this.best,  midX, y2); cx.fillText(this.best,  midX, y2);
+    cx.restore();
+  }
+};
+
+function updateScoreDom() {
+  scoreDom.textContent = score.value;
+  scoreDom.classList.remove('pop');
+  void scoreDom.offsetWidth;
+  scoreDom.classList.add('pop');
+}
+
+// ── Hit / Die ────────────────────────────────────────────────────
+function hitPipe() {
+  if (state === ST.OVER) return;
+  playSound('HIT');
+  triggerShake(7, 14);
+  triggerFlash();
+  spawnParticles(bird.x, bird.y, 20, ['#ff4444','#ffaa00','#fff'], 5);
+  state = ST.OVER;
+  overlayOver.reset();
+  scoreDom.style.display = 'none';
+  setTimeout(() => playSound('DIE'), 180);
+}
+function hitFloor() {
+  if (state === ST.OVER) return;
+  playSound('DIE');
+  triggerShake(5, 10);
+  spawnParticles(bird.x, GAME_H - fg.h, 15, ['#c8a96e','#fff','#8b7355'], 3);
+  state = ST.OVER;
+  overlayOver.reset();
+  scoreDom.style.display = 'none';
+}
+
+// ── Input ────────────────────────────────────────────────────────
+function handleInput() {
+  switch (state) {
+    case ST.READY:
+      playSound('START');
+      state = ST.GAME;
+      overlayReady.reset();
+      scoreDom.style.display = 'block';
+      scoreDom.textContent = '0';
+      break;
+    case ST.GAME:
+      playSound('FLAP');
+      bird.flap();
+      break;
+    case ST.OVER:
+      bird.reset(); pipes.reset(); score.reset();
+      particles = []; frames = 0;
+      state = ST.READY;
+      overlayReady.reset();
+      scoreDom.style.display = 'none';
+      break;
+  }
+}
+
+document.addEventListener('click', handleInput);
+document.addEventListener('touchstart', e => { e.preventDefault(); handleInput(); }, { passive: false });
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); handleInput(); }
+});
+
+// ── Loop ─────────────────────────────────────────────────────────
+function update() {
+  updateShake(); updateParticles();
+  bird.update(); fg.update(); pipes.update();
+  if (state === ST.READY) overlayReady.update();
+  if (state === ST.OVER)  overlayOver.update();
+}
+
+function draw() {
+  cx.save();
+  cx.translate(shake.x, shake.y);
+
+  // Sky
+  cx.fillStyle = '#70C5CE';
+  cx.fillRect(0, 0, GAME_W, GAME_H);
+
+  // Subtle dusk tint as score rises
+  if (score.value > 0) {
+    const t = Math.min(score.value / 30, 1);
+    const tg = cx.createLinearGradient(0, 0, 0, GAME_H * 0.6);
+    tg.addColorStop(0, `rgba(${Math.floor(t*80)},${Math.floor(t*20)},${Math.floor(t*60)},${t * 0.3})`);
+    tg.addColorStop(1, 'rgba(0,0,0,0)');
+    cx.fillStyle = tg;
+    cx.fillRect(0, 0, GAME_W, GAME_H);
+  }
+
+  drawBg();
+  pipes.draw();
+  fg.draw();
+  drawParticles();
+  bird.draw();
+
+  if (state === ST.READY) overlayReady.draw();
+  if (state === ST.OVER)  { overlayOver.draw(); score.drawGameOver(); }
+
+  cx.restore();
+}
+
+function loop() {
+  update(); draw(); frames++;
+  requestAnimationFrame(loop);
+}
+
+image.onload  = () => loop();
+image.onerror = () => {
+  // Image failed – show a helpful message on the canvas
+  cx.fillStyle = '#70C5CE';
+  cx.fillRect(0, 0, GAME_W, GAME_H);
+  cx.fillStyle = '#000';
+  cx.font = '11px monospace';
+  cx.textAlign = 'center';
+  cx.fillText('Image not found!', GAME_W/2, GAME_H/2 - 20);
+  cx.fillText('Make sure assets/pics/image-pack.png', GAME_W/2, GAME_H/2);
+  cx.fillText('exists next to index.html', GAME_W/2, GAME_H/2 + 20);
+};
+</script>
 </body>
 </html>
