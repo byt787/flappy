@@ -3,117 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Flappy Bird</title>
+  <title>Flappy Bird – BYT Studios</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #1a1a2e;
+      background: #1a0a2e;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
       overflow: hidden;
       background-image:
-        radial-gradient(ellipse at 20% 50%, #16213e 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 50%, #0f3460 0%, transparent 60%);
+        radial-gradient(ellipse at 30% 40%, #2d0a4e 0%, transparent 55%),
+        radial-gradient(ellipse at 70% 60%, #0a1a3e 0%, transparent 55%);
     }
 
     #gameWrapper {
       position: relative;
       box-shadow:
-        0 0 0 2px rgba(255,255,255,0.08),
-        0 0 40px rgba(0,0,0,0.8),
-        0 20px 60px rgba(0,0,0,0.5);
-      border-radius: 3px;
+        0 0 0 3px rgba(255,220,50,0.25),
+        0 0 0 5px rgba(0,0,0,0.6),
+        0 0 50px rgba(120,0,255,0.3),
+        0 25px 70px rgba(0,0,0,0.7);
+      border-radius: 4px;
     }
 
-    canvas {
-      display: block;
-      border-radius: 3px;
-    }
+    canvas { display: block; border-radius: 4px; }
 
+    /* Live score on canvas */
     #scoreDisplay {
       position: absolute;
-      top: 14px;
+      top: 16px;
       left: 50%;
       transform: translateX(-50%);
       font-family: 'Press Start 2P', monospace;
-      font-size: 28px;
+      font-size: 32px;
       color: #fff;
       text-shadow:
-        2px 2px 0 #000,
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        0 0 20px rgba(255,255,255,0.4);
+        3px 3px 0 #000,
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px  2px 0 #000,
+        0 0 16px rgba(255,220,50,0.6);
       pointer-events: none;
       z-index: 10;
-      white-space: nowrap;
       display: none;
+      white-space: nowrap;
+      letter-spacing: 2px;
     }
     #scoreDisplay.pop {
-      animation: scorePop 0.15s ease forwards;
+      animation: scorePop 0.18s cubic-bezier(0.36,0.07,0.19,0.97) forwards;
     }
     @keyframes scorePop {
       0%   { transform: translateX(-50%) scale(1); }
-      50%  { transform: translateX(-50%) scale(1.5); }
+      40%  { transform: translateX(-50%) scale(1.6) rotate(-4deg); }
       100% { transform: translateX(-50%) scale(1); }
     }
 
+    /* Flash */
     #flash {
       position: absolute;
       inset: 0;
       background: white;
-      border-radius: 3px;
+      border-radius: 4px;
       opacity: 0;
       pointer-events: none;
       z-index: 20;
-      transition: opacity 0.05s;
     }
-    #flash.active { opacity: 0.7; }
+    #flash.active { animation: flashAnim 0.25s ease forwards; }
+    @keyframes flashAnim {
+      0%   { opacity: 0.8; }
+      100% { opacity: 0; }
+    }
 
+    /* Vignette */
     #vignette {
       position: absolute;
       inset: 0;
-      border-radius: 3px;
-      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.45) 100%);
+      border-radius: 4px;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%);
       pointer-events: none;
       z-index: 5;
+    }
+
+    /* Watermark */
+    #watermark {
+      position: absolute;
+      bottom: 7px;
+      right: 10px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 6px;
+      color: rgba(255,255,255,0.45);
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+      pointer-events: none;
+      z-index: 15;
+      letter-spacing: 0.5px;
+      line-height: 1.6;
+      text-align: right;
     }
   </style>
 </head>
 <body>
 <div id="gameWrapper">
   <canvas id="canvas"></canvas>
-  <div id="scoreDisplay"></div>
+  <div id="scoreDisplay">0</div>
   <div id="flash"></div>
   <div id="vignette"></div>
+  <div id="watermark">BYT-Studios<br>© 2026</div>
 </div>
 
 <script>
+// ── Setup ────────────────────────────────────────────────────────
 const canvas   = document.getElementById('canvas');
 const cx       = canvas.getContext('2d');
 const wrapper  = document.getElementById('gameWrapper');
 const scoreDom = document.getElementById('scoreDisplay');
 const flashDom = document.getElementById('flash');
 
-const GAME_W = 320;
-const GAME_H = 480;
-canvas.width  = GAME_W;
-canvas.height = GAME_H;
+// Internal resolution – tall mobile-ish ratio
+const GW = 360, GH = 570;
+canvas.width = GW; canvas.height = GH;
 
 function resize() {
-  const scale = Math.min(
-    (window.innerWidth  * 0.96) / GAME_W,
-    (window.innerHeight * 0.96) / GAME_H
+  const s = Math.min(
+    (window.innerWidth  * 0.94) / GW,
+    (window.innerHeight * 0.94) / GH
   );
-  const w = GAME_W * scale + 'px';
-  const h = GAME_H * scale + 'px';
-  canvas.style.width   = w; canvas.style.height  = h;
-  wrapper.style.width  = w; wrapper.style.height = h;
+  const w = GW * s + 'px', h = GH * s + 'px';
+  canvas.style.width  = w; canvas.style.height = h;
+  wrapper.style.width = w; wrapper.style.height = h;
 }
 resize();
 window.addEventListener('resize', resize);
@@ -123,404 +145,369 @@ const image = new Image();
 image.src = 'assets/pics/image-pack.png';
 
 const sounds = {
-  SCORE : new Audio('assets/sounds/score.wav'),
-  FLAP  : new Audio('assets/sounds/flap.wav'),
-  HIT   : new Audio('assets/sounds/hit.wav'),
-  DIE   : new Audio('assets/sounds/die.wav'),
-  START : new Audio('assets/sounds/start.wav'),
+  SCORE: new Audio('assets/sounds/score.wav'),
+  FLAP : new Audio('assets/sounds/flap.wav'),
+  HIT  : new Audio('assets/sounds/hit.wav'),
+  DIE  : new Audio('assets/sounds/die.wav'),
+  START: new Audio('assets/sounds/start.wav'),
 };
-function playSound(s) {
-  try { sounds[s].currentTime = 0; sounds[s].play(); } catch(e) {}
-}
+function snd(k) { try { sounds[k].currentTime = 0; sounds[k].play(); } catch(e){} }
 
-// ── Config ───────────────────────────────────────────────────────
-const DEGREE     = Math.PI / 180;
-const PIPE_GAP   = 130;   // was 80 – much more playable
-const PIPE_DX    = 2.2;
-const PIPE_SPAWN = 90;    // frames between pipe spawns
+// ── Spritesheet coordinates (from original script) ───────────────
+// background: sX=0,   sY=0,   w=275, h=226
+// foreground: sX=276, sY=0,   w=224, h=112   (tiled at half-width)
+// bird anim:  sX=276, sY=112/139/164
+// pipe top:   sX=553, sY=0   (rotated, cap at bottom)
+// pipe bot:   sX=502, sY=0   (cap at top)
+// getReady:   sX=0,   sY=228, w=173, h=152
+// gameOver:   sX=175, sY=228, w=225, h=202
+
+const SP = {
+  BG:  { x:0,   y:0,   w:275, h:226 },
+  FG:  { x:276, y:0,   w:224, h:112 },
+  BIRD:[{ x:276,y:112 },{ x:276,y:139 },{ x:276,y:164 },{ x:276,y:139 }],
+  PT:  { x:553, y:0   },  // pipe top sprite (flipped upside-down pipe)
+  PB:  { x:502, y:0   },  // pipe bottom sprite
+  PW:  53, PH: 400,       // pipe dimensions in spritesheet
+  READY:{ x:0,  y:228, w:173, h:152 },
+  OVER: { x:175,y:228, w:225, h:202 },
+};
+
+const DEGREE  = Math.PI / 180;
+const FG_H    = 112;   // foreground strip height
+const PIPE_GAP   = 145;  // generous gap – very playable
+const PIPE_SPEED = 2.4;
+const PIPE_EVERY = 95;  // frames
 
 // ── State ────────────────────────────────────────────────────────
-const ST = { READY: 0, GAME: 1, OVER: 2 };
-let state  = ST.READY;
-let frames = 0;
+const ST = { READY:0, GAME:1, OVER:2 };
+let state = ST.READY, frames = 0;
 
-// ── Screen shake ─────────────────────────────────────────────────
-let shake = { x: 0, y: 0, frames: 0, strength: 0 };
-function triggerShake(str, dur) { shake.strength = str; shake.frames = dur; }
-function triggerFlash() {
-  flashDom.classList.add('active');
-  setTimeout(() => flashDom.classList.remove('active'), 60);
+// ── Screenshake ──────────────────────────────────────────────────
+let shk = { x:0, y:0, t:0, s:0 };
+function shake(str, dur) { shk.s=str; shk.t=dur; }
+function doShake() {
+  if (shk.t > 0) {
+    const m = shk.s * (shk.t/12);
+    shk.x=(Math.random()-.5)*m*2; shk.y=(Math.random()-.5)*m*2; shk.t--;
+  } else { shk.x=0; shk.y=0; }
 }
-function updateShake() {
-  if (shake.frames > 0) {
-    const s = shake.strength * (shake.frames / 12);
-    shake.x = (Math.random() - 0.5) * s * 2;
-    shake.y = (Math.random() - 0.5) * s * 2;
-    shake.frames--;
-  } else { shake.x = 0; shake.y = 0; }
+function flash() {
+  flashDom.classList.remove('active');
+  void flashDom.offsetWidth;
+  flashDom.classList.add('active');
 }
 
 // ── Particles ────────────────────────────────────────────────────
-let particles = [];
-function spawnParticles(x, y, count, colors, speed) {
-  for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const spd   = speed * (0.4 + Math.random() * 0.8);
-    particles.push({
-      x, y,
-      vx: Math.cos(angle) * spd,
-      vy: Math.sin(angle) * spd - 1,
-      life: 1,
-      decay: 0.025 + Math.random() * 0.03,
-      r: 2 + Math.random() * 3,
-      color: colors[Math.floor(Math.random() * colors.length)]
-    });
+let parts = [];
+function spawn(x, y, n, cols, spd) {
+  for (let i=0;i<n;i++) {
+    const a=Math.random()*Math.PI*2, s=spd*(0.4+Math.random()*0.8);
+    parts.push({ x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s-1.2,
+      life:1, decay:0.022+Math.random()*0.025,
+      r:2.5+Math.random()*3.5,
+      c:cols[Math.floor(Math.random()*cols.length)] });
   }
 }
-function updateParticles() {
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    p.vy += 0.12; p.x += p.vx; p.y += p.vy; p.life -= p.decay;
-    if (p.life <= 0) particles.splice(i, 1);
+function tickParts() {
+  for (let i=parts.length-1;i>=0;i--) {
+    const p=parts[i]; p.vy+=0.13; p.x+=p.vx; p.y+=p.vy; p.life-=p.decay;
+    if(p.life<=0) parts.splice(i,1);
   }
 }
-function drawParticles() {
-  for (const p of particles) {
-    cx.save();
-    cx.globalAlpha = p.life * 0.9;
-    cx.fillStyle   = p.color;
-    cx.shadowColor = p.color;
-    cx.shadowBlur  = 6;
-    cx.beginPath();
-    cx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
-    cx.fill();
+function drawParts() {
+  for (const p of parts) {
+    cx.save(); cx.globalAlpha=p.life*0.9;
+    cx.fillStyle=p.c; cx.shadowColor=p.c; cx.shadowBlur=8;
+    cx.beginPath(); cx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2); cx.fill();
     cx.restore();
   }
 }
 
-// ── Background sprite ────────────────────────────────────────────
-function drawBg() {
-  const h = 226, w = 275;
-  for (let i = 0; i < GAME_W + w; i += w)
-    cx.drawImage(image, 0, 0, w, h, i, GAME_H - h, w, h);
+// ── Background ───────────────────────────────────────────────────
+function drawBG() {
+  const {x,y,w,h} = SP.BG;
+  for (let i=0; i<GW+w; i+=w)
+    cx.drawImage(image, x,y,w,h, i, GH-h, w, h);
 }
 
-// ── Foreground (scrolling ground) ────────────────────────────────
+// ── Foreground ───────────────────────────────────────────────────
 const fg = {
-  sX: 276, sY: 0, w: 224, h: 112,
   x: 0,
-  update() { if (state === ST.GAME) this.x = (this.x - PIPE_DX) % (this.w / 2); },
+  tick() { if(state===ST.GAME) this.x=(this.x-PIPE_SPEED)%(SP.FG.w/2); },
   draw() {
-    for (let i = 0; i < GAME_W + this.w; i += this.w / 2)
-      cx.drawImage(image, this.sX, this.sY, this.w, this.h,
-        this.x + i, GAME_H - this.h, this.w / 2, this.h);
+    const {x:sx,y:sy,w,h} = SP.FG;
+    for (let i=0; i<GW+w; i+=w/2)
+      cx.drawImage(image, sx,sy,w,h, this.x+i, GH-h, w/2, h);
   }
 };
 
 // ── Pipes ────────────────────────────────────────────────────────
 const pipes = {
-  top    : { sX: 553, sY: 0 },
-  bottom : { sX: 502, sY: 0 },
-  w: 53, h: 400,
-  position: [],
-
+  list: [],
   spawn() {
-    const minY = -this.h + 60;
-    const maxY = -this.h + (GAME_H - fg.h - PIPE_GAP - 60);
-    this.position.push({
-      x: GAME_W + 10,
-      y: minY + Math.random() * (maxY - minY),
-      scored: false
-    });
+    const minY = -SP.PH + 55;
+    const maxY = -SP.PH + (GH - FG_H - PIPE_GAP - 55);
+    this.list.push({ x: GW+10, y: minY+Math.random()*(maxY-minY), ok:false });
   },
-
   draw() {
-    for (const p of this.position) {
-      const botY = p.y + this.h + PIPE_GAP;
+    for (const p of this.list) {
+      const botY = p.y + SP.PH + PIPE_GAP;
 
-      cx.save();
-      cx.shadowColor = 'rgba(0,180,70,0.4)';
-      cx.shadowBlur  = 10;
-      cx.drawImage(image, this.top.sX,    this.top.sY,    this.w, this.h, p.x, p.y,  this.w, this.h);
-      cx.drawImage(image, this.bottom.sX, this.bottom.sY, this.w, this.h, p.x, botY, this.w, this.h);
-      cx.restore();
-
-      // Subtle danger gradient in gap
-      const g = cx.createLinearGradient(p.x, p.y + this.h, p.x, botY);
-      g.addColorStop(0,   'rgba(255,50,50,0.10)');
-      g.addColorStop(0.5, 'rgba(255,50,50,0)');
-      g.addColorStop(1,   'rgba(255,50,50,0.10)');
-      cx.fillStyle = g;
-      cx.fillRect(p.x, p.y + this.h, this.w, PIPE_GAP);
+      // Draw sprites – no tint, no overlay – pure original look
+      cx.drawImage(image, SP.PT.x, SP.PT.y, SP.PW, SP.PH,
+        p.x, p.y, SP.PW, SP.PH);
+      cx.drawImage(image, SP.PB.x, SP.PB.y, SP.PW, SP.PH,
+        p.x, botY, SP.PW, SP.PH);
     }
   },
+  tick() {
+    if (state!==ST.GAME) return;
+    if (frames % PIPE_EVERY === 0) this.spawn();
 
-  update() {
-    if (state !== ST.GAME) return;
-    if (frames % PIPE_SPAWN === 0) this.spawn();
+    for (let i=this.list.length-1; i>=0; i--) {
+      const p = this.list[i];
+      p.x -= PIPE_SPEED;
 
-    for (let i = this.position.length - 1; i >= 0; i--) {
-      const p   = this.position[i];
-      p.x      -= PIPE_DX;
-      const botY = p.y + this.h + PIPE_GAP;
-
-      // Collision (3px forgiveness)
-      const bx = bird.x, by = bird.y, br = bird.radius - 3;
-      if (bx + br > p.x && bx - br < p.x + this.w) {
-        if (by - br < p.y + this.h || by + br > botY) {
-          hitPipe(); return;
-        }
+      // Score when pipe passes bird
+      if (!p.ok && p.x + SP.PW < bird.x - bird.r) {
+        p.ok = true;
+        score.v++;
+        score.best = Math.max(score.v, score.best);
+        localStorage.setItem('fb_best', score.best);
+        snd('SCORE');
+        spawn(bird.x, bird.y, 14, ['#ffe600','#fff','#ffcc00','#ffd700'], 3.5);
+        scoreDom.textContent = score.v;
+        scoreDom.classList.remove('pop');
+        void scoreDom.offsetWidth;
+        scoreDom.classList.add('pop');
       }
 
-      // Score
-      if (!p.scored && p.x + this.w < bird.x - bird.radius) {
-        p.scored = true;
-        score.value++;
-        score.best = Math.max(score.value, score.best);
-        localStorage.setItem('best', score.best);
-        playSound('SCORE');
-        spawnParticles(bird.x, bird.y, 12, ['#ffe600','#fff','#ffcc00'], 3);
-        updateScoreDom();
+      // Collision (4px forgiveness)
+      const bx=bird.x, by=bird.y, br=bird.r-4;
+      const botY = p.y + SP.PH + PIPE_GAP;
+      if (bx+br>p.x && bx-br<p.x+SP.PW) {
+        if (by-br < p.y+SP.PH || by+br > botY) { die('pipe'); return; }
       }
 
-      if (p.x + this.w < -10) this.position.splice(i, 1);
+      if (p.x + SP.PW < -10) this.list.splice(i,1);
     }
   },
-
-  reset() { this.position = []; }
+  reset() { this.list=[]; }
 };
 
 // ── Bird ─────────────────────────────────────────────────────────
 const bird = {
-  animation: [
-    { sX: 276, sY: 112 }, { sX: 276, sY: 139 },
-    { sX: 276, sY: 164 }, { sX: 276, sY: 139 },
-  ],
-  w: 34, h: 26,
-  x: 60, y: 150,
-  speed: 0, gravity: 0.28, jump: 5.2,
-  animIdx: 0, rotation: 0, radius: 12,
-  scaleX: 1, scaleY: 1,
+  x:80, y:200, vy:0,
+  r:12, gravity:0.30, jump:5.5,
+  ai:0, rot:0,
+  sx:1, sy:1,   // squish
 
-  reset() {
-    this.x = 60; this.y = 150;
-    this.speed = 0; this.rotation = 0;
-    this.scaleX = 1; this.scaleY = 1;
-  },
+  reset() { this.x=80; this.y=200; this.vy=0; this.rot=0; this.sx=1; this.sy=1; },
 
   flap() {
-    this.speed  = -this.jump;
-    this.scaleX = 0.75; this.scaleY = 1.3;
-    spawnParticles(this.x - 12, this.y + 6, 5, ['#70C5CE','#b0e8ff','#fff'], 2);
+    this.vy = -this.jump;
+    this.sx=0.7; this.sy=1.35;
+    spawn(this.x-14, this.y+7, 6, ['#70C5CE','#b0e8ff','#fff'], 2.5);
   },
 
-  update() {
-    const period = state === ST.READY ? 10 : 5;
-    this.animIdx = (this.animIdx + (frames % period === 0 ? 1 : 0)) % 4;
+  tick() {
+    const period = state===ST.READY ? 10 : 5;
+    this.ai = (this.ai + (frames%period===0?1:0)) % 4;
 
-    // Squish recovery
-    this.scaleX += (1 - this.scaleX) * 0.2;
-    this.scaleY += (1 - this.scaleY) * 0.2;
+    this.sx += (1-this.sx)*0.22;
+    this.sy += (1-this.sy)*0.22;
 
-    if (state === ST.READY) {
-      this.y = 150 + Math.sin(frames * 0.07) * 5;
-      this.rotation = Math.sin(frames * 0.07) * 0.12;
+    if (state===ST.READY) {
+      this.y = 200 + Math.sin(frames*0.07)*6;
+      this.rot = Math.sin(frames*0.07)*0.13;
       return;
     }
 
-    this.speed    += this.gravity;
-    this.y        += this.speed;
+    this.vy += this.gravity;
+    this.y  += this.vy;
 
-    const targetRot = this.speed < 0
-      ? -25 * DEGREE
-      : Math.min(this.speed * 4 * DEGREE, 90 * DEGREE);
-    this.rotation += (targetRot - this.rotation) * 0.15;
+    const tgt = this.vy < 0 ? -25*DEGREE : Math.min(this.vy*3.5*DEGREE, 90*DEGREE);
+    this.rot += (tgt-this.rot)*0.15;
 
-    if (this.y + this.h / 2 >= GAME_H - fg.h) {
-      this.y = GAME_H - fg.h - this.h / 2;
-      if (state === ST.GAME) hitFloor();
+    // Floor
+    if (this.y + 13 >= GH - FG_H) {
+      this.y = GH - FG_H - 13;
+      if (state===ST.GAME) die('floor');
     }
-    if (this.y - this.h / 2 < 0) { this.y = this.h / 2; this.speed = 0; }
+    // Ceiling
+    if (this.y - 13 < 0) { this.y=13; this.vy=0; }
   },
 
   draw() {
-    const frame = this.animation[this.animIdx];
+    const fr = SP.BIRD[this.ai];
     cx.save();
     cx.translate(this.x, this.y);
-    cx.rotate(this.rotation);
-    cx.scale(this.scaleX, this.scaleY);
-
-    // Shadow under bird
+    cx.rotate(this.rot);
+    cx.scale(this.sx, this.sy);
+    // Subtle drop shadow
     cx.save();
-    cx.globalAlpha = 0.22;
-    cx.filter = 'blur(2px)';
-    cx.drawImage(image, frame.sX, frame.sY, this.w, this.h,
-      -this.w / 2 + 4, -this.h / 2 + 6, this.w, this.h);
+    cx.globalAlpha=0.2; cx.filter='blur(2px)';
+    cx.drawImage(image,fr.x,fr.y,34,26, -17+4,-13+6,34,26);
     cx.restore();
-
-    cx.drawImage(image, frame.sX, frame.sY, this.w, this.h,
-      -this.w / 2, -this.h / 2, this.w, this.h);
+    // Bird sprite
+    cx.drawImage(image,fr.x,fr.y,34,26, -17,-13,34,26);
     cx.restore();
   }
 };
 
-// ── Animated overlays (from spritesheet) ─────────────────────────
-function makeOverlay(sX, sY, w, h, targetY) {
+// ── Score ────────────────────────────────────────────────────────
+const score = {
+  v: 0,
+  best: parseInt(localStorage.getItem('fb_best'))||0,
+  reset() { this.v=0; }
+};
+
+// ── Animated overlay helper ───────────────────────────────────────
+function makeOverlay(sp, targetY) {
   return {
-    sX, sY, w, h, targetY,
-    y: targetY - 30, alpha: 0,
-    reset() { this.y = this.targetY - 30; this.alpha = 0; },
-    update() {
-      this.alpha += (1 - this.alpha) * 0.12;
-      this.y     += (this.targetY - this.y) * 0.15;
-    },
+    sp, targetY, y: targetY-25, alpha:0,
+    reset() { this.y=this.targetY-25; this.alpha=0; },
+    tick() { this.alpha+=(1-this.alpha)*0.13; this.y+=(this.targetY-this.y)*0.15; },
     draw() {
-      cx.save();
-      cx.globalAlpha = this.alpha;
-      cx.drawImage(image, this.sX, this.sY, this.w, this.h,
-        GAME_W / 2 - this.w / 2, this.y, this.w, this.h);
+      cx.save(); cx.globalAlpha=this.alpha;
+      cx.drawImage(image, sp.x,sp.y,sp.w,sp.h, GW/2-sp.w/2, this.y, sp.w, sp.h);
       cx.restore();
     }
   };
 }
-const overlayReady = makeOverlay(0,   228, 173, 152, 75);
-const overlayOver  = makeOverlay(175, 228, 225, 202, 85);
+const oReady = makeOverlay(SP.READY, 80);
+const oOver  = makeOverlay(SP.OVER, 100);
 
-// ── Score ────────────────────────────────────────────────────────
-const score = {
-  value: 0,
-  best : parseInt(localStorage.getItem('best')) || 0,
-  reset() { this.value = 0; },
-  drawGameOver() {
-    cx.save();
-    cx.textAlign    = 'center';
-    cx.textBaseline = 'middle';
-    cx.font         = 'bold 16px "Press Start 2P", monospace';
-    cx.fillStyle    = '#fff';
-    cx.strokeStyle  = '#543847';
-    cx.lineWidth    = 3;
-    const midX = GAME_W / 2 + 42;
-    const y1   = overlayOver.y + 118;
-    const y2   = overlayOver.y + 158;
-    cx.strokeText(this.value, midX, y1); cx.fillText(this.value, midX, y1);
-    cx.strokeText(this.best,  midX, y2); cx.fillText(this.best,  midX, y2);
-    cx.restore();
-  }
-};
+// ── Game Over score overlay ───────────────────────────────────────
+function drawGameOverScore() {
+  // The score panel in the spritesheet sits roughly at right half of the panel
+  const panelX = GW/2 - SP.OVER.w/2;
+  const panelY = oOver.y;
 
-function updateScoreDom() {
-  scoreDom.textContent = score.value;
-  scoreDom.classList.remove('pop');
-  void scoreDom.offsetWidth;
-  scoreDom.classList.add('pop');
+  cx.save();
+  cx.globalAlpha = oOver.alpha;
+  cx.textAlign = 'center';
+  cx.textBaseline = 'middle';
+  cx.font = 'bold 14px "Press Start 2P", monospace';
+
+  // Current score
+  const sx = panelX + SP.OVER.w*0.745;
+  const sy1 = panelY + 95;
+  const sy2 = panelY + 135;
+
+  cx.fillStyle='#fff';
+  cx.strokeStyle='#543847';
+  cx.lineWidth=3;
+  cx.strokeText(score.v,    sx, sy1); cx.fillText(score.v,    sx, sy1);
+  cx.strokeText(score.best, sx, sy2); cx.fillText(score.best, sx, sy2);
+  cx.restore();
 }
 
-// ── Hit / Die ────────────────────────────────────────────────────
-function hitPipe() {
-  if (state === ST.OVER) return;
-  playSound('HIT');
-  triggerShake(7, 14);
-  triggerFlash();
-  spawnParticles(bird.x, bird.y, 20, ['#ff4444','#ffaa00','#fff'], 5);
-  state = ST.OVER;
-  overlayOver.reset();
-  scoreDom.style.display = 'none';
-  setTimeout(() => playSound('DIE'), 180);
-}
-function hitFloor() {
-  if (state === ST.OVER) return;
-  playSound('DIE');
-  triggerShake(5, 10);
-  spawnParticles(bird.x, GAME_H - fg.h, 15, ['#c8a96e','#fff','#8b7355'], 3);
-  state = ST.OVER;
-  overlayOver.reset();
-  scoreDom.style.display = 'none';
+// ── Die ──────────────────────────────────────────────────────────
+function die(cause) {
+  if (state===ST.OVER) return;
+  snd('HIT');
+  shake(8,16); flash();
+  spawn(bird.x, bird.y, 24, ['#ff4444','#ffaa00','#fff','#ff8800'], 6);
+  state=ST.OVER; oOver.reset();
+  scoreDom.style.display='none';
+  setTimeout(()=>snd('DIE'),180);
 }
 
 // ── Input ────────────────────────────────────────────────────────
-function handleInput() {
-  switch (state) {
+function input() {
+  switch(state) {
     case ST.READY:
-      playSound('START');
-      state = ST.GAME;
-      overlayReady.reset();
-      scoreDom.style.display = 'block';
-      scoreDom.textContent = '0';
+      snd('START'); state=ST.GAME;
+      oReady.reset();
+      scoreDom.style.display='block';
+      scoreDom.textContent='0';
       break;
     case ST.GAME:
-      playSound('FLAP');
-      bird.flap();
-      break;
+      snd('FLAP'); bird.flap(); break;
     case ST.OVER:
       bird.reset(); pipes.reset(); score.reset();
-      particles = []; frames = 0;
-      state = ST.READY;
-      overlayReady.reset();
-      scoreDom.style.display = 'none';
+      parts=[]; frames=0;
+      state=ST.READY; oReady.reset();
+      scoreDom.style.display='none';
       break;
   }
 }
-
-document.addEventListener('click', handleInput);
-document.addEventListener('touchstart', e => { e.preventDefault(); handleInput(); }, { passive: false });
-document.addEventListener('keydown', e => {
-  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); handleInput(); }
+document.addEventListener('click', input);
+document.addEventListener('touchstart', e=>{ e.preventDefault(); input(); }, {passive:false});
+document.addEventListener('keydown', e=>{
+  if (e.code==='Space'||e.code==='ArrowUp') { e.preventDefault(); input(); }
 });
 
-// ── Loop ─────────────────────────────────────────────────────────
-function update() {
-  updateShake(); updateParticles();
-  bird.update(); fg.update(); pipes.update();
-  if (state === ST.READY) overlayReady.update();
-  if (state === ST.OVER)  overlayOver.update();
+// ── Draw sky gradient (no dark overlay on pipes) ─────────────────
+function drawSky() {
+  // Simple solid sky – matches the sprite BG color, no gradient overlay on game area
+  cx.fillStyle = '#70C5CE';
+  cx.fillRect(0, 0, GW, GH);
+}
+
+// ── Subtle UI chrome – top bar score backdrop ─────────────────────
+function drawScoreBadge() {
+  if (state !== ST.GAME) return;
+  // Pill behind score number for readability
+  const w = 80, h = 38;
+  const x = GW/2 - w/2, y = 10;
+  cx.save();
+  cx.fillStyle = 'rgba(0,0,0,0.28)';
+  cx.beginPath();
+  cx.roundRect(x, y, w, h, 10);
+  cx.fill();
+  cx.restore();
+}
+
+// ── BYT watermark on canvas (fallback, also in HTML) ─────────────
+function drawWatermark() {
+  cx.save();
+  cx.globalAlpha = 0.38;
+  cx.fillStyle = '#fff';
+  cx.font = '6px "Press Start 2P", monospace';
+  cx.textAlign = 'right';
+  cx.textBaseline = 'bottom';
+  cx.fillText('BYT-Studios © 2026', GW-6, GH-6);
+  cx.restore();
+}
+
+// ── Main loop ────────────────────────────────────────────────────
+function tick() {
+  doShake(); tickParts();
+  bird.tick(); fg.tick(); pipes.tick();
+  if (state===ST.READY) oReady.tick();
+  if (state===ST.OVER)  oOver.tick();
 }
 
 function draw() {
   cx.save();
-  cx.translate(shake.x, shake.y);
+  cx.translate(shk.x, shk.y);
 
-  // Sky
-  cx.fillStyle = '#70C5CE';
-  cx.fillRect(0, 0, GAME_W, GAME_H);
-
-  // Subtle dusk tint as score rises
-  if (score.value > 0) {
-    const t = Math.min(score.value / 30, 1);
-    const tg = cx.createLinearGradient(0, 0, 0, GAME_H * 0.6);
-    tg.addColorStop(0, `rgba(${Math.floor(t*80)},${Math.floor(t*20)},${Math.floor(t*60)},${t * 0.3})`);
-    tg.addColorStop(1, 'rgba(0,0,0,0)');
-    cx.fillStyle = tg;
-    cx.fillRect(0, 0, GAME_W, GAME_H);
-  }
-
-  drawBg();
+  drawSky();
+  drawBG();
   pipes.draw();
   fg.draw();
-  drawParticles();
+  drawParts();
   bird.draw();
+  drawScoreBadge();
 
-  if (state === ST.READY) overlayReady.draw();
-  if (state === ST.OVER)  { overlayOver.draw(); score.drawGameOver(); }
+  if (state===ST.READY) oReady.draw();
+  if (state===ST.OVER)  { oOver.draw(); drawGameOverScore(); }
 
+  drawWatermark();
   cx.restore();
 }
 
-function loop() {
-  update(); draw(); frames++;
-  requestAnimationFrame(loop);
-}
+function loop() { tick(); draw(); frames++; requestAnimationFrame(loop); }
 
+// ── Boot ─────────────────────────────────────────────────────────
 image.onload  = () => loop();
 image.onerror = () => {
-  // Image failed – show a helpful message on the canvas
-  cx.fillStyle = '#70C5CE';
-  cx.fillRect(0, 0, GAME_W, GAME_H);
-  cx.fillStyle = '#000';
-  cx.font = '11px monospace';
-  cx.textAlign = 'center';
-  cx.fillText('Image not found!', GAME_W/2, GAME_H/2 - 20);
-  cx.fillText('Make sure assets/pics/image-pack.png', GAME_W/2, GAME_H/2);
-  cx.fillText('exists next to index.html', GAME_W/2, GAME_H/2 + 20);
+  cx.fillStyle='#70C5CE'; cx.fillRect(0,0,GW,GH);
+  cx.fillStyle='#000'; cx.font='10px monospace'; cx.textAlign='center';
+  cx.fillText('⚠ assets/pics/image-pack.png not found', GW/2, GH/2);
 };
 </script>
 </body>
