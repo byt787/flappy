@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESILIENCE — Clean Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --glass: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.12);
+    --glass-hover: rgba(255,255,255,0.10);
+    --accent: #c8a06e;
+    --accent2: #e8734a;
+    --text: #f0ece4;
+    --text-muted: #8a8070;
+    --danger: #e05555;
+    --success: #6ec87a;
+    --card-radius: 20px;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --bg-image: none;
+    --overlay: rgba(10,10,15,0.75);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: all 0.6s ease;
+  }
+
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    transition: all 0.6s ease;
+  }
+  .bg-overlay {
+    position: fixed; inset: 0; z-index: 1;
+    background: var(--overlay);
+    backdrop-filter: blur(2px);
+  }
+
+  .app { position: relative; z-index: 2; min-height: 100vh; }
+
+  /* ---- SCREENS ---- */
+  .screen { display: none; min-height: 100vh; padding: 20px; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ---- GLASS CARD ---- */
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--card-radius);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+  }
+  .glass:hover { background: var(--glass-hover); }
+
+  /* ---- LOGIN SCREEN ---- */
+  #screen-login {
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .login-logo {
+    font-family: var(--font-display);
+    font-size: 72px;
+    letter-spacing: 8px;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1;
+    text-shadow: 0 0 60px rgba(200,160,110,0.3);
+  }
+  .login-sub {
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--text-muted);
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .login-card {
+    padding: 32px;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .user-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .user-btn {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+  }
+  .user-btn:hover { background: var(--glass-hover); border-color: var(--accent); transform: translateX(4px); }
+  .user-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+  .user-streak-mini { margin-left: auto; font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+
+  .divider { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 12px; letter-spacing: 2px; margin: 16px 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--glass-border); }
+
+  .input-field {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+  }
+  .input-field:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
+  .input-field::placeholder { color: var(--text-muted); }
+
+  .btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn:hover { background: var(--glass-hover); transform: translateY(-1px); }
+  .btn-accent { background: var(--accent); border-color: var(--accent); color: #0a0a0f; font-weight: 600; }
+  .btn-accent:hover { background: #d4ae7e; filter: brightness(1.1); }
+  .btn-danger { background: rgba(224,85,85,0.2); border-color: var(--danger); color: var(--danger); }
+  .btn-danger:hover { background: rgba(224,85,85,0.35); }
+  .btn-full { width: 100%; }
+  .btn-sm { padding: 8px 16px; font-size: 13px; border-radius: 10px; }
+
+  /* ---- MAIN SCREEN ---- */
+  #screen-main { padding: 0; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(20px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-logo { font-family: var(--font-display); font-size: 28px; color: var(--accent); letter-spacing: 4px; }
+  .topbar-user { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-muted); }
+  .topbar-user .user-avatar { width: 32px; height: 32px; font-size: 14px; }
+  .topbar-actions { display: flex; gap: 8px; }
+
+  .main-content {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .col-full { grid-column: 1 / -1; }
+
+  /* ---- HERO STREAK CARD ---- */
+  .streak-hero {
+    padding: 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .streak-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,160,110,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .streak-label {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 8px;
+  }
+  .streak-number {
+    font-family: var(--font-display);
+    font-size: 120px;
+    line-height: 1;
+    color: var(--accent);
+    text-shadow: 0 0 80px rgba(200,160,110,0.4);
+    transition: all 0.5s;
+  }
+  .streak-unit { font-family: var(--font-display); font-size: 28px; color: var(--text-muted); letter-spacing: 6px; }
+  .streak-since { font-size: 13px; color: var(--text-muted); margin-top: 8px; font-family: var(--font-mono); }
+  .streak-category-badge {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: rgba(200,160,110,0.15);
+    border: 1px solid rgba(200,160,110,0.3);
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* ---- TRACKER SELECTOR ---- */
+  .trackers-card { padding: 20px; }
+  .card-title { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; }
+  .tracker-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tracker-tab {
+    padding: 8px 16px; border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tracker-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(200,160,110,0.1); }
+  .tracker-tab:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---- ACTIONS CARD ---- */
+  .actions-card { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .action-row { display: flex; gap: 10px; }
+
+  /* ---- TIMELINE CARD ---- */
+  .timeline-card { padding: 20px; }
+  .timeline { display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; }
+  .timeline-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border-left: 3px solid;
+    transition: all 0.2s;
+  }
+  .timeline-item.clean { border-color: var(--success); }
+  .timeline-item.relapse { border-color: var(--danger); }
+  .timeline-item.start { border-color: var(--accent); }
+  .timeline-meta { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 2px; }
+  .timeline-text { font-size: 14px; }
+
+  /* ---- ACHIEVEMENTS CARD ---- */
+  .achievements-card { padding: 20px; }
+  .achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+  .achievement {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 8px;
+    border-radius: 14px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: default;
+  }
+  .achievement.locked { opacity: 0.3; filter: grayscale(1); }
+  .achievement.unlocked { background: rgba(200,160,110,0.1); border: 1px solid rgba(200,160,110,0.3); }
+  .achievement.unlocked:hover { transform: scale(1.05); background: rgba(200,160,110,0.18); }
+  .achievement-icon { font-size: 28px; }
+  .achievement-name { font-size: 10px; color: var(--text-muted); letter-spacing: 0.5px; line-height: 1.3; }
+  .achievement.unlocked .achievement-name { color: var(--accent); }
+
+  /* ---- THEMES SCREEN ---- */
+  #screen-themes {
+    padding: 24px;
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .themes-title { font-family: var(--font-display); font-size: 42px; color: var(--accent); letter-spacing: 4px; }
+  .themes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .theme-card {
+    height: 140px;
+    border-radius: 16px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s;
+  }
+  .theme-card:hover { transform: scale(1.03); }
+  .theme-card.active { border-color: var(--accent); box-shadow: 0 0 20px rgba(200,160,110,0.3); }
+  .theme-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  .theme-card-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; padding: 12px; }
+  .theme-card-name { font-family: var(--font-display); font-size: 20px; letter-spacing: 2px; color: white; }
+  .upload-theme-card {
+    height: 140px; border-radius: 16px;
+    border: 2px dashed var(--glass-border);
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  .upload-theme-card:hover { border-color: var(--accent); color: var(--accent); background: rgba(200,160,110,0.05); }
+  .upload-icon { font-size: 28px; }
+
+  /* ---- MODAL ---- */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal { padding: 32px; max-width: 460px; width: 100%; }
+  .modal-title { font-family: var(--font-display); font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 8px; }
+  .modal-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+  /* ---- EASTER EGG ---- */
+  .konami-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #0a0a0f;
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 20px;
+    text-align: center;
+  }
+  .konami-overlay.open { display: flex; }
+  .konami-text { font-family: var(--font-display); font-size: 48px; color: var(--accent); letter-spacing: 4px; animation: pulse 1s infinite; }
+  .konami-sub { color: var(--text-muted); font-size: 16px; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* ---- STATS ROW ---- */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .stat-box { padding: 16px 20px; border-radius: 16px; text-align: center; }
+  .stat-val { font-family: var(--font-display); font-size: 36px; color: var(--accent); }
+  .stat-lbl { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+
+  /* ---- SCROLL ---- */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 2px; }
+
+  /* ---- NAV ---- */
+  .nav-bottom {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    display: flex; justify-content: center;
+    padding: 12px 20px 20px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--glass-border);
+    gap: 8px;
+  }
+  .nav-btn {
+    padding: 10px 22px; border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 13px; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-btn.active, .nav-btn:hover { background: rgba(200,160,110,0.15); border-color: var(--accent); color: var(--accent); }
+
+  /* ---- CONFETTI ---- */
+  .confetti-piece {
+    position: fixed;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 9998;
+    animation: confetti-fall linear forwards;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ---- PROFILE SCREEN ---- */
+  #screen-profile { padding: 24px; gap: 16px; max-width: 600px; margin: 0 auto; }
+
+  /* ---- NOTIFICATION ---- */
+  .notif {
+    position: fixed; top: 80px; right: 20px; z-index: 5000;
+    padding: 14px 20px; border-radius: 14px;
+    background: rgba(30,30,40,0.95);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    font-size: 14px;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+  }
+  .notif.show { transform: translateX(0); }
+  .notif.success { border-color: var(--success); color: var(--success); }
+  .notif.error { border-color: var(--danger); color: var(--danger); }
+  .notif.info { border-color: var(--accent); color: var(--accent); }
+
+  /* ---- PROGRESS RING ---- */
+  .ring-wrap { display: flex; align-items: center; justify-content: center; padding: 10px; }
+  .progress-ring { transform: rotate(-90deg); }
+  .ring-label { font-family: var(--font-display); font-size: 22px; fill: var(--accent); }
+
+  @media (max-width: 600px) {
+    .main-content { grid-template-columns: 1fr; }
+    .streak-number { font-size: 80px; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ---- TIME BREAKDOWN ---- */
+  .time-breakdown-card { padding: 20px; }
+  .time-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+  .time-item { background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 14px; padding: 16px 10px; text-align: center; transition: all 0.2s; }
+  .time-item:hover { border-color: var(--accent); background: rgba(255,255,255,0.07); }
+  .time-item.time-full { grid-column: 1 / -1; }
+  .time-val { font-family: var(--font-display); font-size: 36px; color: var(--accent); line-height: 1; }
+  .time-lbl { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+
+  /* ---- DATE MODAL INPUT ---- */
+  input[type="datetime-local"] { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 16px; color: var(--text); font-family: var(--font-mono); font-size: 14px; outline: none; transition: all 0.2s; margin-bottom: 10px; color-scheme: dark; }
+  input[type="datetime-local"]:focus { border-color: var(--accent); }
+
+  /* ---- BYT WATERMARK ---- */
+  #byt-watermark { position: fixed; bottom: 20px; left: 18px; z-index: 500; cursor: pointer; display: flex; align-items: center; gap: 7px; opacity: 0.38; transition: opacity 0.25s; user-select: none; }
+  #byt-watermark:hover { opacity: 1; }
+  .byt-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .byt-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+
+  /* ---- DEV POPUP ---- */
+  .dev-popup { position: fixed; bottom: 58px; left: 18px; width: 230px; z-index: 600; padding: 16px 18px; border-radius: 16px; background: rgba(8,8,14,0.97); border: 1px solid var(--glass-border); backdrop-filter: blur(24px); box-shadow: 0 16px 48px rgba(0,0,0,0.7); opacity: 0; pointer-events: none; transform: translateY(8px) scale(0.96); transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+  .dev-popup.open { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+  .dev-popup-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  .dev-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+  .dev-row:last-child { border-bottom: none; }
+  .dev-key { color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; }
+  .dev-val { color: var(--text); font-weight: 500; }
+
+  /* ---- NAV TOGGLE ---- */
+  .nav-bottom { transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .nav-bottom.hidden { transform: translateY(120%); }
+  .nav-toggle-btn { position: fixed; bottom: 20px; right: 18px; z-index: 400; width: 42px; height: 42px; border-radius: 50%; background: rgba(0,0,0,0.85); border: 1px solid var(--glass-border); color: var(--text-muted); font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; backdrop-filter: blur(20px); }
+  .nav-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---- PFP / COLOR ---- */
+  .pfp-big { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 30px; color: #0a0a0f; overflow: hidden; position: relative; border: 2px solid var(--glass-border); }
+  .pfp-big img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .color-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+  .color-swatch.active { border-color: white; transform: scale(1.15); }
+  .color-swatch:hover { transform: scale(1.1); }
+
+  @media (max-width: 600px) {
+    .time-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="bg-layer" id="bgLayer"></div>
+<div class="bg-overlay" id="bgOverlay"></div>
+
+<div class="app">
+
+  <!-- ====== LOGIN SCREEN ====== -->
+  <div class="screen active" id="screen-login">
+    <div class="login-logo">RESILIENCE</div>
+    <div class="login-sub">Your clean streak tracker</div>
+
+    <div class="glass login-card">
+      <div class="card-title">Choose Profile</div>
+      <div class="user-list" id="userList"></div>
+      <div class="divider">OR NEW</div>
+      <input class="input-field" id="newUserName" placeholder="Name eingeben..." maxlength="20">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="avatarColorPicker"></div>
+      <br>
+      <button class="btn btn-accent btn-full" onclick="createUser()">Profil erstellen</button>
+    </div>
+  </div>
+
+  <!-- ====== MAIN SCREEN ====== -->
+  <div class="screen" id="screen-main">
+    <div class="topbar">
+      <div class="topbar-logo">RES</div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div class="topbar-user">
+          <div class="user-avatar" id="topbarAvatar"></div>
+          <span id="topbarName"></span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-sm" onclick="showScreen('screen-themes')">🎨 Theme</button>
+        <button class="btn btn-sm" onclick="logout()">← Exit</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Streak Hero -->
+      <div class="glass streak-hero col-full">
+        <div class="streak-label">Aktueller Streak</div>
+        <div class="streak-number" id="streakDays">0</div>
+        <div class="streak-unit">TAGE</div>
+        <div class="streak-since" id="streakSince">—</div>
+        <div class="streak-category-badge" id="streakCategory">—</div>
+      </div>
+
+      <!-- Time Breakdown -->
+      <div class="glass time-breakdown-card col-full">
+        <div class="card-title">Zeitdetails</div>
+        <div class="time-grid">
+          <div class="time-item"><div class="time-val" id="tYears">0</div><div class="time-lbl">Jahre</div></div>
+          <div class="time-item"><div class="time-val" id="tMonths">0</div><div class="time-lbl">Monate</div></div>
+          <div class="time-item"><div class="time-val" id="tWeeks">0</div><div class="time-lbl">Wochen</div></div>
+          <div class="time-item"><div class="time-val" id="tDays">0</div><div class="time-lbl">Tage</div></div>
+          <div class="time-item"><div class="time-val" id="tHours">0</div><div class="time-lbl">Stunden</div></div>
+          <div class="time-item"><div class="time-val" id="tMinutes">0</div><div class="time-lbl">Minuten</div></div>
+          <div class="time-item time-full"><div class="time-val" id="tSeconds">0</div><div class="time-lbl">Sekunden</div></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="col-full stats-row">
+        <div class="glass stat-box">
+          <div class="stat-val" id="statBest">0</div>
+          <div class="stat-lbl">Bester Streak</div>
+        </div>
+        <div class="glass stat-box">
+          <div class="stat-val" id="statTotal">0</div>
+          <div class="stat-lbl">Tage gesamt</div>
+        </div>
+        <div class="glass stat-box">
+          <div class="stat-val" id="statRelapses">0</div>
+          <div class="stat-lbl">Relapses</div>
+        </div>
+      </div>
+
+      <!-- Trackers -->
+      <div class="glass trackers-card">
+        <div class="card-title">Tracker auswählen</div>
+        <div class="tracker-tabs" id="trackerTabs"></div>
+        <br>
+        <button class="btn btn-sm" onclick="openAddTracker()">+ Neu</button>
+      </div>
+
+      <!-- Actions -->
+      <div class="glass actions-card">
+        <div class="card-title">Aktionen</div>
+        <button class="btn btn-accent btn-full" onclick="logCleanDay()">✓ Tag als clean markieren</button>
+        <button class="btn btn-full" style="background:rgba(78,180,210,0.15);border-color:rgba(78,180,210,0.35);color:#6bbfd4;" onclick="openDateModal()">📅 Startdatum ändern</button>
+        <button class="btn btn-danger btn-full" onclick="openRelapseModal()">↺ Relapse melden</button>
+        <button class="btn btn-full" onclick="openNoteModal()">✎ Notiz hinzufügen</button>
+      </div>
+
+      <!-- Timeline -->
+      <div class="glass timeline-card col-full">
+        <div class="card-title">Verlauf</div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="glass achievements-card col-full">
+        <div class="card-title">Achievements</div>
+        <div class="achievements-grid" id="achievementsGrid"></div>
+      </div>
+
+
+      <div style="height:100px;" class="col-full"></div>
+    </div>
+
+    <!-- Nav -->
+    <div class="nav-bottom">
+      <button class="nav-btn active" onclick="showScreen('screen-main')">📊 Dashboard</button>
+      <button class="nav-btn" onclick="showScreen('screen-themes')">🎨 Themes</button>
+      <button class="nav-btn" onclick="showScreen('screen-profile')">👤 Profil</button>
+    </div>
+  </div>
+
+  <!-- ====== THEMES SCREEN ====== -->
+  <div class="screen" id="screen-themes">
+    <button class="btn btn-sm" style="align-self:flex-start;margin-bottom:16px;" onclick="showScreen('screen-main')">← Zurück</button>
+    <div class="themes-title">THEMES</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Wähle dein vibe oder erstelle ein eigenes</div>
+    <div class="themes-grid" id="themesGrid"></div>
+    <div style="height:80px;"></div>
+    <div class="nav-bottom">
+      <button class="nav-btn" onclick="showScreen('screen-main')">📊 Dashboard</button>
+      <button class="nav-btn active" onclick="showScreen('screen-themes')">🎨 Themes</button>
+      <button class="nav-btn" onclick="showScreen('screen-profile')">👤 Profil</button>
+    </div>
+  </div>
+
+  <!-- ====== PROFILE SCREEN ====== -->
+  <div class="screen" id="screen-profile">
+    <button class="btn btn-sm" style="align-self:flex-start;margin-bottom:16px;" onclick="showScreen('screen-main')">← Zurück</button>
+    <div style="font-family:var(--font-display);font-size:42px;color:var(--accent);letter-spacing:4px;">PROFIL</div>
+    <div class="glass" style="padding:24px;margin-bottom:0;">
+      <div class="card-title">Benutzername</div>
+      <input class="input-field" id="profileNameInput" placeholder="Neuer Name...">
+      <button class="btn btn-accent" onclick="updateProfileName()">Speichern</button>
+    </div>
+    <div class="glass" style="padding:24px;margin-bottom:0;">
+      <div class="card-title">Profilbild & Farbe</div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+        <div class="pfp-big" id="pfpPreviewBig" style="background:#c8a06e;">M</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-sm" onclick="document.getElementById('pfpFileInput').click()">📷 Bild hochladen</button>
+          <button class="btn btn-sm btn-danger" onclick="clearPfp()">× Entfernen</button>
+        </div>
+      </div>
+      <input type="file" id="pfpFileInput" accept="image/*" style="display:none" onchange="uploadPfp(event)">
+      <div class="card-title" style="margin-top:8px;">Farbe</div>
+      <div class="color-swatches" id="colorSwatches"></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input type="color" id="customColorPicker" value="#c8a06e" onchange="setCustomColor(this.value)" style="width:38px;height:38px;border:1px solid var(--glass-border);border-radius:10px;background:var(--glass);cursor:pointer;padding:3px;">
+        <span style="font-size:13px;color:var(--text-muted);">Eigene Farbe</span>
+      </div>
+    </div>
+    <div class="glass" style="padding:24px;margin-bottom:0;">
+      <div class="card-title">Gefahrenzone</div>
+      <button class="btn btn-danger" onclick="deleteCurrentUser()">🗑 Profil löschen</button>
+    </div>
+    <div style="height:80px;"></div>
+    <div class="nav-bottom">
+      <button class="nav-btn" onclick="showScreen('screen-main')">📊 Dashboard</button>
+      <button class="nav-btn" onclick="showScreen('screen-themes')">🎨 Themes</button>
+      <button class="nav-btn active" onclick="showScreen('screen-profile')">👤 Profil</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ====== MODALS ====== -->
+
+
+<!-- Date Modal -->
+<div class="modal-overlay" id="dateModal">
+  <div class="glass modal">
+    <div class="modal-title">Startdatum</div>
+    <div class="modal-sub">Seit wann bist du clean?</div>
+    <input type="datetime-local" id="dateInput">
+    <div class="modal-actions">
+      <button class="btn btn-sm" onclick="closeModal('dateModal')">Abbrechen</button>
+      <button class="btn btn-sm btn-accent" onclick="saveDateModal()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- BYT Watermark -->
+<div id="byt-watermark" onclick="toggleDevPopup()">
+  <div class="byt-dot"></div>
+  <div class="byt-label">BYT-Studios<br>© 2026</div>
+</div>
+<div class="dev-popup" id="devPopup">
+  <div class="dev-popup-title">BYT-Studios</div>
+  <div class="dev-row"><span class="dev-key">Studio</span><span class="dev-val">BYT-Studios</span></div>
+  <div class="dev-row"><span class="dev-key">Typ</span><span class="dev-val">Solo Hobby Dev</span></div>
+  <div class="dev-row"><span class="dev-key">Alter</span><span class="dev-val">18 Jahre</span></div>
+  <div class="dev-row"><span class="dev-key">Gegründet</span><span class="dev-val">2023 (3 Jahre)</span></div>
+  <div class="dev-row"><span class="dev-key">Fokus</span><span class="dev-val">Recovery Tools</span></div>
+  <div class="dev-row"><span class="dev-key">Version</span><span class="dev-val">RES v2.1</span></div>
+</div>
+<button class="nav-toggle-btn" id="navToggleBtn" onclick="toggleNav()">☰</button>
+
+<!-- Relapse Modal -->
+<div class="modal-overlay" id="relapseModal">
+  <div class="glass modal">
+    <div class="modal-title">Relapse</div>
+    <div class="modal-sub">Das ist okay. Du fängst wieder an. Kein Rückschritt – nur ein neuer Start.</div>
+    <textarea class="input-field" id="relapseNote" placeholder="Optionale Notiz..." style="min-height:80px;resize:none;"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-sm" onclick="closeModal('relapseModal')">Abbrechen</button>
+      <button class="btn btn-sm btn-danger" onclick="confirmRelapse()">Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Note Modal -->
+<div class="modal-overlay" id="noteModal">
+  <div class="glass modal">
+    <div class="modal-title">Notiz</div>
+    <textarea class="input-field" id="noteText" placeholder="Wie geht's dir heute?" style="min-height:100px;resize:none;"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-sm" onclick="closeModal('noteModal')">Abbrechen</button>
+      <button class="btn btn-sm btn-accent" onclick="saveNote()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Tracker Modal -->
+<div class="modal-overlay" id="addTrackerModal">
+  <div class="glass modal">
+    <div class="modal-title">Neuer Tracker</div>
+    <input class="input-field" id="newTrackerName" placeholder="z.B. SV, Rauchen, Alkohol...">
+    <div class="modal-actions">
+      <button class="btn btn-sm" onclick="closeModal('addTrackerModal')">Abbrechen</button>
+      <button class="btn btn-sm btn-accent" onclick="confirmAddTracker()">Erstellen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Easter Egg -->
+<div class="konami-overlay" id="konamiOverlay" onclick="closeKonami()">
+  <div class="konami-text" id="konamiText">YOU FOUND IT</div>
+  <div class="konami-sub" id="konamiSub">du bist krasser als du denkst fr fr</div>
+  <button class="btn btn-sm" style="margin-top:20px;">schließen</button>
+</div>
+
+<!-- Notification -->
+<div class="notif" id="notif"></div>
+
+<!-- Hidden file input for theme upload -->
+<input type="file" id="themeImageInput" accept="image/*" style="display:none" onchange="handleThemeUpload(event)">
+
+<script>
+// ===========================
+// STATE
+// ===========================
+let state = {
+  users: {},
+  currentUser: null,
+  theme: 'void'
+};
+
+const THEMES = {
+  void: {
+    name: 'VOID',
+    bg: '#0a0a0f',
+    accent: '#c8a06e',
+    accent2: '#e8734a',
+    overlay: 'rgba(10,10,15,0)',
+    image: null,
+    colors: { bg: '#0a0a0f', glass: 'rgba(255,255,255,0.06)', accent: '#c8a06e' }
+  },
+  leader: {
+    name: 'FOLLOW THE LEADER',
+    bg: '#1a1208',
+    accent: '#c8832a',
+    accent2: '#e05020',
+    overlay: 'rgba(15,8,2,0.72)',
+    image: 'https://i.pinimg.com/736x/f9/b5/28/f9b528afa0e0545becee896c1b4ffe42.jpg',
+    colors: { bg: '#1a1208', glass: 'rgba(200,120,40,0.08)', accent: '#c8832a' }
+  },
+  abyss: {
+    name: 'ABYSS',
+    bg: '#060e1a',
+    accent: '#4a9eff',
+    accent2: '#2060d0',
+    overlay: 'rgba(6,14,26,0)',
+    image: null,
+    colors: { bg: '#060e1a', glass: 'rgba(74,158,255,0.06)', accent: '#4a9eff' }
+  },
+  ember: {
+    name: 'EMBER',
+    bg: '#120806',
+    accent: '#ff6b35',
+    accent2: '#ff3d00',
+    overlay: 'rgba(18,8,6,0)',
+    image: null,
+    colors: { bg: '#120806', glass: 'rgba(255,107,53,0.07)', accent: '#ff6b35' }
+  },
+  ghost: {
+    name: 'GHOST',
+    bg: '#0f0f0f',
+    accent: '#d0d0d0',
+    accent2: '#888',
+    overlay: 'rgba(15,15,15,0)',
+    image: null,
+    colors: { bg: '#0f0f0f', glass: 'rgba(255,255,255,0.05)', accent: '#d0d0d0' }
+  }
+};
+
+const ACHIEVEMENTS = [
+  { id: 'day1', icon: '🌱', name: '1 Tag', req: 1 },
+  { id: 'day3', icon: '🔥', name: '3 Tage', req: 3 },
+  { id: 'day7', icon: '⭐', name: '1 Woche', req: 7 },
+  { id: 'day14', icon: '💎', name: '2 Wochen', req: 14 },
+  { id: 'day30', icon: '🏆', name: '1 Monat', req: 30 },
+  { id: 'day60', icon: '👑', name: '2 Monate', req: 60 },
+  { id: 'day100', icon: '🌟', name: '100 Tage', req: 100 },
+  { id: 'day365', icon: '🎯', name: '1 Jahr', req: 365 },
+];
+
+const AVATAR_COLORS = ['#c8832a','#4a9eff','#e05555','#6ec87a','#b45aff','#ff6b9d','#ffd166'];
+
+const DEFAULT_TRACKERS = ['SV','SH'];
+
+// Konami code
+let konamiSeq = [];
+const KONAMI = [38,38,40,40,37,39,37,39,66,65];
+const EASTER_EGGS = [
+  { text: "YOU FOUND IT", sub: "du bist krasser als du denkst fr fr" },
+  { text: "404: QUITTER NOT FOUND", sub: "weil du keiner bist" },
+  { text: "CHEAT CODE AKTIVIERT", sub: "+999 Willenskraft addiert" },
+  { text: "HEY DU", sub: "ich bin stolz auf dich. kein witz." },
+];
+
+// ===========================
+// INIT
+// ===========================
+window.addEventListener('load', () => {
+  loadState();
+  renderLogin();
+  renderThemes();
+  setupKonami();
+});
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('resilience_state');
+    if (saved) {
+      const p = JSON.parse(saved);
+      state = { ...state, ...p };
+      if (p.customThemes) Object.assign(THEMES, p.customThemes);
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  const customThemes = {};
+  Object.entries(THEMES).forEach(([k,v]) => { if(k.startsWith('custom_')) customThemes[k]=v; });
+  localStorage.setItem('resilience_state', JSON.stringify({...state, customThemes}));
+}
+
+// ===========================
+// SCREEN NAV
+// ===========================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen-profile') { updatePfpPreview(); renderColorSwatches(); }
+}
+
+// ===========================
+// LOGIN / USER
+// ===========================
+function renderLogin() {
+  const list = document.getElementById('userList');
+  list.innerHTML = '';
+  const users = Object.values(state.users);
+  if (users.length === 0) {
+    list.innerHTML = '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:8px;">Noch keine Profile</div>';
+  }
+  users.forEach(u => {
+    const streak = getCurrentStreak(u);
+    const div = document.createElement('button');
+    div.className = 'user-btn';
+    div.innerHTML = `
+      <div class="user-avatar" style="background:${u.color}">${u.name[0].toUpperCase()}</div>
+      <span>${u.name}</span>
+      <span class="user-streak-mini">${streak}d</span>
+    `;
+    div.onclick = () => loginAs(u.id);
+    list.appendChild(div);
+  });
+
+  // Avatar color picker
+  const picker = document.getElementById('avatarColorPicker');
+  picker.innerHTML = '';
+  AVATAR_COLORS.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.style.cssText = `width:28px;height:28px;border-radius:50%;background:${c};border:2px solid transparent;cursor:pointer;transition:all 0.2s;margin-right:6px;`;
+    btn.dataset.color = c;
+    if (i === 0) btn.style.borderColor = '#fff';
+    btn.onclick = () => {
+      document.querySelectorAll('#avatarColorPicker button').forEach(b => b.style.borderColor = 'transparent');
+      btn.style.borderColor = '#fff';
+    };
+    picker.appendChild(btn);
+  });
+}
+
+function createUser() {
+  const name = document.getElementById('newUserName').value.trim();
+  if (!name) { showNotif('Name eingeben!', 'error'); return; }
+  const colorBtn = document.querySelector('#avatarColorPicker button[style*="borderColor: rgb(255, 255, 255)"]') 
+    || document.querySelector('#avatarColorPicker button');
+  const color = colorBtn ? colorBtn.dataset.color : AVATAR_COLORS[0];
+  const id = 'u_' + Date.now();
+  state.users[id] = {
+    id, name, color,
+    trackers: {}
+  };
+  DEFAULT_TRACKERS.forEach(t => {
+    state.users[id].trackers[t] = { name: t, entries: [], startDate: new Date().toISOString() };
+  });
+  state.users[id].activeTracker = DEFAULT_TRACKERS[0];
+  saveState();
+  renderLogin();
+  document.getElementById('newUserName').value = '';
+  showNotif('Profil erstellt!', 'success');
+}
+
+function loginAs(userId) {
+  state.currentUser = userId;
+  saveState();
+  applyTheme(state.theme || 'void');
+  renderMain();
+  showScreen('screen-main');
+  startClock();
+}
+
+function logout() {
+  state.currentUser = null;
+  saveState();
+  renderLogin();
+  showScreen('screen-login');
+}
+
+function deleteCurrentUser() {
+  if (!confirm('Wirklich löschen?')) return;
+  delete state.users[state.currentUser];
+  state.currentUser = null;
+  saveState();
+  renderLogin();
+  showScreen('screen-login');
+}
+
+function updateProfileName() {
+  const n = document.getElementById('profileNameInput').value.trim();
+  if (!n) return;
+  getUser().name = n;
+  saveState();
+  renderMain();
+  showNotif('Name aktualisiert!', 'success');
+}
+
+function getUser() { return state.users[state.currentUser]; }
+
+// ===========================
+// TRACKER LOGIC
+// ===========================
+function getCurrentStreak(user) {
+  const at = user.activeTracker || Object.keys(user.trackers)[0];
+  const tracker = user.trackers[at];
+  if (!tracker || !tracker.entries.length) return 0;
+  // Find last relapse or start
+  const entries = [...tracker.entries].sort((a,b) => new Date(b.date) - new Date(a.date));
+  let start = tracker.startDate;
+  for (const e of entries) {
+    if (e.type === 'relapse' || e.type === 'start') { start = e.date; break; }
+  }
+  const days = Math.floor((Date.now() - new Date(start)) / 86400000);
+  return Math.max(0, days);
+}
+
+function getActiveTracker() {
+  const u = getUser();
+  if (!u || !u.trackers) return null;
+  const at = u.activeTracker || Object.keys(u.trackers)[0];
+  return u.trackers[at] || null;
+}
+
+function setActiveTracker(name) {
+  getUser().activeTracker = name;
+  saveState();
+  renderMain();
+  stopClock(); startClock();
+}
+
+function openAddTracker() { document.getElementById('addTrackerModal').classList.add('open'); }
+function confirmAddTracker() {
+  const name = document.getElementById('newTrackerName').value.trim();
+  if (!name) return;
+  const u = getUser();
+  u.trackers[name] = { name, entries: [], startDate: new Date().toISOString() };
+  u.activeTracker = name;
+  saveState();
+  renderMain();
+  closeModal('addTrackerModal');
+  document.getElementById('newTrackerName').value = '';
+}
+
+// ===========================
+// ACTIONS
+// ===========================
+function logCleanDay() {
+  const t = getActiveTracker();
+  const today = new Date().toDateString();
+  const alreadyToday = t.entries.some(e => new Date(e.date).toDateString() === today && e.type === 'clean');
+  if (alreadyToday) { showNotif('Heute schon geloggt!', 'info'); return; }
+  t.entries.push({ type: 'clean', date: new Date().toISOString(), note: '' });
+  saveState();
+  renderMain();
+  showNotif('Tag als clean markiert ✓', 'success');
+  checkAchievements();
+  spawnConfetti();
+}
+
+function openRelapseModal() { document.getElementById('relapseModal').classList.add('open'); }
+function confirmRelapse() {
+  const note = document.getElementById('relapseNote').value;
+  const t = getActiveTracker();
+  t.entries.push({ type: 'relapse', date: new Date().toISOString(), note });
+  t.startDate = new Date().toISOString();
+  saveState();
+  renderMain();
+  closeModal('relapseModal');
+  document.getElementById('relapseNote').value = '';
+  showNotif('Neu angefangen. Du schaffst das.', 'info');
+  stopClock(); startClock();
+}
+
+function openNoteModal() { document.getElementById('noteModal').classList.add('open'); }
+function saveNote() {
+  const note = document.getElementById('noteText').value.trim();
+  if (!note) return;
+  getActiveTracker().entries.push({ type: 'note', date: new Date().toISOString(), note });
+  saveState();
+  renderMain();
+  closeModal('noteModal');
+  document.getElementById('noteText').value = '';
+  showNotif('Notiz gespeichert', 'success');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ===========================
+// RENDER MAIN
+// ===========================
+function renderMain() {
+  const u = getUser();
+  if (!u) return;
+
+  // Topbar
+  document.getElementById('topbarName').textContent = u.name;
+  const av = document.getElementById('topbarAvatar');
+  av.style.background = u.color;
+  av.style.color = '#0a0a0f';
+  if (u.pfpImage) { av.innerHTML = `<img src="${u.pfpImage}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:50%;">`; av.style.position='relative'; av.style.overflow='hidden'; }
+  else { av.textContent = u.name[0].toUpperCase(); }
+  updatePfpPreview();
+  renderColorSwatches();
+
+  // Profile input
+  document.getElementById('profileNameInput').value = u.name;
+
+  // Active tracker
+  const at = u.activeTracker || Object.keys(u.trackers)[0];
+  const tracker = u.trackers[at];
+
+  // Streak
+  const streak = getCurrentStreak(u);
+  document.getElementById('streakDays').textContent = streak;
+  document.getElementById('streakCategory').textContent = at;
+
+  if (tracker) {
+    const since = new Date(tracker.startDate);
+    document.getElementById('streakSince').textContent = `Seit ${since.toLocaleDateString('de-DE', {day:'2-digit',month:'long',year:'numeric'})}`;
+  }
+
+  // Stats
+  const allEntries = tracker ? tracker.entries : [];
+  const relapses = allEntries.filter(e => e.type === 'relapse').length;
+  document.getElementById('statRelapses').textContent = relapses;
+
+  // Best streak calculation
+  let best = streak;
+  let tempStart = tracker ? new Date(tracker.startDate) : new Date();
+  const sorted = [...allEntries].sort((a,b) => new Date(a.date) - new Date(b.date));
+  sorted.forEach(e => {
+    if (e.type === 'relapse') {
+      const d = Math.floor((new Date(e.date) - tempStart) / 86400000);
+      if (d > best) best = d;
+      tempStart = new Date(e.date);
+    }
+  });
+  document.getElementById('statBest').textContent = best;
+  document.getElementById('statTotal').textContent = tracker ? Math.floor((Date.now() - new Date(tracker.startDate)) / 86400000) : 0;
+
+  // Tracker tabs
+  const tabs = document.getElementById('trackerTabs');
+  tabs.innerHTML = '';
+  Object.keys(u.trackers).forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'tracker-tab' + (name === at ? ' active' : '');
+    btn.textContent = name;
+    btn.onclick = () => setActiveTracker(name);
+    tabs.appendChild(btn);
+  });
+
+  // Timeline
+  renderTimeline(tracker);
+
+  // Achievements
+  renderAchievements(streak);
+
+  // JSON Editor (removed from UI, keep export function only)
+  const _jed = document.getElementById('jsonEditor');
+  if (_jed) { const jsonData = { user: u.name, tracker: at, data: tracker }; _jed.value = JSON.stringify(jsonData, null, 2); }
+}
+
+function renderTimeline(tracker) {
+  const el = document.getElementById('timeline');
+  if (!tracker || !tracker.entries.length) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px;">Noch keine Einträge</div>';
+    return;
+  }
+  const entries = [...tracker.entries].sort((a,b) => new Date(b.date) - new Date(a.date));
+  el.innerHTML = entries.slice(0, 20).map(e => {
+    const icons = { clean: '✓', relapse: '↺', note: '✎', start: '★' };
+    const labels = { clean: 'Clean Tag', relapse: 'Relapse', note: 'Notiz', start: 'Start' };
+    const date = new Date(e.date).toLocaleDateString('de-DE', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    return `<div class="timeline-item ${e.type}">
+      <div>
+        <div class="timeline-text">${icons[e.type]||'•'} ${labels[e.type]||e.type}${e.note ? ': '+e.note : ''}</div>
+        <div class="timeline-meta">${date}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAchievements(streak) {
+  const grid = document.getElementById('achievementsGrid');
+  grid.innerHTML = ACHIEVEMENTS.map(a => {
+    const unlocked = streak >= a.req;
+    return `<div class="achievement ${unlocked ? 'unlocked' : 'locked'}" title="${a.req} Tage">
+      <div class="achievement-icon">${a.icon}</div>
+      <div class="achievement-name">${a.name}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===========================
+// JSON EDITOR
+// ===========================
+function loadJson() {
+  const u = getUser();
+  const at = u.activeTracker || Object.keys(u.trackers)[0];
+  const jsonData = { user: u.name, tracker: at, data: u.trackers[at] };
+  document.getElementById('jsonEditor').value = JSON.stringify(jsonData, null, 2);
+  showNotif('JSON geladen', 'info');
+}
+
+function saveJson() {
+  try {
+    const raw = document.getElementById('jsonEditor').value;
+    const parsed = JSON.parse(raw);
+    const u = getUser();
+    if (parsed.data && parsed.tracker) {
+      u.trackers[parsed.tracker] = parsed.data;
+      u.activeTracker = parsed.tracker;
+    }
+    saveState();
+    renderMain();
+    showNotif('JSON gespeichert ✓', 'success');
+    stopClock(); startClock();
+  } catch(e) {
+    showNotif('Ungültiges JSON!', 'error');
+  }
+}
+
+function exportJson() {
+  const u = getUser();
+  const blob = new Blob([JSON.stringify(u, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `resilience_${u.name}_${Date.now()}.json`;
+  a.click();
+  showNotif('Export gestartet', 'success');
+}
+
+// ===========================
+// THEMES
+// ===========================
+function renderThemes() {
+  const grid = document.getElementById('themesGrid');
+  grid.innerHTML = '';
+
+  Object.entries(THEMES).forEach(([key, theme]) => {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (state.theme === key ? ' active' : '');
+
+    const bgStyle = theme.image
+      ? `background-image: url('${theme.image}');`
+      : `background: ${theme.bg};`;
+
+    card.innerHTML = `
+      <div class="theme-card-bg" style="${bgStyle}"></div>
+      <div class="theme-card-overlay" style="background:${theme.overlay||'rgba(0,0,0,0.4)'}">
+        <div class="theme-card-name">${theme.name}</div>
+      </div>
+    `;
+    card.onclick = () => {
+      state.theme = key;
+      saveState();
+      applyTheme(key);
+      renderThemes();
+      showNotif(`Theme: ${theme.name}`, 'info');
+    };
+    grid.appendChild(card);
+  });
+
+  // Custom themes
+  Object.entries(THEMES).filter(([k]) => k.startsWith('custom_')).forEach(([key, theme]) => {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (state.theme === key ? ' active' : '');
+    card.innerHTML = `
+      <div class="theme-card-bg" style="background-image: url('${theme.image}');"></div>
+      <div class="theme-card-overlay">
+        <div class="theme-card-name">${theme.name}</div>
+      </div>
+    `;
+    card.onclick = () => { state.theme = key; saveState(); applyTheme(key); renderThemes(); };
+    grid.appendChild(card);
+  });
+
+  // Upload card
+  const upload = document.createElement('div');
+  upload.className = 'upload-theme-card';
+  upload.innerHTML = `<div class="upload-icon">+</div><div>Eigenes Bild</div>`;
+  upload.onclick = () => document.getElementById('themeImageInput').click();
+  grid.appendChild(upload);
+}
+
+function applyTheme(key) {
+  const theme = THEMES[key];
+  if (!theme) return;
+  const root = document.documentElement;
+  root.style.setProperty('--accent', theme.accent);
+  root.style.setProperty('--accent2', theme.accent2 || theme.accent);
+  root.style.setProperty('--bg', theme.bg);
+  root.style.setProperty('--glass', theme.colors?.glass || 'rgba(255,255,255,0.06)');
+  root.style.setProperty('--overlay', theme.overlay || 'rgba(0,0,0,0.6)');
+
+  const bgLayer = document.getElementById('bgLayer');
+  if (theme.image) {
+    bgLayer.style.backgroundImage = `url('${theme.image}')`;
+    bgLayer.style.display = 'block';
+  } else {
+    bgLayer.style.backgroundImage = 'none';
+    bgLayer.style.background = theme.bg;
+  }
+}
+
+function handleThemeUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    // Extract dominant color via canvas
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 50; canvas.height = 50;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, 50, 50);
+      const d = ctx.getImageData(0, 0, 50, 50).data;
+      let r=0,g=0,b=0,count=0;
+      for (let i=0;i<d.length;i+=16) { r+=d[i]; g+=d[i+1]; b+=d[i+2]; count++; }
+      r=Math.floor(r/count); g=Math.floor(g/count); b=Math.floor(b/count);
+      const accent = `rgb(${Math.min(255,r+60)},${Math.min(255,g+40)},${Math.min(255,b+20)})`;
+      const bg = `rgb(${Math.floor(r*0.2)},${Math.floor(g*0.2)},${Math.floor(b*0.2)})`;
+      const key = 'custom_' + Date.now();
+      THEMES[key] = {
+        name: 'CUSTOM',
+        bg, accent, accent2: accent,
+        overlay: `rgba(${Math.floor(r*0.1)},${Math.floor(g*0.1)},${Math.floor(b*0.1)},0.7)`,
+        image: dataUrl,
+        colors: { bg, glass: `rgba(${r},${g},${b},0.08)`, accent }
+      };
+      state.theme = key;
+      saveState();
+      applyTheme(key);
+      renderThemes();
+      showNotif('Custom Theme erstellt!', 'success');
+    };
+    img.src = dataUrl;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ===========================
+// ACHIEVEMENTS + CONFETTI
+// ===========================
+function checkAchievements() {
+  const streak = getCurrentStreak(getUser());
+  const milestone = ACHIEVEMENTS.find(a => a.req === streak);
+  if (milestone) {
+    showNotif(`Achievement unlocked: ${milestone.icon} ${milestone.name}`, 'success');
+    spawnConfetti(80);
+  }
+}
+
+function spawnConfetti(count = 30) {
+  const colors = ['#c8a06e','#e8734a','#6ec87a','#4a9eff','#b45aff'];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.top = '-10px';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay = Math.random() * 0.5 + 's';
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+// ===========================
+// NOTIFICATIONS
+// ===========================
+function showNotif(msg, type = 'info') {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.className = `notif ${type} show`;
+  setTimeout(() => n.classList.remove('show'), 3000);
+}
+
+// ===========================
+// EASTER EGG (Konami)
+// ===========================
+function setupKonami() {
+  document.addEventListener('keydown', (e) => {
+    konamiSeq.push(e.keyCode);
+    if (konamiSeq.length > KONAMI.length) konamiSeq.shift();
+    if (JSON.stringify(konamiSeq) === JSON.stringify(KONAMI)) triggerEasterEgg();
+  });
+  // Triple-tap logo on mobile
+  let tapCount = 0;
+  document.querySelector('.login-logo')?.addEventListener('click', () => {
+    tapCount++;
+    if (tapCount >= 5) { triggerEasterEgg(); tapCount = 0; }
+    setTimeout(() => tapCount = 0, 2000);
+  });
+}
+
+function triggerEasterEgg() {
+  const egg = EASTER_EGGS[Math.floor(Math.random() * EASTER_EGGS.length)];
+  document.getElementById('konamiText').textContent = egg.text;
+  document.getElementById('konamiSub').textContent = egg.sub;
+  document.getElementById('konamiOverlay').classList.add('open');
+  spawnConfetti(100);
+}
+
+function closeKonami() {
+  document.getElementById('konamiOverlay').classList.remove('open');
+}
+
+// Fix theme card bg inline style bug
+// (The template literal had a stray quote, let's patch it via JS instead of template)
+// Already handled above correctly.
+
+
+// ===========================
+// NEW FEATURES
+// ===========================
+
+// --- NAV TOGGLE ---
+let _navVisible = true;
+function toggleNav() {
+  _navVisible = !_navVisible;
+  document.querySelectorAll('.nav-bottom').forEach(n => n.classList.toggle('hidden', !_navVisible));
+  try { const s = JSON.parse(localStorage.getItem('resilience_state')||'{}'); s.navVisible = _navVisible; localStorage.setItem('resilience_state', JSON.stringify(s)); } catch(e){}
+}
+
+// --- BYT DEV POPUP ---
+let _devOpen = false;
+function toggleDevPopup() {
+  _devOpen = !_devOpen;
+  document.getElementById('devPopup').classList.toggle('open', _devOpen);
+}
+document.addEventListener('click', e => {
+  const wm = document.getElementById('byt-watermark');
+  const dp = document.getElementById('devPopup');
+  if (wm && dp && !wm.contains(e.target) && !dp.contains(e.target)) {
+    _devOpen = false; dp.classList.remove('open');
+  }
+});
+
+// --- DATE MODAL ---
+function openDateModal() {
+  const t = getActiveTracker();
+  if (t) {
+    const d = new Date(t.startDate);
+    document.getElementById('dateInput').value = new Date(d - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  }
+  document.getElementById('dateModal').classList.add('open');
+}
+function saveDateModal() {
+  const val = document.getElementById('dateInput').value;
+  if (!val) { showNotif('Bitte Datum eingeben.', 'error'); return; }
+  const t = getActiveTracker();
+  if (t) { t.startDate = new Date(val).toISOString(); saveState(); renderMain(); stopClock(); startClock(); }
+  closeModal('dateModal');
+  showNotif('Startdatum gespeichert ✓', 'success');
+}
+
+// --- LIVE CLOCK ---
+let _clockInterval = null;
+function startClock() {
+  stopClock();
+  updateClock();
+  _clockInterval = setInterval(updateClock, 1000);
+}
+function stopClock() { if (_clockInterval) { clearInterval(_clockInterval); _clockInterval = null; } }
+function updateClock() {
+  const t = getActiveTracker(); if (!t) return;
+  const diff = Date.now() - new Date(t.startDate);
+  if (diff < 0) { ['tYears','tMonths','tWeeks','tDays','tHours','tMinutes','tSeconds'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent='0'; }); return; }
+  const totalSec = Math.floor(diff/1000);
+  const sec = totalSec % 60;
+  const totalMin = Math.floor(totalSec/60);
+  const min = totalMin % 60;
+  const totalHrs = Math.floor(totalMin/60);
+  const hrs = totalHrs % 24;
+  const totalDays = Math.floor(totalHrs/24);
+  const years = Math.floor(totalDays/365);
+  const rem1 = totalDays % 365;
+  const months = Math.floor(rem1/30.44);
+  const rem2 = Math.floor(rem1 % 30.44);
+  const weeks = Math.floor(rem2/7);
+  const days = rem2 % 7;
+  const set = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('tYears',years); set('tMonths',months); set('tWeeks',weeks); set('tDays',days);
+  set('tHours',hrs); set('tMinutes',min); set('tSeconds',sec);
+  const sd = document.getElementById('streakDays'); if(sd) sd.textContent = totalDays;
+}
+
+// --- PFP UPLOAD ---
+function uploadPfp(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { getUser().pfpImage = ev.target.result; saveState(); renderMain(); updatePfpPreview(); showNotif('Profilbild gespeichert!', 'success'); };
+  reader.readAsDataURL(file);
+}
+function clearPfp() { getUser().pfpImage = null; saveState(); renderMain(); updatePfpPreview(); showNotif('Entfernt.','info'); }
+function updatePfpPreview() {
+  const u = getUser(); if (!u) return;
+  const el = document.getElementById('pfpPreviewBig'); if (!el) return;
+  el.style.background = u.color;
+  el.innerHTML = u.pfpImage ? `<img src="${u.pfpImage}">` : u.name[0].toUpperCase();
+}
+
+// --- COLOR SWATCHES ---
+const PFP_COLORS = ['#c8832a','#4a9eff','#e05555','#6ec87a','#b45aff','#ff6b9d','#ffd166','#c8a06e','#7eb8c9','#e8734a'];
+function renderColorSwatches() {
+  const u = getUser(); if (!u) return;
+  const c = document.getElementById('colorSwatches'); if (!c) return;
+  c.innerHTML = '';
+  PFP_COLORS.forEach(col => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch' + (u.color===col?' active':'');
+    s.style.background = col;
+    s.onclick = () => { u.color=col; saveState(); renderColorSwatches(); updatePfpPreview(); renderMain(); };
+    c.appendChild(s);
+  });
+  const ci = document.getElementById('customColorPicker'); if(ci) ci.value = u.color;
+}
+function setCustomColor(val) { const u=getUser(); if(!u) return; u.color=val; saveState(); renderColorSwatches(); updatePfpPreview(); renderMain(); }
+
+// --- RESTORE NAV STATE ---
+try { const s=JSON.parse(localStorage.getItem('resilience_state')||'{}'); if(s.navVisible===false){_navVisible=false;document.querySelectorAll('.nav-bottom').forEach(n=>n.classList.add('hidden'));} } catch(e){}
+
+// Apply saved theme on load
+applyTheme(state.theme || 'void');
+</script>
+</body>
+</html>
