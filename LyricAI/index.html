@@ -315,6 +315,20 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <input class="field-input" id="setupGenius" type="password" placeholder="Client Access Token …" autocomplete="off">
       <div class="field-help">→ <a href="https://genius.com/api-clients" target="_blank">genius.com/api-clients</a> · New API Client · App Website URL: <code style="color:var(--accent2)">http://localhost</code> · Save → Generate Access Token</div>
     </div>
+    <div class="field" style="margin-top:.75rem">
+      <label class="field-label">Cloudflare Worker URL <span style="color:var(--muted);font-family:IBM Plex Mono,monospace;font-size:9px;border:1px solid var(--border2);border-radius:4px;padding:1px 6px;margin-left:4px">Empfohlen für live Deploy</span></label>
+      <input class="field-input" id="setupWorker" type="text" placeholder="https://lyricai.DEINNAME.workers.dev" autocomplete="off">
+      <div class="field-help" id="workerHelp">Optional aber empfohlen wenn du die App deployed hast → <a href="#" onclick="document.getElementById('workerInstructions').style.display=document.getElementById('workerInstructions').style.display==='none'?'block':'none';return false" style="color:var(--accent2)">Setup-Anleitung anzeigen</a>
+        <div id="workerInstructions" style="display:none;margin-top:.75rem;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:.9rem 1rem;line-height:1.9;color:rgba(226,226,240,.75)">
+          <strong style="color:var(--accent2);font-family:Syne,sans-serif">Cloudflare Worker einrichten (2 Min):</strong><br>
+          1. <a href="https://dash.cloudflare.com" target="_blank" style="color:var(--accent2)">dash.cloudflare.com</a> → Workers &amp; Pages → Create<br>
+          2. "Hello World" Template → Deploy<br>
+          3. Edit Code → Inhalt von <code style="color:var(--teal)">lyricai-worker.js</code> reinkopieren → Deploy<br>
+          4. Worker URL kopieren (z.B. <code style="color:var(--teal)">https://lyricai.name.workers.dev</code>) → hier einfügen<br>
+          <span style="color:var(--green);font-size:11px">✓ Kostenlos · 100.000 Requests/Tag · Keine Kreditkarte</span>
+        </div>
+      </div>
+    </div>
     <button class="setup-btn" onclick="startApp()">Start Analyzing →</button>
   </div>
 </div>
@@ -520,6 +534,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <label class="field-label">Genius Token</label>
       <input class="field-input" id="mGenius" type="password" placeholder="Paste token …">
     </div>
+    <div class="field" style="margin-top:.75rem">
+      <label class="field-label">Worker URL (optional)</label>
+      <input class="field-input" id="mWorker" type="text" placeholder="https://…workers.dev">
+    </div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">Cancel</button>
       <button class="modal-save" onclick="saveKey()">Save</button>
@@ -555,7 +573,7 @@ function showScreen(id){
 }
 function openModal(){document.getElementById('mGenius').value=geniusKey;const mhf=document.getElementById('mHF');if(mhf)mhf.value=hfKey;document.getElementById('overlay').classList.add('open')}
 function closeModal(){document.getElementById('overlay').classList.remove('open')}
-function saveKey(){const v=document.getElementById('mGenius').value.trim();const hf=document.getElementById('mHF')?.value.trim();if(v){geniusKey=v;}if(hf)hfKey=hf;setKeyOk();closeModal()}
+function saveKey(){const v=document.getElementById('mGenius').value.trim();const w=document.getElementById('mWorker')?.value.trim();if(v){geniusKey=v;}if(w)setWorkerUrl(w);setKeyOk();closeModal()}
 function setKeyOk(){const b=document.getElementById('tokenBtn');b.classList.add('set');b.textContent='✓ Key set'}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -563,29 +581,138 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function startApp(){
   const g=document.getElementById('setupGenius').value.trim();
   if(!g){alert('Please enter your Genius API token.');return}
+  const w=document.getElementById('setupWorker')?.value.trim();
+  if(w) setWorkerUrl(w);
   geniusKey=g; setKeyOk(); showScreen('mainScreen');
 }
 
+
+// ─────────────────── PROXY FETCH (multi-fallback) ───────────────────
+// ── PROXY CONFIG ──
+// Cloudflare Worker URL — set this after deploying your worker (see setup instructions)
+let CF_WORKER_URL = localStorage.getItem('lyricai_worker') || '';
+
+async function proxyFetch(url, options={}, json=true, rawText=false){
+  const hasAuth = !!(options.headers?.Authorization || options.headers?.authorization);
+  const authHeader = options.headers?.Authorization || '';
+
+  // If user has set up CF Worker, use it — most reliable
+  if(CF_WORKER_URL){
+    try{
+      const res = await fetch(CF_WORKER_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({url, authHeader, rawText})
+      });
+      if(!res.ok) throw new Error('Worker HTTP '+res.status);
+      if(rawText) return await res.text();
+      return await res.json();
+    }catch(e){ console.warn('CF Worker failed, trying direct proxies:', e.message); }
+  }
+
+  if(hasAuth){
+    // Genius API proxies — try each
+    const attempts = [
+      async () => {
+        const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, {headers:{Authorization: authHeader}});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const d = await res.json();
+        if(d?.response) return d;
+        throw new Error('bad shape');
+      },
+      async () => {
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const w = await res.json();
+        const d = JSON.parse(w.contents);
+        if(d?.response) return d;
+        throw new Error('bad shape');
+      },
+      async () => {
+        // Try with token embedded as query param (Genius supports this)
+        const sep = url.includes('?')?'&':'?';
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url+sep+'access_token='+authHeader.replace('Bearer ',''))}`);
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const w = await res.json();
+        return JSON.parse(w.contents);
+      },
+    ];
+    let lastErr;
+    for(const attempt of attempts){
+      try{ return await attempt(); }catch(e){ lastErr=e; console.warn('attempt failed:', e.message); }
+    }
+    throw new Error('Genius unreachable. Last: '+lastErr?.message);
+  }
+
+  // HTML proxies for lyrics
+  const htmlProxies = [
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+  ];
+  let lastErr2;
+  for(const proxy of htmlProxies){
+    try{
+      const res = await fetch(proxy(url));
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      if(rawText) return await res.text();
+      if(json) return await res.json();
+      return res;
+    }catch(e){ lastErr2=e; }
+  }
+  throw new Error('All proxies failed: '+lastErr2?.message);
+}
+
+function setWorkerUrl(url){
+  CF_WORKER_URL = url.trim();
+  localStorage.setItem('lyricai_worker', CF_WORKER_URL);
+}
+
 // ─────────────────── SEARCH ───────────────────
+function normalizeQuery(q){
+  // replace German umlauts for better Genius search compatibility
+  return q.replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
+          .replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue')
+          .replace(/ß/g,'ss');
+}
+
+async function geniusSearch(q){
+  const url=`https://api.genius.com/search?q=${encodeURIComponent(q)}`;
+  const data = await proxyFetch(url, {headers:{'Authorization':`Bearer ${geniusKey}`}}, true);
+  return data?.response?.hits ?? data?.hits ?? [];
+}
+
 async function doSearch(){
-  const q=document.getElementById('searchInput').value.trim();if(!q)return;
+  const raw=document.getElementById('searchInput').value.trim();if(!raw)return;
   const btn=document.getElementById('searchBtn');btn.disabled=true;btn.textContent='…';
   const area=document.getElementById('resultsArea');
   area.innerHTML='<div style="color:var(--muted);font-size:11px;font-family:IBM Plex Mono,monospace;letter-spacing:.06em;padding:.5rem 0">Searching…</div>';
   try{
-    const url=`https://api.genius.com/search?q=${encodeURIComponent(q)}`;
-    const res=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`,{headers:{'Authorization':`Bearer ${geniusKey}`}});
-    if(!res.ok) throw new Error(`HTTP ${res.status} — check your Genius token`);
-    const data=await res.json();
-    renderResults(data.response.hits);
+    // Try original query first
+    let hits = await geniusSearch(raw);
+    // If no results and query has umlauts, try normalized version
+    if(!hits.length && raw !== normalizeQuery(raw)){
+      hits = await geniusSearch(normalizeQuery(raw));
+    }
+    // If still nothing, try first word only (e.g. "Menschenmühle" → "Kanonenfieber")
+    if(!hits.length && raw.includes(' ')){
+      hits = await geniusSearch(raw.split(' ')[0]);
+    }
+    renderResults(hits, raw);
   }catch(e){area.innerHTML=`<div class="err-card"><strong>Search failed</strong><small>${esc(e.message)}</small></div>`}
   btn.disabled=false;btn.textContent='Search';
 }
 
-function renderResults(hits){
+function renderResults(hits, query=''){
   const area=document.getElementById('resultsArea');
   const songs=hits.filter(h=>h.type==='song').slice(0,12).map(h=>h.result);
-  if(!songs.length){area.innerHTML='<div style="color:var(--muted);font-size:13px">No results.</div>';return}
+  if(!songs.length){
+    area.innerHTML=`<div style="color:var(--muted);font-size:13px;line-height:1.8">
+      Keine Ergebnisse für <em style="color:var(--text)">"${esc(query)}"</em>.<br>
+      <span style="font-size:12px">Tipp: Suche auf Englisch oder nur nach dem Artist (z.B. "Kanonenfieber" statt "Menschenmühle")</span>
+    </div>`;
+    return;
+  }
   area.innerHTML=`<div class="sec-label">${songs.length} results — click to analyze</div>
     <div class="results-grid">${songs.map(s=>`
       <div class="song-card" onclick='pickSong(${JSON.stringify({title:s.title,artist:s.primary_artist?.name||'',cover:s.song_art_image_thumbnail_url||'',url:s.url})})'>
@@ -649,8 +776,7 @@ async function runAnalysis(song){
 
 // ─────────────────── LYRICS FETCH ───────────────────
 async function fetchLyrics(url){
-  const res=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
-  const html=await res.text();
+  const html=await proxyFetch(url, {}, false, true);
   const doc=new DOMParser().parseFromString(html,'text/html');
   const containers=doc.querySelectorAll('[data-lyrics-container="true"]');
   if(containers.length){
@@ -801,9 +927,8 @@ Respond ONLY with a JSON array, no markdown:
       try{
         const q = `${rec.title} ${rec.artist}`;
         const url = `https://api.genius.com/search?q=${encodeURIComponent(q)}`;
-        const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`,{headers:{'Authorization':`Bearer ${geniusKey}`}});
-        if(!res.ok) continue;
-        const data = await res.json();
+        const data = await proxyFetch(url, {headers:{'Authorization':`Bearer ${geniusKey}`}}, true).catch(()=>null);
+        if(!data) continue;
         const hit = data.response.hits.find(h=>h.type==='song');
         if(hit) results.push({...hit.result, ai_reason: rec.reason||''});
         else results.push({title:rec.title, primary_artist:{name:rec.artist}, song_art_image_thumbnail_url:'', url:'', ai_fallback:true});
