@@ -18,7 +18,7 @@
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px}
-.app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+.app{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column}
 
 /* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.75rem;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:rgba(6,6,8,.94);backdrop-filter:blur(20px)}
@@ -196,6 +196,21 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .tool-spinner.show{display:inline-block}
 
 
+
+/* ── THEMES ── */
+.themes-screen-inner{max-width:1080px;margin:0 auto;width:100%}
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem}
+.theme-card-wrap{position:relative;height:100px;border-radius:12px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .2s;flex-shrink:0}
+.theme-card-wrap:hover{transform:scale(1.03)}
+.theme-card-wrap.active{border-color:var(--accent2) !important;box-shadow:0 0 20px rgba(167,139,250,.4)}
+.theme-card-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.theme-card-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;padding:10px 12px}
+.theme-card-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em}
+.theme-upload-card{height:100px;border-radius:12px;border:1px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:6px;transition:all .2s;background:var(--bg2)}
+.theme-upload-card:hover{border-color:var(--accent);background:rgba(124,92,252,.07)}
+.theme-upload-icon{font-size:22px}
+.theme-upload-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
 /* ── QUIZ ── */
 .quiz-playlist{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;max-height:220px;overflow-y:auto}
 .quiz-pl-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.6rem .85rem}
@@ -292,10 +307,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <body>
 <div class="app">
 
+<div id="bgLayer" style="position:fixed;inset:0;z-index:0;background-size:cover;background-position:center;transition:all .6s ease;pointer-events:none"></div>
+<div id="bgOverlay" style="position:fixed;inset:0;z-index:0;transition:all .6s ease;pointer-events:none"></div>
 <div style="position:fixed;bottom:.9rem;right:1.1rem;font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(90,90,120,.5);letter-spacing:.12em;z-index:50;pointer-events:none;text-transform:uppercase">BYT-Studios</div>
 <div class="topbar">
   <div class="logo"><div class="logo-icon">♪</div>LyricAI</div>
   <div class="topbar-r">
+    <button class="pill-btn" onclick="showScreen('themesScreen')">🎨 Theme</button>
     <button class="pill-btn" onclick="showScreen('toolsScreen')">🔧 Tools</button>
     <button class="pill-btn" onclick="showScreen('historyScreen')" style="position:relative">
       ⏱ Saved<span class="hist-badge" id="histBadge">0</span>
@@ -397,6 +415,20 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div id="histList"></div>
 </div>
 
+
+
+<!-- THEMES -->
+<div class="screen" id="themesScreen">
+  <div class="themes-screen-inner">
+    <div class="tools-h" style="margin-bottom:.4rem">🎨 Themes</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:1.75rem">Wähle einen Look — oder lade dein eigenes Bild hoch</div>
+    <div class="theme-grid" id="themeGrid"></div>
+    <div style="margin-top:1rem">
+      <button class="back-btn" onclick="showScreen('mainScreen')">← Zurück</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="themeUploadInput" accept="image/*" style="display:none" onchange="handleThemeUpload(event)">
 
 <!-- TOOLS -->
 <div class="screen" id="toolsScreen">
@@ -1563,6 +1595,153 @@ window.showScreen = function(id){
   _origShowScreen(id);
   if(id==='toolsScreen') renderQuizSavedList();
 };
+
+// ─────────────────── THEMES ───────────────────
+const THEMES = {
+  void: {
+    name:'Default',
+    bg:'#060608', accent:'#7c5cfc', accent2:'#a78bfa', pink:'#f06292',
+    glass:'rgba(255,255,255,0.06)', overlay:'rgba(6,6,8,0)', image:null
+  },
+  abyss: {
+    name:'Abyss',
+    bg:'#04080f', accent:'#3b82f6', accent2:'#60a5fa', pink:'#818cf8',
+    glass:'rgba(59,130,246,0.07)', overlay:'rgba(4,8,15,0)', image:null
+  },
+  ember: {
+    name:'Ember',
+    bg:'#0f0602', accent:'#f97316', accent2:'#fb923c', pink:'#f43f5e',
+    glass:'rgba(249,115,22,0.07)', overlay:'rgba(15,6,2,0)', image:null
+  },
+  ghost: {
+    name:'Ghost',
+    bg:'#0d0d0d', accent:'#d4d4d4', accent2:'#a3a3a3', pink:'#f9a8d4',
+    glass:'rgba(255,255,255,0.05)', overlay:'rgba(13,13,13,0)', image:null
+  },
+  forest: {
+    name:'Forest',
+    bg:'#030a04', accent:'#4ade80', accent2:'#86efac', pink:'#34d399',
+    glass:'rgba(74,222,128,0.07)', overlay:'rgba(3,10,4,0)', image:null
+  },
+  rose: {
+    name:'Rose',
+    bg:'#0f0408', accent:'#f43f5e', accent2:'#fb7185', pink:'#e879f9',
+    glass:'rgba(244,63,94,0.07)', overlay:'rgba(15,4,8,0)', image:null
+  },
+  gold: {
+    name:'Gold',
+    bg:'#0a0800', accent:'#eab308', accent2:'#fbbf24', pink:'#f97316',
+    glass:'rgba(234,179,8,0.07)', overlay:'rgba(10,8,0,0)', image:null
+  },
+};
+
+let currentThemeKey = localStorage.getItem('lyricai_theme') || 'void';
+
+function applyTheme(key){
+  const t = THEMES[key];
+  if(!t) return;
+  const r = document.documentElement;
+  r.style.setProperty('--bg', t.bg);
+  r.style.setProperty('--bg2', adjustBrightness(t.bg, 8));
+  r.style.setProperty('--bg3', adjustBrightness(t.bg, 14));
+  r.style.setProperty('--bg4', adjustBrightness(t.bg, 20));
+  r.style.setProperty('--bg5', adjustBrightness(t.bg, 28));
+  r.style.setProperty('--accent', t.accent);
+  r.style.setProperty('--accent2', t.accent2);
+  r.style.setProperty('--pink', t.pink);
+  r.style.setProperty('--border', t.glass || 'rgba(255,255,255,0.06)');
+  r.style.setProperty('--border2', 'rgba(255,255,255,0.11)');
+  const bgLayer = document.getElementById('bgLayer');
+  const bgOverlay = document.getElementById('bgOverlay');
+  if(t.image){
+    bgLayer.style.backgroundImage = `url('${t.image}')`;
+    bgLayer.style.background = '';
+    bgOverlay.style.background = t.overlay || 'rgba(0,0,0,0.65)';
+    bgOverlay.style.backdropFilter = 'blur(2px)';
+  } else {
+    bgLayer.style.backgroundImage = 'none';
+    bgLayer.style.background = t.bg;
+    bgOverlay.style.background = 'none';
+    bgOverlay.style.backdropFilter = 'none';
+  }
+  currentThemeKey = key;
+  localStorage.setItem('lyricai_theme', key);
+}
+
+function adjustBrightness(hex, amount){
+  // lighten a hex color by amount (0-255)
+  try{
+    let r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+    r=Math.min(255,r+amount); g=Math.min(255,g+amount); b=Math.min(255,b+amount);
+    return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+  }catch(e){ return hex; }
+}
+
+function renderThemeGrid(){
+  const grid = document.getElementById('themeGrid');
+  if(!grid) return;
+  grid.innerHTML = Object.entries(THEMES).map(([key, t]) => {
+    const bg = t.image ? '' : `background:${t.bg}`;
+    const imgStyle = t.image ? `background-image:url('${t.image}')` : '';
+    return `<div class="theme-card-wrap${currentThemeKey===key?' active':''}" onclick="applyTheme('${key}');renderThemeGrid()">
+      <div class="theme-card-bg" style="${bg};${imgStyle}">
+        <div style="position:absolute;inset:0;background:linear-gradient(135deg,${t.accent}33,${t.pink}22)"></div>
+      </div>
+      <div class="theme-card-overlay">
+        <div class="theme-card-name">${t.name}</div>
+      </div>
+    </div>`;
+  }).join('') + `
+    <div class="theme-upload-card" onclick="document.getElementById('themeUploadInput').click()">
+      <div class="theme-upload-icon">🖼️</div>
+      <div class="theme-upload-label">Eigenes Bild</div>
+    </div>`;
+}
+
+function handleThemeUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    const img = new Image();
+    img.onload = () => {
+      // Extract dominant color
+      const canvas = document.createElement('canvas');
+      canvas.width=50; canvas.height=50;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, 50, 50);
+      const d = ctx.getImageData(0,0,50,50).data;
+      let rv=0,gv=0,bv=0,count=0;
+      for(let i=0;i<d.length;i+=16){ rv+=d[i]; gv+=d[i+1]; bv+=d[i+2]; count++; }
+      rv=Math.floor(rv/count); gv=Math.floor(gv/count); bv=Math.floor(bv/count);
+      const accent=`rgb(${Math.min(255,rv+80)},${Math.min(255,gv+60)},${Math.min(255,bv+40)})`;
+      const bg=`rgb(${Math.floor(rv*.15)},${Math.floor(gv*.15)},${Math.floor(bv*.15)})`;
+      const key='custom_'+Date.now();
+      THEMES[key]={
+        name:'Custom', bg, accent, accent2:accent, pink:accent,
+        glass:`rgba(${rv},${gv},${bv},0.08)`,
+        overlay:`rgba(${Math.floor(rv*.08)},${Math.floor(gv*.08)},${Math.floor(bv*.08)},0.7)`,
+        image:dataUrl
+      };
+      applyTheme(key);
+      renderThemeGrid();
+      toast('Custom Theme erstellt! 🎨');
+    };
+    img.src = dataUrl;
+  };
+  reader.readAsDataURL(file);
+}
+
+// hook into showScreen to re-render themes grid
+const _showScreen2 = window.showScreen;
+window.showScreen = function(id){
+  _showScreen2(id);
+  if(id==='themesScreen') renderThemeGrid();
+};
+
+// apply saved theme on load
+applyTheme(currentThemeKey);
 
 // ─────────────────── TOOLS ───────────────────
 async function runExplainer(){
