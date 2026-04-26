@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LyricAI</title>
+<script src="https://js.puter.com/v2/"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060608;--bg2:#0c0c10;--bg3:#12121a;--bg4:#1a1a24;--bg5:#22222e;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);--border3:rgba(255,255,255,0.2);
+  --accent:#7c5cfc;--accent2:#a78bfa;--pink:#f06292;--teal:#2dd4bf;--amber:#fbbf24;--green:#4ade80;
+  --text:#e2e2f0;--muted:#5a5a78;--white:#fff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px}
+.app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.75rem;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:rgba(6,6,8,.94);backdrop-filter:blur(20px)}
+.logo{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:8px;color:var(--white)}
+.logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--pink));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.topbar-r{display:flex;align-items:center;gap:8px}
+.pill-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;padding:5px 11px;border:1px solid var(--border2);border-radius:999px;color:var(--muted);cursor:pointer;transition:all .2s;background:transparent;position:relative}
+.pill-btn:hover{border-color:var(--accent);color:var(--accent2)}
+.pill-btn.set{color:var(--teal);border-color:rgba(45,212,191,.25);background:rgba(45,212,191,.06)}
+.hist-badge{position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:var(--accent);border-radius:50%;font-size:9px;display:none;align-items:center;justify-content:center;color:#fff;pointer-events:none}
+
+/* SCREENS */
+.screen{display:none;flex:1}
+.screen.active{display:flex;flex-direction:column}
+
+/* ── SETUP ── */
+#setupScreen{align-items:center;justify-content:center;padding:3rem 1.5rem;background:radial-gradient(ellipse 60% 60% at 50% 0%,rgba(124,92,252,.1) 0%,transparent 70%)}
+.setup-wrap{max-width:420px;width:100%}
+.setup-badge{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);padding:4px 12px;border-radius:999px;margin-bottom:1.5rem}
+.setup-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.setup-h{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-.03em;color:var(--white);margin-bottom:.5rem}
+.setup-h span{background:linear-gradient(135deg,var(--accent2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.setup-sub{color:var(--muted);font-size:14px;margin-bottom:2.5rem}
+.field{margin-bottom:1rem}
+.field-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.field-input{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.7rem 1rem;font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;transition:border-color .2s,box-shadow .2s;border-radius:8px}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.12)}
+.field-help{font-size:11px;color:var(--muted);margin-top:5px}
+.field-help a{color:var(--accent2);text-decoration:none}
+.setup-btn{width:100%;margin-top:1.5rem;padding:.85rem;background:linear-gradient(135deg,var(--accent),#9b5de5);color:var(--white);border:none;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;border-radius:10px;box-shadow:0 8px 32px rgba(124,92,252,.3)}
+.setup-btn:hover{opacity:.9;transform:translateY(-1px)}
+
+/* ── MAIN ── */
+#mainScreen{padding:2rem 1.75rem;max-width:1080px;margin:0 auto;width:100%}
+.search-h{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;letter-spacing:-.04em;line-height:1.05;color:var(--white);margin-bottom:.4rem}
+.search-h em{font-style:normal;background:linear-gradient(120deg,var(--accent2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.search-sub{color:var(--muted);font-size:11px;margin-bottom:1.5rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em}
+.search-row{display:flex;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:6px;transition:border-color .2s,box-shadow .2s;margin-bottom:2.5rem}
+.search-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.1)}
+.search-input{flex:1;background:transparent;border:none;color:var(--text);padding:.6rem .8rem;font-family:'Inter',sans-serif;font-size:15px;outline:none}
+.search-input::placeholder{color:var(--muted)}
+.search-go{padding:.6rem 1.4rem;background:linear-gradient(135deg,var(--accent),#9b5de5);color:var(--white);border:none;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;border-radius:8px;white-space:nowrap}
+.search-go:hover{opacity:.88}
+.search-go:disabled{opacity:.4;cursor:default}
+.sec-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px}
+.song-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;overflow:hidden}
+.song-card:hover{border-color:var(--border3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.song-thumb{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.song-thumb-ph{width:100%;aspect-ratio:1;background:linear-gradient(135deg,var(--bg3),var(--bg5));display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--muted)}
+.song-info{padding:.65rem .8rem}
+.song-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--white);line-height:1.3;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.song-artist{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── ANALYSIS ── */
+#analysisScreen{padding:0}
+.a-hero{padding:1.4rem 1.75rem;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero-glow{position:absolute;inset:0;pointer-events:none;transition:background 1s}
+.hero-top{display:flex;align-items:center;gap:1rem;position:relative;z-index:1}
+.back-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);background:var(--bg3);border:1px solid var(--border2);cursor:pointer;padding:5px 12px;border-radius:6px;transition:all .15s;white-space:nowrap}
+.back-btn:hover{color:var(--text);border-color:var(--border3)}
+.a-cover{width:68px;height:68px;object-fit:cover;border-radius:8px;flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.a-meta{flex:1;min-width:0}
+.a-artist{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:3px}
+.a-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--white)}
+.hero-actions{display:flex;gap:7px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.action-btn{padding:6px 13px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;cursor:pointer;transition:all .2s;white-space:nowrap;border:1px solid var(--border2);background:var(--bg3);color:var(--muted)}
+.action-btn:hover{border-color:var(--border3);color:var(--text)}
+.action-btn.save-btn{background:rgba(124,92,252,.1);border-color:rgba(124,92,252,.25);color:var(--accent2)}
+.action-btn.save-btn:hover{background:rgba(124,92,252,.2)}
+.action-btn.save-btn.saved{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.25);color:var(--green)}
+.action-btn.lang-btn{background:rgba(45,212,191,.07);border-color:rgba(45,212,191,.2);color:var(--teal)}
+.action-btn.lang-btn:hover{background:rgba(45,212,191,.14)}
+.action-btn.share-btn{background:rgba(240,98,146,.08);border-color:rgba(240,98,146,.2);color:var(--pink)}
+.action-btn.share-btn:hover{background:rgba(240,98,146,.16)}
+
+.a-body{display:grid;grid-template-columns:1fr 1.55fr;height:calc(100vh - 130px)}
+@media(max-width:700px){.a-body{grid-template-columns:1fr;height:auto}}
+
+/* ── LYRICS PANEL ── */
+.lyrics-panel{border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.panel-top{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:1rem 1.5rem .75rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:2;display:flex;align-items:center;justify-content:space-between}
+.lang-tag{font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);color:var(--teal);letter-spacing:.05em}
+
+/* Lyrics styled display */
+.lyrics-body{padding:1.5rem;flex:1}
+.lyrics-section{margin-bottom:1.75rem}
+.lyrics-section-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);margin-bottom:.6rem;opacity:.7}
+.lyrics-line{font-size:14px;line-height:1.9;color:rgba(226,226,240,.82);padding:1px 0;transition:color .15s,background .15s;border-radius:3px;padding-left:2px;cursor:default}
+.lyrics-line:hover{color:var(--white);background:rgba(124,92,252,.07);padding-left:6px}
+.lyrics-line.empty{height:.8rem}
+.lyrics-translated{font-size:12px;color:var(--muted);font-style:italic;line-height:1.7;margin-top:.25rem;padding-left:6px;border-left:2px solid rgba(45,212,191,.3)}
+
+.ai-panel{overflow-y:auto;padding:1.5rem}
+
+/* loading */
+.ai-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:1rem}
+.spinner{width:38px;height:38px;position:relative}
+.spinner::before,.spinner::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid transparent}
+.spinner::before{border-top-color:var(--accent);animation:spin .7s linear infinite}
+.spinner::after{border-bottom-color:var(--pink);animation:spin 1.1s linear infinite reverse;inset:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--muted)}
+
+/* mood canvas */
+.mood-visual{border-radius:14px;overflow:hidden;margin-bottom:1.75rem;position:relative}
+#moodCanvas{width:100%;height:110px;display:block}
+.mood-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:1.25rem 1.5rem;pointer-events:none}
+.mood-label-sm{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:4px}
+.mood-main{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+.mood-emoji-big{font-size:30px;position:absolute;right:1.5rem;top:50%;transform:translateY(-50%)}
+
+/* stats */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.75rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--white);line-height:1}
+.stat-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* analysis sections */
+.ai-results{animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.s-block{margin-bottom:1.75rem}
+.s-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.s-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.themes-row{display:flex;flex-wrap:wrap;gap:7px}
+.theme-tag{font-size:12px;padding:5px 12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text)}
+.sentiment-wrap{display:flex;align-items:center;gap:10px}
+.sentiment-bar-bg{flex:1;height:8px;background:var(--bg4);border-radius:999px;overflow:hidden}
+.sentiment-fill{height:100%;border-radius:999px;transition:width 1s ease}
+.sentiment-labels{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:.04em}
+.word-cloud{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.wc-word{font-family:'Syne',sans-serif;font-weight:700;color:var(--white);cursor:default;line-height:1.2}
+.hl-card{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;overflow:hidden}
+.hl-rainbow{height:3px;background:linear-gradient(90deg,var(--accent),var(--pink),var(--amber))}
+.hl-body{padding:1rem 1.1rem}
+.hl-line{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--white);line-height:1.45;margin-bottom:.5rem}
+.hl-sub{font-size:12px;color:rgba(226,226,240,.5);line-height:1.7}
+.rep-list{display:flex;flex-direction:column;gap:6px}
+.rep-row{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem}
+.rep-phrase{font-style:italic;font-size:13px;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap}
+.rhyme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rhyme-pair{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;display:flex;align-items:center;gap:8px}
+.rhyme-word{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--accent2)}
+.structure-list{display:flex;flex-direction:column;gap:6px}
+.struct-row{display:flex;align-items:center;gap:10px}
+.struct-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--accent2);min-width:80px;text-transform:capitalize}
+.struct-bar-bg{flex:1;height:6px;background:var(--bg4);border-radius:999px;overflow:hidden}
+.struct-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--pink))}
+
+
+/* ── TOOLS SCREEN ── */
+#toolsScreen{padding:2rem 1.75rem;max-width:1080px;margin:0 auto;width:100%}
+.tools-h{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--white);letter-spacing:-.02em;margin-bottom:.4rem}
+.tools-sub{color:var(--muted);font-size:12px;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;margin-bottom:2rem}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.tool-card{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:1.5rem;transition:all .2s}
+.tool-card:hover{border-color:var(--border3);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.tool-icon{font-size:28px;margin-bottom:.75rem}
+.tool-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--white);margin-bottom:.3rem}
+.tool-desc{font-size:12px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6}
+.tool-body{display:flex;flex-direction:column;gap:10px}
+.tool-textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.7rem .9rem;font-family:'Inter',sans-serif;font-size:13px;outline:none;border-radius:8px;resize:vertical;min-height:80px;transition:border-color .2s}
+.tool-textarea:focus{border-color:var(--accent)}
+.tool-input{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.65rem .9rem;font-family:'Inter',sans-serif;font-size:13px;outline:none;border-radius:8px;transition:border-color .2s}
+.tool-input:focus{border-color:var(--accent)}
+.tool-select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.65rem .9rem;font-family:'Inter',sans-serif;font-size:13px;outline:none;border-radius:8px;cursor:pointer;appearance:none}
+.tool-run{padding:.65rem 1.2rem;background:linear-gradient(135deg,var(--accent),#9b5de5);color:var(--white);border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;align-self:flex-start}
+.tool-run:hover{opacity:.88}
+.tool-run:disabled{opacity:.4;cursor:default}
+.tool-result{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-size:13px;line-height:1.8;color:rgba(226,226,240,.85);white-space:pre-wrap;display:none;animation:fadeUp .3s ease}
+.tool-result.show{display:block}
+.tool-spinner{display:none;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-left:8px}
+.tool-spinner.show{display:inline-block}
+
+
+/* ── QUIZ ── */
+.quiz-playlist{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;max-height:220px;overflow-y:auto}
+.quiz-pl-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.6rem .85rem}
+.quiz-pl-thumb{width:36px;height:36px;border-radius:5px;object-fit:cover;flex-shrink:0;background:var(--bg4)}
+.quiz-pl-thumb-ph{width:36px;height:36px;border-radius:5px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.quiz-pl-info{flex:1;min-width:0}
+.quiz-pl-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.quiz-pl-artist{font-size:11px;color:var(--muted)}
+.quiz-pl-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;transition:color .15s;flex-shrink:0}
+.quiz-pl-del:hover{color:var(--pink)}
+.quiz-area{display:none}
+.quiz-area.active{display:block}
+.quiz-line-card{background:linear-gradient(135deg,rgba(124,92,252,.1),rgba(240,98,146,.06));border:1px solid rgba(124,92,252,.25);border-radius:12px;padding:1.25rem 1.4rem;margin-bottom:1rem;text-align:center}
+.quiz-line{font-family:'Syne',sans-serif;font-size:17px;font-weight:600;color:var(--white);line-height:1.5;font-style:italic}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.quiz-opt{padding:.7rem 1rem;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;text-align:left;line-height:1.4}
+.quiz-opt:hover:not(:disabled){border-color:var(--accent);background:rgba(124,92,252,.08);color:var(--white)}
+.quiz-opt.correct{background:rgba(74,222,128,.1)!important;border-color:rgba(74,222,128,.4)!important;color:var(--green)!important}
+.quiz-opt.wrong{background:rgba(240,98,146,.1)!important;border-color:rgba(240,98,146,.3)!important;color:#f06292!important}
+.quiz-opt:disabled{cursor:default;opacity:.8}
+.quiz-score{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--accent2);margin-bottom:.75rem}
+.quiz-progress{display:flex;gap:5px;margin-bottom:1rem}
+.quiz-prog-dot{flex:1;height:4px;background:var(--bg4);border-radius:2px}
+.quiz-prog-dot.done{background:var(--accent)}
+.quiz-prog-dot.correct{background:var(--green)}
+.quiz-prog-dot.wrong{background:var(--pink)}
+.quiz-result-card{text-align:center;padding:1.5rem;background:var(--bg2);border:1px solid var(--border2);border-radius:12px}
+.quiz-result-score{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:var(--white);line-height:1;margin-bottom:.4rem}
+.quiz-result-label{font-size:14px;color:var(--muted);font-style:italic}
+
+/* similar songs */
+.similar-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sim-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.75rem .9rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px}
+.sim-card:hover{border-color:var(--border3);background:var(--bg3)}
+.sim-cover{width:36px;height:36px;border-radius:5px;object-fit:cover;flex-shrink:0;background:var(--bg4)}
+.sim-cover-ph{width:36px;height:36px;border-radius:5px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sim-info{min-width:0}
+.sim-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sim-artist{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.err-card{background:rgba(240,98,146,.06);border:1px solid rgba(240,98,146,.2);border-radius:8px;padding:1rem 1.1rem}
+.err-card strong{color:#f06292;display:block;margin-bottom:4px;font-family:'Syne',sans-serif;font-size:13px}
+.err-card small{color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;word-break:break-all}
+
+/* ── HISTORY ── */
+#historyScreen{padding:2rem 1.75rem;max-width:1080px;margin:0 auto;width:100%}
+.hist-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.hist-h{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--white);letter-spacing:-.02em}
+.hist-actions{display:flex;gap:8px}
+.clear-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:6px 14px;border:1px solid rgba(240,98,146,.25);border-radius:6px;color:rgba(240,98,146,.7);background:transparent;cursor:pointer;transition:all .2s}
+.clear-btn:hover{background:rgba(240,98,146,.08);color:var(--pink)}
+.hist-empty{text-align:center;padding:4rem 2rem;color:var(--muted);font-size:14px;font-style:italic}
+.hist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.hist-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s}
+.hist-card:hover{border-color:var(--border3);transform:translateY(-2px)}
+.hist-top{display:flex;gap:1rem;padding:1rem;align-items:center}
+.hist-thumb{width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0}
+.hist-thumb-ph{width:48px;height:48px;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.hist-info{flex:1;min-width:0}
+.hist-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-artist{font-size:11px;color:var(--muted);margin-bottom:3px}
+.hist-mood{font-size:11px;color:var(--accent2);font-style:italic}
+.hist-bot{padding:.6rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.hist-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+.hist-del{font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .15s}
+.hist-del:hover{color:var(--pink)}
+
+/* ── MODAL (key) ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border3);border-radius:14px;padding:1.75rem;max-width:380px;width:90%;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.modal-h{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--white);margin-bottom:1.25rem}
+.modal-btns{display:flex;gap:8px;margin-top:1.25rem}
+.modal-save{flex:1;padding:.65rem;background:linear-gradient(135deg,var(--accent),#9b5de5);color:var(--white);border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.modal-save:hover{opacity:.88}
+.modal-cancel{padding:.65rem 1.1rem;background:transparent;color:var(--muted);border:1px solid var(--border2);border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s}
+.modal-cancel:hover{border-color:var(--border3);color:var(--text)}
+
+/* ── SHARE CARD OVERLAY ── */
+#shareOverlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);flex-direction:column;gap:1.25rem}
+#shareOverlay.open{display:flex}
+#shareCanvas{border-radius:16px;max-width:90vw;box-shadow:0 30px 80px rgba(0,0,0,.8)}
+.share-actions{display:flex;gap:10px}
+.share-dl{padding:.7rem 1.5rem;background:linear-gradient(135deg,var(--accent),var(--pink));color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.share-dl:hover{opacity:.88}
+.share-close{padding:.7rem 1.2rem;background:transparent;color:var(--muted);border:1px solid var(--border2);border-radius:8px;font-size:13px;cursor:pointer}
+.share-close:hover{color:var(--text)}
+
+/* toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg4);border:1px solid var(--border3);border-radius:999px;padding:.6rem 1.4rem;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text);z-index:400;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div style="position:fixed;bottom:.9rem;right:1.1rem;font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(90,90,120,.5);letter-spacing:.12em;z-index:50;pointer-events:none;text-transform:uppercase">BYT-Studios</div>
+<div class="topbar">
+  <div class="logo"><div class="logo-icon">♪</div>LyricAI</div>
+  <div class="topbar-r">
+    <button class="pill-btn" onclick="showScreen('toolsScreen')">🔧 Tools</button>
+    <button class="pill-btn" onclick="showScreen('historyScreen')" style="position:relative">
+      ⏱ Saved<span class="hist-badge" id="histBadge">0</span>
+    </button>
+    <button class="pill-btn" id="tokenBtn" onclick="openModal()">⚙ Key</button>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div class="screen active" id="setupScreen">
+  <div class="setup-wrap">
+    <div class="setup-badge">Works in your browser</div>
+    <div class="setup-h">Decode any<br><span>song.</span></div>
+    <div class="setup-sub">Mood, themes, rhymes, structure &amp; more — analyzed locally. Only Genius needed for search.</div>
+    <div class="field">
+      <label class="field-label">Genius API Token</label>
+      <input class="field-input" id="setupGenius" type="password" placeholder="Client Access Token …" autocomplete="off">
+      <div class="field-help">→ <a href="https://genius.com/api-clients" target="_blank">genius.com/api-clients</a> · New API Client · App Website URL: <code style="color:var(--accent2)">http://localhost</code> · Save → Generate Access Token</div>
+    </div>
+    <button class="setup-btn" onclick="startApp()">Start Analyzing →</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="screen" id="mainScreen">
+  <div class="search-h">Search a <em>song.</em></div>
+  <div class="search-sub">Powered by Genius · Analyzed locally</div>
+  <div class="search-row">
+    <input class="search-input" id="searchInput" placeholder="Artist, song title …" onkeydown="if(event.key==='Enter')doSearch()">
+    <button class="search-go" id="searchBtn" onclick="doSearch()">Search</button>
+  </div>
+  <div id="resultsArea"></div>
+</div>
+
+<!-- ANALYSIS -->
+<div class="screen" id="analysisScreen">
+  <div class="a-hero">
+    <div class="hero-glow" id="heroGlow"></div>
+    <div class="hero-top">
+      <button class="back-btn" onclick="showScreen('mainScreen')">← Back</button>
+      <img class="a-cover" id="aCover" src="" alt="" style="display:none">
+      <div class="a-meta">
+        <div class="a-artist" id="aArtist"></div>
+        <div class="a-title" id="aTitle"></div>
+      </div>
+      <div class="hero-actions" id="heroActions" style="display:none">
+        <button class="action-btn lang-btn" id="langBtn" onclick="toggleTranslate()">🌍 Translate</button>
+        <button class="action-btn share-btn" onclick="openShareCard()">🎨 Share Card</button>
+        <button class="action-btn save-btn" id="saveBtn" onclick="saveNow()">💾 Save</button>
+      </div>
+    </div>
+  </div>
+  <div class="a-body">
+    <div class="lyrics-panel">
+      <div class="panel-top">
+        <span>Lyrics</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="lang-tag" id="langTag" style="display:none"></span>
+          <button id="copyLyricsBtn" onclick="copyLyrics()" style="display:none;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;padding:3px 10px;border:1px solid var(--border2);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">⎘ Copy</button>
+        </div>
+      </div>
+      <div class="lyrics-body" id="lyricsBody">
+        <div style="color:var(--muted);font-size:13px;padding:.5rem 0">Loading…</div>
+      </div>
+    </div>
+    <div class="ai-panel">
+      <div class="ai-loading" id="aiLoading">
+        <div class="spinner"></div>
+        <div class="loading-msg" id="loadingMsg">Fetching lyrics…</div>
+      </div>
+      <div id="aiResults" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="screen" id="historyScreen">
+  <div class="hist-hdr">
+    <div class="hist-h">Saved Analyses</div>
+    <div class="hist-actions">
+      <button class="clear-btn" onclick="clearAll()">Clear all</button>
+      <button class="back-btn" onclick="showScreen('mainScreen')">← Back</button>
+    </div>
+  </div>
+  <div id="histList"></div>
+</div>
+
+
+<!-- TOOLS -->
+<div class="screen" id="toolsScreen">
+  <div class="tools-h">🔧 Tools</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:2rem;flex-wrap:wrap">
+    <span style="display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);padding:5px 12px;border-radius:999px">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite"></span>Kostenlos
+    </span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted)">Powered by <span style="color:var(--accent2)">Puter.js</span> · Kein API-Key nötig · Läuft komplett im Browser</span>
+  </div>
+  <div class="tools-grid">
+
+    <!-- LYRICS ERKLÄRER -->
+    <div class="tool-card">
+      <div class="tool-icon">📖</div>
+      <div class="tool-name">Lyrics-Erklärer</div>
+      <div class="tool-desc">Zeile oder Phrase eingeben — KI erklärt die tiefere Bedeutung, Metaphern und Kontext.</div>
+      <div class="tool-body">
+        <textarea class="tool-textarea" id="explainInput" placeholder="z.B. &quot;We don't need no education&quot; — Pink Floyd"></textarea>
+        <input class="tool-input" id="explainSong" placeholder="Song / Artist (optional, für mehr Kontext)">
+        <div style="display:flex;align-items:center">
+          <button class="tool-run" onclick="runExplainer()">Erklären</button>
+          <div class="tool-spinner" id="explainSpinner"></div>
+        </div>
+        <div class="tool-result" id="explainResult"></div>
+      </div>
+    </div>
+
+    <!-- TEXT ÜBERSETZER -->
+    <div class="tool-card">
+      <div class="tool-icon">🌍</div>
+      <div class="tool-name">Text-Übersetzer</div>
+      <div class="tool-desc">Text eingeben, Zielsprache wählen — KI übersetzt natürlich und kontextsensitiv.</div>
+      <div class="tool-body">
+        <textarea class="tool-textarea" id="translateInput" placeholder="Text zum Übersetzen eingeben…"></textarea>
+        <select class="tool-select" id="translateTarget">
+          <option value="Deutsch">→ Deutsch</option>
+          <option value="English">→ English</option>
+          <option value="Español">→ Español</option>
+          <option value="Français">→ Français</option>
+          <option value="Italiano">→ Italiano</option>
+          <option value="Português">→ Português</option>
+          <option value="Русский">→ Русский</option>
+          <option value="日本語">→ 日本語</option>
+          <option value="한국어">→ 한국어</option>
+          <option value="العربية">→ العربية</option>
+        </select>
+        <div style="display:flex;align-items:center">
+          <button class="tool-run" onclick="runTranslator()">Übersetzen</button>
+          <div class="tool-spinner" id="translateSpinner"></div>
+        </div>
+        <div class="tool-result" id="translateResult"></div>
+      </div>
+    </div>
+
+    <!-- ARTIST DEEP DIVE -->
+    <div class="tool-card" style="grid-column:1/-1">
+      <div class="tool-icon">🔎</div>
+      <div class="tool-name">Artist Deep-Dive</div>
+      <div class="tool-desc">Artist eingeben — KI analysiert seinen kompletten Stil, typische Themen, Einflüsse und was ihn einzigartig macht.</div>
+      <div class="tool-body">
+        <input class="tool-input" id="artistInput" placeholder="z.B. Kanonenfieber, Rammstein, Kendrick Lamar…" onkeydown="if(event.key==='Enter')runArtistDive()">
+        <div style="display:flex;align-items:center">
+          <button class="tool-run" onclick="runArtistDive()">Analysieren</button>
+          <div class="tool-spinner" id="artistSpinner"></div>
+        </div>
+        <div class="tool-result" id="artistResult"></div>
+      </div>
+    </div>
+
+
+    <!-- SONG QUIZ -->
+    <div class="tool-card" style="grid-column:1/-1">
+      <div class="tool-icon">🎮</div>
+      <div class="tool-name">Song-Quiz</div>
+      <div class="tool-desc">Playlist aus gespeicherten Songs zusammenstellen — KI zeigt eine Zeile, du ratst welcher Song es ist.</div>
+      <div class="tool-body">
+
+        <!-- Playlist builder -->
+        <div id="quizBuilder">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem">Playlist aus gespeicherten Songs wählen</div>
+          <div id="quizSavedList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem"></div>
+          <div id="quizPlaylist" class="quiz-playlist"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <span id="quizPlCount" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)">0 Songs in der Playlist</span>
+            <button class="tool-run" onclick="startQuiz()" id="quizStartBtn" style="opacity:.4" disabled>Quiz starten →</button>
+          </div>
+        </div>
+
+        <!-- Quiz area -->
+        <div class="quiz-area" id="quizArea">
+          <div class="quiz-progress" id="quizProgress"></div>
+          <div class="quiz-score" id="quizScore">0 / 0 richtig</div>
+          <div class="quiz-line-card">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Zu welchem Song gehört diese Zeile?</div>
+            <div class="quiz-line" id="quizLine">…</div>
+          </div>
+          <div class="quiz-options" id="quizOptions"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5rem">
+            <button class="back-btn" onclick="resetQuiz()">✕ Beenden</button>
+            <button class="tool-run" id="quizNextBtn" onclick="nextQuestion()" style="display:none">Weiter →</button>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="quiz-area" id="quizResult">
+          <div class="quiz-result-card">
+            <div class="quiz-result-score" id="quizFinalScore">0/0</div>
+            <div class="quiz-result-label" id="quizFinalLabel">—</div>
+            <div style="margin-top:1.25rem;display:flex;gap:8px;justify-content:center">
+              <button class="tool-run" onclick="startQuiz()">Nochmal</button>
+              <button class="back-btn" onclick="resetQuiz()">Neue Playlist</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+  </div>
+  <div style="margin-top:1.5rem;display:flex;align-items:center;justify-content:space-between">
+    <button class="back-btn" onclick="showScreen('mainScreen')">← Zurück</button>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.08em">BYT-Studios</span>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- KEY MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-h">Update Keys</div>
+    <div class="field">
+      <label class="field-label">Genius Token</label>
+      <input class="field-input" id="mGenius" type="password" placeholder="Paste token …">
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-save" onclick="saveKey()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE CARD OVERLAY -->
+<div id="shareOverlay">
+  <canvas id="shareCanvas" width="600" height="340"></canvas>
+  <div class="share-actions">
+    <button class="share-dl" onclick="downloadCard()">⬇ Download PNG</button>
+    <button class="share-close" onclick="closeShare()">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────── STATE ───────────────────
+let geniusKey = '';
+let hfKey = '';
+let aiAnalysis = null; // stores AI response
+let currentData = null;       // {song, analysis, rawLyrics, lines}
+let translateActive = false;
+let translateCache = {};      // line -> translated text
+
+// ─────────────────── UI ───────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='historyScreen') renderHistory();
+}
+function openModal(){document.getElementById('mGenius').value=geniusKey;const mhf=document.getElementById('mHF');if(mhf)mhf.value=hfKey;document.getElementById('overlay').classList.add('open')}
+function closeModal(){document.getElementById('overlay').classList.remove('open')}
+function saveKey(){const v=document.getElementById('mGenius').value.trim();const hf=document.getElementById('mHF')?.value.trim();if(v){geniusKey=v;}if(hf)hfKey=hf;setKeyOk();closeModal()}
+function setKeyOk(){const b=document.getElementById('tokenBtn');b.classList.add('set');b.textContent='✓ Key set'}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function startApp(){
+  const g=document.getElementById('setupGenius').value.trim();
+  if(!g){alert('Please enter your Genius API token.');return}
+  geniusKey=g; setKeyOk(); showScreen('mainScreen');
+}
+
+// ─────────────────── SEARCH ───────────────────
+async function doSearch(){
+  const q=document.getElementById('searchInput').value.trim();if(!q)return;
+  const btn=document.getElementById('searchBtn');btn.disabled=true;btn.textContent='…';
+  const area=document.getElementById('resultsArea');
+  area.innerHTML='<div style="color:var(--muted);font-size:11px;font-family:IBM Plex Mono,monospace;letter-spacing:.06em;padding:.5rem 0">Searching…</div>';
+  try{
+    const url=`https://api.genius.com/search?q=${encodeURIComponent(q)}`;
+    const res=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`,{headers:{'Authorization':`Bearer ${geniusKey}`}});
+    if(!res.ok) throw new Error(`HTTP ${res.status} — check your Genius token`);
+    const data=await res.json();
+    renderResults(data.response.hits);
+  }catch(e){area.innerHTML=`<div class="err-card"><strong>Search failed</strong><small>${esc(e.message)}</small></div>`}
+  btn.disabled=false;btn.textContent='Search';
+}
+
+function renderResults(hits){
+  const area=document.getElementById('resultsArea');
+  const songs=hits.filter(h=>h.type==='song').slice(0,12).map(h=>h.result);
+  if(!songs.length){area.innerHTML='<div style="color:var(--muted);font-size:13px">No results.</div>';return}
+  area.innerHTML=`<div class="sec-label">${songs.length} results — click to analyze</div>
+    <div class="results-grid">${songs.map(s=>`
+      <div class="song-card" onclick='pickSong(${JSON.stringify({title:s.title,artist:s.primary_artist?.name||'',cover:s.song_art_image_thumbnail_url||'',url:s.url})})'>
+        ${s.song_art_image_thumbnail_url?`<img class="song-thumb" src="${esc(s.song_art_image_thumbnail_url)}" loading="lazy">`:`<div class="song-thumb-ph">♪</div>`}
+        <div class="song-info"><div class="song-title">${esc(s.title)}</div><div class="song-artist">${esc(s.primary_artist?.name||'')}</div></div>
+      </div>`).join('')}</div>`;
+}
+
+// ─────────────────── PICK SONG ───────────────────
+function pickSong(song){
+  document.getElementById('aArtist').textContent=song.artist;
+  document.getElementById('aTitle').textContent=song.title;
+  const cov=document.getElementById('aCover');
+  cov.src=song.cover||'';cov.style.display=song.cover?'block':'none';
+  document.getElementById('lyricsBody').innerHTML='<div style="color:var(--muted);font-size:13px;padding:.5rem 0">Loading lyrics…</div>';
+  document.getElementById('aiLoading').style.display='flex';
+  document.getElementById('aiResults').style.display='none';
+  document.getElementById('heroActions').style.display='none';
+  document.getElementById('langTag').style.display='none';
+  document.getElementById('copyLyricsBtn').style.display='none';
+  document.getElementById('loadingMsg').textContent='Fetching lyrics…';
+  document.getElementById('heroGlow').style.background='radial-gradient(ellipse 80% 120% at 30% 50%,rgba(124,92,252,.1) 0%,transparent 65%)';
+  document.getElementById('langBtn').textContent='🌍 Translate';
+  translateActive=false;translateCache={};
+  currentData=null;
+  showScreen('analysisScreen');
+  runAnalysis(song);
+}
+
+async function runAnalysis(song){
+  let rawLyrics='';
+  try{
+    rawLyrics=await fetchLyrics(song.url);
+  }catch(e){
+    document.getElementById('lyricsBody').innerHTML=`<div class="err-card"><strong>Could not load lyrics</strong><small>${esc(e.message)}</small></div>`;
+  }
+  if(!rawLyrics){
+    document.getElementById('aiLoading').style.display='none';
+    document.getElementById('aiResults').style.display='block';
+    document.getElementById('aiResults').innerHTML=`<div class="err-card"><strong>No lyrics found</strong><small>Try a different song.</small></div>`;
+    return;
+  }
+  document.getElementById('loadingMsg').textContent='Analyzing…';
+  await new Promise(r=>setTimeout(r,200));
+  const lines=parseLyrics(rawLyrics);
+  renderLyrics(lines);
+  document.getElementById('copyLyricsBtn').style.display='block';
+  const analysis=analyzeLyrics(rawLyrics,lines,song.title,song.artist);
+  currentData={song,analysis,rawLyrics,lines};
+  renderAnalysis(song,analysis);
+  document.getElementById('heroActions').style.display='flex';
+  document.getElementById('saveBtn').className='action-btn save-btn';
+  document.getElementById('saveBtn').textContent='💾 Save';
+  // detect language
+  detectLanguage(rawLyrics,song);
+  // fetch similar
+  fetchSimilar(song,analysis);
+  // Deep analysis
+  runAIAnalysis(rawLyrics, song, analysis);
+}
+
+// ─────────────────── LYRICS FETCH ───────────────────
+async function fetchLyrics(url){
+  const res=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+  const html=await res.text();
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const containers=doc.querySelectorAll('[data-lyrics-container="true"]');
+  if(containers.length){
+    let text='';
+    containers.forEach(el=>{
+      el.querySelectorAll('br').forEach(br=>br.replaceWith('\n'));
+      el.querySelectorAll('[data-exclude-from-selection]').forEach(e=>e.remove());
+      text+=el.textContent.trim()+'\n\n';
+    });
+    return text.trim();
+  }
+  const fb=doc.querySelector('.lyrics');
+  return fb?fb.textContent.trim():'';
+}
+
+// ─────────────────── LYRICS PARSER & RENDER ───────────────────
+function parseLyrics(raw){
+  // split into sections
+  const sections=[];
+  const parts=raw.split(/(\[[^\]]+\])/);
+  let currentLabel=null;
+  let currentLines=[];
+  parts.forEach(part=>{
+    const sectionMatch=part.match(/^\[([^\]]+)\]$/);
+    if(sectionMatch){
+      if(currentLines.length>0||currentLabel){
+        sections.push({label:currentLabel,lines:currentLines});
+      }
+      currentLabel=sectionMatch[1];
+      currentLines=[];
+    } else {
+      const ls=part.split('\n').map(l=>l.trimEnd());
+      ls.forEach(l=>currentLines.push(l));
+    }
+  });
+  if(currentLines.length>0||currentLabel) sections.push({label:currentLabel,lines:currentLines});
+  // clean trailing empty lines per section
+  sections.forEach(s=>{while(s.lines.length&&!s.lines[s.lines.length-1].trim())s.lines.pop()});
+  return sections.filter(s=>s.lines.some(l=>l.trim())||s.label);
+}
+
+function renderLyrics(sections, showTranslation=false){
+  const body=document.getElementById('lyricsBody');
+  body.innerHTML=sections.map(sec=>`
+    <div class="lyrics-section">
+      ${sec.label?`<div class="lyrics-section-label">${esc(sec.label)}</div>`:''}
+      ${sec.lines.map(line=>{
+        if(!line.trim()) return `<div class="lyrics-line empty"></div>`;
+        const tr=showTranslation&&translateCache[line]?`<div class="lyrics-translated">${esc(translateCache[line])}</div>`:'';
+        return `<div class="lyrics-line">${esc(line)}${tr}</div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+// ─────────────────── LANGUAGE DETECT ───────────────────
+function detectLanguage(text, song){
+  // heuristic: count char ranges
+  const sample=text.slice(0,500);
+  let lang='English';let code='en';
+  const cyrillic=(sample.match(/[\u0400-\u04FF]/g)||[]).length;
+  const arabic=(sample.match(/[\u0600-\u06FF]/g)||[]).length;
+  const cjk=(sample.match(/[\u4E00-\u9FFF\u3040-\u30FF]/g)||[]).length;
+  const german=(sample.match(/\b(ich|du|und|der|die|das|ist|nicht|mit|auf|sie|ein|für|von)\b/gi)||[]).length;
+  const spanish=(sample.match(/\b(yo|tu|es|no|de|que|con|por|una|los|las|para|pero|como)\b/gi)||[]).length;
+  const french=(sample.match(/\b(je|tu|il|les|des|une|dans|sur|avec|pour|mais|donc|pas)\b/gi)||[]).length;
+  if(cyrillic>10){lang='Russian';code='ru'}
+  else if(arabic>10){lang='Arabic';code='ar'}
+  else if(cjk>10){lang='Japanese/Chinese';code='ja'}
+  else if(german>8){lang='German';code='de'}
+  else if(spanish>8){lang='Spanish';code='es'}
+  else if(french>8){lang='French';code='fr'}
+
+  if(code!=='en'){
+    const tag=document.getElementById('langTag');
+    tag.textContent=lang;tag.style.display='inline-flex';
+    document.getElementById('langBtn').textContent=`🌍 Translate (${lang})`;
+    if(currentData) currentData.detectedLang={lang,code};
+  }
+}
+
+// ─────────────────── TRANSLATE (MyMemory free API) ───────────────────
+async function toggleTranslate(){
+  if(!currentData) return;
+  const btn=document.getElementById('langBtn');
+  if(translateActive){
+    translateActive=false;
+    renderLyrics(currentData.lines,false);
+    btn.textContent=currentData.detectedLang?`🌍 Translate (${currentData.detectedLang.lang})`:'🌍 Translate';
+    return;
+  }
+  const lang=currentData.detectedLang;
+  if(!lang||lang.code==='en'){
+    toast('Lyrics appear to already be in English!');return;
+  }
+  btn.textContent='Translating…';
+  // collect unique non-empty lines
+  const allLines=[...new Set(currentData.lines.flatMap(s=>s.lines).filter(l=>l.trim()&&!translateCache[l]))];
+  // batch translate via MyMemory (free, no key needed)
+  let done=0;
+  for(const line of allLines){
+    try{
+      const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(line.slice(0,500))}&langpair=${lang.code}|en`);
+      const data=await res.json();
+      const tr=data?.responseData?.translatedText||'';
+      if(tr&&tr!==line) translateCache[line]=tr;
+    }catch(e){}
+    done++;
+    if(done%5===0) btn.textContent=`Translating… ${Math.round(done/allLines.length*100)}%`;
+    await new Promise(r=>setTimeout(r,60));// rate limit
+  }
+  translateActive=true;
+  renderLyrics(currentData.lines,true);
+  btn.textContent='🌍 Hide Translation';
+  toast('Translation complete!');
+}
+
+// ─────────────────── COPY LYRICS ───────────────────
+function copyLyrics(){
+  if(!currentData?.rawLyrics) return;
+  navigator.clipboard.writeText(currentData.rawLyrics).then(()=>{
+    const btn=document.getElementById('copyLyricsBtn');
+    btn.textContent='✓ Copied';
+    setTimeout(()=>btn.textContent='⎘ Copy',1800);
+  });
+}
+
+// ─────────────────── SIMILAR SONGS ───────────────────
+async function fetchSimilar(song, analysis){
+  // Step 1: Ask AI for smart recommendations based on actual mood/themes
+  try{
+    const aiMood = currentData?.aiData?.mood || analysis.mood || '';
+    const aiThemes = currentData?.aiData?.themes?.join(', ') || '';
+    const prompt = `You are a music expert. The song "${song.title}" by ${song.artist} has mood: "${aiMood}" and themes: ${aiThemes}.
+
+List exactly 5 real songs that are sonically and thematically similar. Consider genre, mood, lyrical themes and energy.
+Respond ONLY with a JSON array, no markdown:
+[{"title":"Song Title","artist":"Artist Name"},{"title":"...","artist":"..."},{"title":"...","artist":"..."},{"title":"...","artist":"..."},{"title":"...","artist":"..."}]`;
+
+    const resp = await puter.ai.chat(prompt, {model:'gpt-4o-mini'});
+    const txt = typeof resp==='string'?resp:resp?.message?.content?.[0]?.text||resp?.message?.content||'';
+    const match = txt.match(/\[[\s\S]*\]/);
+    if(!match) throw new Error('no json');
+    const recs = JSON.parse(match[0]);
+
+    // Step 2: Search each on Genius to get cover art + URLs
+    const results = [];
+    for(const rec of recs.slice(0,5)){
+      try{
+        const q = `${rec.title} ${rec.artist}`;
+        const url = `https://api.genius.com/search?q=${encodeURIComponent(q)}`;
+        const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`,{headers:{'Authorization':`Bearer ${geniusKey}`}});
+        if(!res.ok) continue;
+        const data = await res.json();
+        const hit = data.response.hits.find(h=>h.type==='song');
+        if(hit) results.push({...hit.result, ai_reason: rec.reason||''});
+        else results.push({title:rec.title, primary_artist:{name:rec.artist}, song_art_image_thumbnail_url:'', url:'', ai_fallback:true});
+      }catch(e){}
+    }
+    if(results.length && currentData){
+      currentData.similarSongs = results;
+      appendSimilar(results, song, analysis);
+    }
+  }catch(e){ console.log('Similar songs failed:', e.message); }
+}
+
+function appendSimilar(hits,song,analysis){
+  const el=document.getElementById('aiResults');
+  if(!el||el.style.display==='none') return;
+  const div=document.createElement('div');
+  div.className='s-block';
+  div.innerHTML=`<div class="s-label">You Might Also Like</div>
+    <div class="similar-grid">${hits.map(s=>`
+      <div class="sim-card" onclick='pickSong(${JSON.stringify({title:s.title,artist:s.primary_artist?.name||'',cover:s.song_art_image_thumbnail_url||'',url:s.url})})'>
+        ${s.song_art_image_thumbnail_url?`<img class="sim-cover" src="${esc(s.song_art_image_thumbnail_url)}" loading="lazy">`:`<div class="sim-cover-ph">♪</div>`}
+        <div class="sim-info"><div class="sim-title">${esc(s.title)}</div><div class="sim-artist">${esc(s.primary_artist?.name||'')}</div></div>
+      </div>`).join('')}
+    </div>`;
+  el.appendChild(div);
+}
+
+// ─────────────────── ANALYSIS ENGINE ───────────────────
+const MOOD_MAP=[
+  {words:['love','heart','kiss','baby','darling','romance','hold','together','forever','miss'],mood:'Romantic',emoji:'💕',color:'#e91e8c'},
+  {words:['die','death','kill','pain','blood','hurt','suffer','cry','tears','broken','alone','empty','lost','sad','dark'],mood:'Dark & Melancholic',emoji:'🖤',color:'#4a4e8a'},
+  {words:['party','dance','club','tonight','vibe','turn up','lit','hype','celebrate','wild'],mood:'Party & Hype',emoji:'🔥',color:'#ff6b35'},
+  {words:['angry','hate','rage','fight','war','destroy','enemy','attack','revenge','mad'],mood:'Angry & Aggressive',emoji:'😤',color:'#c0392b'},
+  {words:['happy','joy','smile','sun','bright','good','amazing','wonderful','celebrate','free'],mood:'Uplifting & Joyful',emoji:'☀️',color:'#f39c12'},
+  {words:['money','cash','rich','drip','flex','grind','hustle','paid','bank','work'],mood:'Ambitious & Driven',emoji:'💰',color:'#27ae60'},
+  {words:['lost','confused','searching','find','wonder','question','maybe','unsure'],mood:'Reflective & Lost',emoji:'🌙',color:'#5b6abf'},
+  {words:['remember','used to','back then','childhood','miss those','old days'],mood:'Nostalgic',emoji:'🌅',color:'#9b59b6'},
+  {words:['god','pray','soul','heaven','spirit','faith','believe','divine','holy','bless'],mood:'Spiritual',emoji:'✨',color:'#1abc9c'},
+];
+const STOP=['the','a','an','and','or','but','in','on','at','to','for','of','with','i','you','me','my','your','we','they','it','is','was','be','been','have','has','had','do','did','not','no','so','all','this','that','just','like','up','down','out','what','when','who','how','if','can','will','would','could','should','dont','im','its','youre','gonna','wanna','gotta','yeah','oh','uh','hey','na','la','da','ooh','aye'];
+
+function analyzeLyrics(raw,sections,title,artist){
+  const lower=raw.toLowerCase();
+  const contentLines=sections.flatMap(s=>s.lines).filter(l=>l.trim());
+  const words=lower.match(/\b[a-z']+\b/g)||[];
+  const cleanWords=words.map(w=>w.replace(/[^a-z']/g,'')).filter(w=>w.length>2&&!STOP.includes(w));
+  const freq={};cleanWords.forEach(w=>{freq[w]=(freq[w]||0)+1});
+  const topWords=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  // mood
+  let bestMood=MOOD_MAP[0];let bestScore=0;
+  MOOD_MAP.forEach(m=>{
+    const score=m.words.reduce((a,w)=>a+((lower.match(new RegExp('\\b'+w+'\\b','g'))||[]).length),0);
+    if(score>bestScore){bestScore=score;bestMood=m}
+  });
+  if(bestScore===0) bestMood={mood:'Introspective',emoji:'🎵',color:'#7c5cfc'};
+  // sentiment
+  const pos=['love','good','happy','great','amazing','beautiful','wonderful','free','joy','bright','hope','smile','win','light','better','best','proud','strong','rise','shine'];
+  const neg=['hate','bad','pain','hurt','alone','dark','dead','fear','lost','broken','cry','sad','wrong','die','fail','empty','cold','bleed','burn','scar'];
+  let p=0,n=0;
+  pos.forEach(w=>{p+=(lower.match(new RegExp('\\b'+w+'\\b','g'))||[]).length});
+  neg.forEach(w=>{n+=(lower.match(new RegExp('\\b'+w+'\\b','g'))||[]).length});
+  const sentimentScore=p+n>0?Math.round((p/(p+n))*100):50;
+  // repetitions
+  const lineCounts={};
+  contentLines.forEach(l=>{const k=l.trim().toLowerCase();if(k.length>5)lineCounts[k]=(lineCounts[k]||0)+1});
+  const repeated=Object.entries(lineCounts).filter(([,v])=>v>=3).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  // rhymes
+  const lineEnds=contentLines.map(l=>{const w=l.trim().split(/\s+/);return w[w.length-1]?.toLowerCase().replace(/[^a-z]/g,'')||''}).filter(w=>w.length>1);
+  const rhymePairs=[];
+  for(let i=0;i<lineEnds.length-1&&rhymePairs.length<6;i++){
+    const a=lineEnds[i];
+    for(let j=i+1;j<Math.min(i+5,lineEnds.length);j++){
+      const b=lineEnds[j];
+      if(a!==b&&a.length>2&&b.length>2&&a.slice(-2)===b.slice(-2)){
+        if(!rhymePairs.find(p=>p[0]===a||p[1]===a)){rhymePairs.push([a,b]);break}
+      }
+    }
+  }
+  // structure
+  const sectionCounts={};
+  sections.forEach(s=>{if(s.label){const k=s.label.replace(/\s*\d+\s*$/,'').trim().toLowerCase();sectionCounts[k]=(sectionCounts[k]||0)+1}});
+  // themes
+  const themeKws={Love:['love','heart','kiss','baby'],Identity:['i','myself','real','fake','who'],Society:['world','people','system','street'],Loss:['gone','lose','lost','miss','empty'],Success:['top','win','money','king','grind'],Freedom:['free','fly','wings','open','escape'],Struggle:['fight','hard','pain','survive'],Time:['time','forever','never','always','moment']};
+  const detectedThemes=Object.entries(themeKws).filter(([,kws])=>kws.some(kw=>lower.includes(kw))).map(([t])=>t).slice(0,5);
+  if(detectedThemes.length<2) detectedThemes.push('Emotion');
+  // striking line
+  const strikingLine=contentLines.filter(l=>l.length>20&&l.length<120).sort((a,b)=>{
+    const ua=new Set(a.toLowerCase().split(/\s+/).filter(w=>!STOP.includes(w))).size;
+    const ub=new Set(b.toLowerCase().split(/\s+/).filter(w=>!STOP.includes(w))).size;
+    return ub-ua;
+  })[0]||contentLines[0]||'';
+  return{mood:bestMood.mood,moodEmoji:bestMood.emoji,moodColor:bestMood.color,sentimentScore,topWords,repeated,rhymePairs,sectionCounts,detectedThemes,strikingLine,totalLines:contentLines.length,totalWords:words.length,uniqueWords:Object.keys(freq).length};
+}
+
+// ─────────────────── RENDER ANALYSIS ───────────────────
+function renderAnalysis(song,a){
+  document.getElementById('aiLoading').style.display='none';
+  const el=document.getElementById('aiResults');
+  el.style.display='block'; el.className='ai-results';
+  // Skeleton — AI will fill in mood/themes/sentiment properly
+  el.innerHTML=`
+    <div id="moodVisualWrap" class="mood-visual" style="display:none">
+      <canvas id="moodCanvas" height="110"></canvas>
+      <div class="mood-overlay"><div class="mood-label-sm">Stimmung</div><div class="mood-main" id="moodMainText"></div></div>
+      <div class="mood-emoji-big" id="moodEmojiEl"></div>
+    </div>
+    <div id="statsRowWrap" class="stats-row" style="display:none">
+      <div class="stat-card"><div class="stat-num">${a.totalLines}</div><div class="stat-label">Zeilen</div></div>
+      <div class="stat-card"><div class="stat-num">${a.totalWords}</div><div class="stat-label">Wörter</div></div>
+      <div class="stat-card"><div class="stat-num">${a.uniqueWords}</div><div class="stat-label">Unique</div></div>
+    </div>
+  `;
+  document.getElementById('heroGlow').style.background='radial-gradient(ellipse 80% 120% at 30% 50%,rgba(124,92,252,.1) 0%,transparent 65%)';
+}
+
+
+async function runAIAnalysis(lyrics, song, localAnalysis){
+  const el=document.getElementById('aiResults');
+
+  // Show stats right away
+  document.getElementById('statsRowWrap').style.display='grid';
+
+  // Loading placeholder for AI block
+  const aiDiv=document.createElement('div');
+  aiDiv.id='aiDeepBlock'; aiDiv.className='s-block';
+  aiDiv.innerHTML=`
+    <div class="s-label" style="display:flex;align-items:center;justify-content:space-between">
+      <span>KI-Analyse</span>
+      <button id="toggleLangBtn" onclick="toggleAnalysisLang()" style="display:none;font-family:IBM Plex Mono,monospace;font-size:9px;letter-spacing:.08em;padding:3px 10px;border:1px solid var(--border2);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s" onmouseover="this.style.color='var(--teal)';this.style.borderColor='rgba(45,212,191,.4)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">🌐 English</button>
+    </div>
+    <div id="aiDeepInner" style="display:flex;align-items:center;gap:10px;padding:.85rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:10px">
+      <div class="spinner" style="width:20px;height:20px;min-width:20px;flex-shrink:0"></div>
+      <span style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--muted)">KI analysiert…</span>
+    </div>`;
+  el.appendChild(aiDiv);
+
+  const promptDE=`Du bist ein präziser Musikkritiker. Analysiere den Song "${song.title}" von ${song.artist} auf Deutsch.
+
+Lyrics:
+${lyrics.slice(0,2500)}
+
+Antworte NUR mit einem JSON-Objekt, kein Markdown, keine Erklärung davor oder danach:
+{
+  "mood": "Stimmung in 2-4 Wörtern (z.B. 'Wütend & Rebellisch', 'Melancholisch & Träumerisch', 'Euphorisch & Freiheitlich')",
+  "mood_color": "Hex-Farbe die zur Stimmung passt",
+  "mood_emoji": "1 passendes Emoji",
+  "themes": ["Thema1","Thema2","Thema3"],
+  "sentiment": 45,
+  "highlights": ["stärkste Zeile 1","stärkste Zeile 2","stärkste Zeile 3"],
+  "bedeutung": "2-3 Sätze: Was steckt wirklich hinter dem Song?",
+  "stilmittel": "2-3 Sätze: Welche literarischen Techniken?",
+  "konflikt": "2-3 Sätze: Zentrale emotionale Spannung?",
+  "wirkung": "2-3 Sätze: Was macht den Song unvergesslich?"
+}`;
+
+  const promptEN=`You are a precise music critic. Analyze "${song.title}" by ${song.artist}.
+
+Lyrics:
+${lyrics.slice(0,2500)}
+
+Respond ONLY with a JSON object, no markdown, no explanation:
+{
+  "mood": "2-4 word mood (e.g. 'Angry & Defiant', 'Melancholic & Dreamy')",
+  "mood_color": "hex color matching the mood",
+  "mood_emoji": "1 matching emoji",
+  "themes": ["Theme1","Theme2","Theme3"],
+  "sentiment": 45,
+  "highlights": ["strongest line 1","strongest line 2","strongest line 3"],
+  "meaning": "2-3 sentences: What is the song really about?",
+  "devices": "2-3 sentences: What literary techniques are used?",
+  "tension": "2-3 sentences: Central emotional conflict?",
+  "impact": "2-3 sentences: What makes this song unforgettable?"
+}`;
+
+  let dataDE=null, dataEN=null, currentLang='de';
+
+  function parseJSON(text){
+    try{
+      const m=text.match(/\{[\s\S]*\}/);
+      return m?JSON.parse(m[0]):null;
+    }catch(e){return null;}
+  }
+
+  const COLORS=[
+    ['rgba(124,92,252,.12)','rgba(124,92,252,.28)','var(--accent2)'],
+    ['rgba(240,98,146,.08)','rgba(240,98,146,.22)','#f06292'],
+    ['rgba(45,212,191,.07)','rgba(45,212,191,.2)','var(--teal)'],
+    ['rgba(251,191,36,.07)','rgba(251,191,36,.2)','var(--amber)'],
+  ];
+
+  function applyMoodVisual(d){
+    const hex=d.mood_color||'#7c5cfc';
+    document.getElementById('moodMainText').textContent=d.mood||'';
+    document.getElementById('moodEmojiEl').textContent=d.mood_emoji||'🎵';
+    document.getElementById('moodVisualWrap').style.display='block';
+    document.getElementById('heroGlow').style.background=`radial-gradient(ellipse 80% 120% at 30% 50%,${hex}22 0%,transparent 65%)`;
+    drawMoodCanvas(hex);
+  }
+
+  function buildHTML(d, lang){
+    const isDE=lang==='de';
+    const credit=isDE?'KI-ANALYSE · DEUTSCH · PUTER.JS':'AI ANALYSIS · ENGLISH · PUTER.JS';
+    const sections=isDE
+      ?[['Bedeutung',d.bedeutung],['Stilmittel',d.stilmittel],['Konflikt',d.konflikt],['Wirkung',d.wirkung]]
+      :([['Meaning',d.meaning],['Literary Devices',d.devices],['Central Tension',d.tension],['Emotional Impact',d.impact]]);
+    const sentScore=d.sentiment??50;
+    const sentColor=sentScore>55?'var(--green)':sentScore<45?'var(--pink)':'var(--amber)';
+    const sentLabel=isDE?(sentScore>60?'Positiv':sentScore<40?'Negativ':'Gemischt'):(sentScore>60?'Positive':sentScore<40?'Negative':'Mixed');
+    const highlightsHTML=d.highlights?.length?`
+      <div class="s-block"><div class="s-label">${isDE?'Stärkste Zeilen':'Highlight Lines'}</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${d.highlights.map((h,i)=>`
+            <div style="display:flex;gap:10px;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.75rem .9rem">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:${COLORS[i%4][2]};margin-top:2px;flex-shrink:0">${String(i+1).padStart(2,'0')}</span>
+              <span style="font-style:italic;font-size:13.5px;color:rgba(226,226,240,.88);line-height:1.6">"${esc(h)}"</span>
+            </div>`).join('')}
+        </div>
+      </div>`:'';
+    const themeHTML=d.themes?.length?`
+      <div class="s-block"><div class="s-label">${isDE?'Themen':'Themes'}</div>
+        <div class="themes-row">${d.themes.map(t=>`<span class="theme-tag">${esc(t)}</span>`).join('')}</div>
+      </div>`:'';
+    const sentHTML=`
+      <div class="s-block"><div class="s-label">Sentiment</div>
+        <div class="sentiment-wrap"><span style="font-size:16px">😔</span>
+          <div style="flex:1">
+            <div class="sentiment-bar-bg"><div class="sentiment-fill" style="width:${sentScore}%;background:${sentColor}"></div></div>
+            <div class="sentiment-labels"><span>${isDE?'Negativ':'Negative'}</span><span style="color:${sentColor};font-weight:700">${sentLabel} (${sentScore}%)</span><span>${isDE?'Positiv':'Positive'}</span></div>
+          </div>
+        <span style="font-size:16px">😊</span></div>
+      </div>`;
+    const analysisHTML=sections.filter(s=>s[1]).map(([label,text],i)=>{
+      const [bg,border,col]=COLORS[i%4];
+      return `<div style="background:linear-gradient(135deg,${bg},transparent);border:1px solid ${border};border-radius:10px;padding:.9rem 1.15rem">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:${col};margin-bottom:6px;display:flex;align-items:center;gap:6px">
+          <span style="width:5px;height:5px;border-radius:50%;background:${col};flex-shrink:0"></span>${esc(label)}
+        </div>
+        <div style="font-size:13.5px;line-height:1.85;color:rgba(226,226,240,.88)">${esc(text)}</div>
+      </div>`;
+    }).join('');
+    return `${themeHTML}${sentHTML}${highlightsHTML}
+      <div class="s-block"><div class="s-label">Analyse</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${analysisHTML}
+          <div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--muted);letter-spacing:.08em;padding:.15rem .2rem 0">${credit}</div>
+        </div>
+      </div>`;
+  }
+
+  window.toggleAnalysisLang=async function(){
+    const btn=document.getElementById('toggleLangBtn');
+    const wrap=document.getElementById('aiDeepBlock')?.querySelector('#aiContent');
+    if(!wrap) return;
+    if(currentLang==='de'){
+      if(!dataEN){
+        btn.textContent='⏳…'; btn.disabled=true;
+        try{
+          const r=await puter.ai.chat(promptEN,{model:'gpt-4o-mini'});
+          const txt=typeof r==='string'?r:r?.message?.content?.[0]?.text||r?.message?.content||'';
+          dataEN=parseJSON(txt);
+          if(!dataEN) throw new Error('Parse failed');
+        }catch(e){btn.textContent='🌐 English';btn.disabled=false;toast('Übersetzung fehlgeschlagen');return;}
+      }
+      wrap.innerHTML=buildHTML(dataEN,'en');
+      btn.textContent='🌐 Deutsch'; btn.disabled=false; currentLang='en';
+    } else {
+      wrap.innerHTML=buildHTML(dataDE,'de');
+      btn.textContent='🌐 English'; btn.disabled=false; currentLang='de';
+    }
+  };
+
+  try{
+    const resp=await puter.ai.chat(promptDE,{model:'gpt-4o-mini'});
+    const txt=typeof resp==='string'?resp:resp?.message?.content?.[0]?.text||resp?.message?.content||JSON.stringify(resp);
+    dataDE=parseJSON(txt);
+    if(!dataDE) throw new Error('JSON parse failed. Response: '+txt.slice(0,100));
+
+    applyMoodVisual(dataDE);
+
+    const inner=document.getElementById('aiDeepInner');
+    if(!inner) return;
+    inner.outerHTML=`<div id="aiContent">${buildHTML(dataDE,'de')}</div>`;
+    document.getElementById('toggleLangBtn').style.display='block';
+    if(currentData) currentData.aiData=dataDE;
+  }catch(e){
+    const inner=document.getElementById('aiDeepInner');
+    if(inner) inner.outerHTML=`<div class="err-card"><strong>KI nicht verfügbar</strong><small>${esc(String(e?.message||e))}</small></div>`;
+  }
+}
+
+
+
+function drawMoodCanvas(hex){
+  const c=document.getElementById('moodCanvas');if(!c)return;
+  const ctx=c.getContext('2d');c.width=c.offsetWidth||600;c.height=110;
+  const r=parseInt(hex.slice(1,3),16)||100,g=parseInt(hex.slice(3,5),16)||80,b=parseInt(hex.slice(5,7),16)||200;
+  const gr=ctx.createLinearGradient(0,0,c.width,110);
+  gr.addColorStop(0,`rgba(${r},${g},${b},.95)`);
+  gr.addColorStop(.5,`rgba(${Math.min(r+50,255)},${Math.min(g+30,255)},${Math.min(b+50,255)},.7)`);
+  gr.addColorStop(1,`rgba(${r},${g},${b},.35)`);
+  ctx.fillStyle=gr;ctx.fillRect(0,0,c.width,110);
+  [[.022,16,.12],[.016,20,.07],[.03,10,.09]].forEach(([freq,amp,op],i)=>{
+    ctx.strokeStyle=`rgba(255,255,255,${op})`;ctx.lineWidth=1.5;ctx.beginPath();
+    for(let x=0;x<c.width;x++){const y=55+Math.sin(x*freq+i)*amp+Math.cos(x*freq*.7)*amp*.5;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke();
+  });
+}
+
+// ─────────────────── SHARE CARD ───────────────────
+function openShareCard(){
+  if(!currentData) return;
+  const {song,analysis}=currentData;
+  const canvas=document.getElementById('shareCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=600;canvas.height=340;
+  // bg gradient from mood color
+  const hex=analysis.moodColor||'#7c5cfc';
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  const bg=ctx.createLinearGradient(0,0,600,340);
+  bg.addColorStop(0,'#060608');
+  bg.addColorStop(1,`rgba(${r},${g},${b},.45)`);
+  ctx.fillStyle=bg;ctx.fillRect(0,0,600,340);
+  // noise overlay (subtle)
+  for(let i=0;i<3000;i++){ctx.fillStyle=`rgba(255,255,255,${Math.random()*.025})`;ctx.fillRect(Math.random()*600,Math.random()*340,1,1)}
+  // wave lines
+  [[.022,16,.12],[.014,22,.07]].forEach(([freq,amp,op])=>{
+    ctx.strokeStyle=`rgba(255,255,255,${op})`;ctx.lineWidth=1;ctx.beginPath();
+    for(let x=0;x<600;x++){const y=280+Math.sin(x*freq)*amp;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke();
+  });
+  // cover art (if available)
+  const drawText=()=>{
+    // LyricAI logo
+    ctx.font='700 12px "Syne", sans-serif';ctx.fillStyle='rgba(255,255,255,.4)';
+    ctx.fillText('LYRICAI',36,36);
+    // mood emoji
+    ctx.font='52px serif';ctx.fillText(analysis.moodEmoji,500,70);
+    // mood badge
+    ctx.fillStyle=hex;ctx.globalAlpha=.25;ctx.beginPath();ctx.roundRect(36,60,180,36,8);ctx.fill();ctx.globalAlpha=1;
+    ctx.font='700 14px "IBM Plex Mono", monospace';ctx.fillStyle=hex;
+    ctx.fillText(analysis.mood.toUpperCase(),46,83);
+    // title
+    ctx.font='800 32px "Syne", sans-serif';ctx.fillStyle='#ffffff';
+    const title=song.title.length>28?song.title.slice(0,26)+'…':song.title;
+    ctx.fillText(title,36,150);
+    // artist
+    ctx.font='400 16px "Inter", sans-serif';ctx.fillStyle='rgba(226,226,240,.6)';
+    ctx.fillText(song.artist,36,178);
+    // divider
+    ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(36,200);ctx.lineTo(564,200);ctx.stroke();
+    // themes
+    const themes=analysis.detectedThemes.slice(0,4);
+    let tx=36;
+    themes.forEach(theme=>{
+      ctx.font='11px "IBM Plex Mono", monospace';
+      const tw=ctx.measureText(theme).width+20;
+      ctx.fillStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.roundRect(tx,218,tw,24,6);ctx.fill();
+      ctx.fillStyle='rgba(226,226,240,.7)';ctx.fillText(theme,tx+10,234);
+      tx+=tw+8;
+    });
+    // striking line (truncated)
+    const sline=analysis.strikingLine;
+    const maxW=500;
+    ctx.font='italic 13px "Inter", sans-serif';ctx.fillStyle='rgba(226,226,240,.55)';
+    const words=sline.split(' ');let line='';let y=280;
+    words.forEach(w=>{
+      const test=line+w+' ';
+      if(ctx.measureText('"'+test).width>maxW&&line){ctx.fillText('"'+line.trim(),(600-ctx.measureText('"'+line.trim()).width)/2,y);line=w+' ';y+=20}
+      else line=test;
+    });
+    if(line)ctx.fillText('"'+line.trim()+'"',(600-ctx.measureText('"'+line.trim()+'"').width)/2,y);
+    // sentiment
+    ctx.font='11px "IBM Plex Mono", monospace';ctx.fillStyle='rgba(255,255,255,.3)';
+    const sent=`Sentiment ${analysis.sentimentScore}% positive · ${analysis.totalWords} words`;
+    ctx.fillText(sent,600-ctx.measureText(sent).width-36,326);
+  };
+  // try to load cover
+  if(song.cover){
+    const img=new Image();img.crossOrigin='anonymous';
+    img.onload=()=>{
+      ctx.save();ctx.beginPath();ctx.roundRect(36,186,0,0,0);ctx.restore();
+      // small cover bottom right
+      ctx.save();ctx.beginPath();ctx.roundRect(520,26,60,60,8);ctx.clip();
+      ctx.drawImage(img,520,26,60,60);ctx.restore();
+      drawText();
+    };
+    img.onerror=drawText;
+    img.src=song.cover;
+  } else { drawText(); }
+  document.getElementById('shareOverlay').classList.add('open');
+}
+function closeShare(){document.getElementById('shareOverlay').classList.remove('open')}
+function downloadCard(){
+  const c=document.getElementById('shareCanvas');
+  const a=document.createElement('a');
+  a.download=`lyricai-${(currentData?.song?.title||'card').replace(/\s+/g,'-').toLowerCase()}.png`;
+  a.href=c.toDataURL('image/png');a.click();
+  toast('Card downloaded!');
+}
+
+// ─────────────────── SAVE / HISTORY ───────────────────
+function getHistory(){try{return JSON.parse(localStorage.getItem('lyricai_v3')||'[]')}catch{return[]}}
+function setHistory(h){localStorage.setItem('lyricai_v3',JSON.stringify(h))}
+function updateBadge(){const n=getHistory().length;const b=document.getElementById('histBadge');b.style.display=n>0?'flex':'none';b.textContent=n}
+
+function saveNow(){
+  if(!currentData) return;
+  const h=getHistory();
+  if(h.find(e=>e.song.title===currentData.song.title&&e.song.artist===currentData.song.artist)){toast('Already saved!');return}
+  h.unshift({id:Date.now(),date:new Date().toLocaleDateString(),song:currentData.song,analysis:currentData.analysis});
+  if(h.length>60)h.pop();
+  setHistory(h);updateBadge();
+  document.getElementById('saveBtn').className='action-btn save-btn saved';
+  document.getElementById('saveBtn').textContent='✓ Saved';
+  toast('Saved!');
+}
+
+function renderHistory(){
+  const h=getHistory();const el=document.getElementById('histList');
+  if(!h.length){el.innerHTML='<div class="hist-empty">No saved analyses yet.<br>Analyze a song and hit 💾 Save!</div>';return}
+  el.innerHTML=`<div class="hist-grid">${h.map(e=>`
+    <div class="hist-card" onclick="loadSaved('${e.id}')">
+      <div class="hist-top">
+        ${e.song.cover?`<img class="hist-thumb" src="${esc(e.song.cover)}" loading="lazy">`:`<div class="hist-thumb-ph">♪</div>`}
+        <div class="hist-info">
+          <div class="hist-title">${esc(e.song.title)}</div>
+          <div class="hist-artist">${esc(e.song.artist)}</div>
+          <div class="hist-mood">${e.analysis.moodEmoji||'🎵'} ${esc(e.analysis.mood)}</div>
+        </div>
+      </div>
+      <div class="hist-bot"><span class="hist-date">${e.date}</span>
+        <button class="hist-del" onclick="delEntry(event,'${e.id}')">✕</button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function loadSaved(id){
+  const e=getHistory().find(x=>String(x.id)===String(id));if(!e)return;
+  document.getElementById('aArtist').textContent=e.song.artist;
+  document.getElementById('aTitle').textContent=e.song.title;
+  const cov=document.getElementById('aCover');cov.src=e.song.cover||'';cov.style.display=e.song.cover?'block':'none';
+  document.getElementById('lyricsBody').innerHTML='<div style="color:var(--muted);font-size:13px;font-style:italic;padding:.5rem 0">Search the song again to reload lyrics.</div>';
+  document.getElementById('aiLoading').style.display='none';
+  document.getElementById('aiResults').style.display='block';
+  document.getElementById('heroActions').style.display='flex';
+  document.getElementById('saveBtn').className='action-btn save-btn saved';
+  document.getElementById('saveBtn').textContent='✓ Saved';
+  currentData={song:e.song,analysis:e.analysis,lines:[],rawLyrics:''};
+  renderAnalysis(e.song,e.analysis);
+  showScreen('analysisScreen');
+}
+
+function delEntry(e,id){e.stopPropagation();setHistory(getHistory().filter(x=>String(x.id)!==String(id)));updateBadge();renderHistory();toast('Removed')}
+function clearAll(){if(!confirm('Clear all saved analyses?'))return;localStorage.removeItem('lyricai_v3');updateBadge();renderHistory();toast('Cleared')}
+
+// ─────────────────── SONG QUIZ ───────────────────
+let quizPlaylist = []; // [{title, artist, cover, lyrics}]
+let quizQuestions = [];
+let quizCurrent = 0;
+let quizCorrect = 0;
+let quizAnswered = false;
+
+function renderQuizSavedList(){
+  const h = getHistory();
+  const el = document.getElementById('quizSavedList');
+  if(!el) return;
+  if(!h.length){
+    el.innerHTML='<span style="font-size:12px;color:var(--muted);font-style:italic">Noch keine gespeicherten Songs. Analysiere Songs und speichere sie!</span>';
+    return;
+  }
+  el.innerHTML = h.map(e=>`
+    <div onclick="toggleQuizSong(${e.id})" id="qsong_${e.id}" style="display:flex;align-items:center;gap:7px;padding:5px 11px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;transition:all .2s;background:var(--bg3);font-size:12px;color:var(--text)">
+      ${e.song.cover?`<img src="${e.song.cover}" style="width:20px;height:20px;border-radius:3px;object-fit:cover">`:``}
+      <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${e.song.title}</span>
+    </div>`).join('');
+}
+
+function toggleQuizSong(id){
+  const h = getHistory();
+  const entry = h.find(e=>String(e.id)===String(id));
+  if(!entry) return;
+  const existing = quizPlaylist.findIndex(s=>String(s.id)===String(id));
+  const el = document.getElementById('qsong_'+id);
+  if(existing>=0){
+    quizPlaylist.splice(existing,1);
+    if(el){el.style.borderColor='var(--border2)';el.style.background='var(--bg3)';el.style.color='var(--text)'}
+  } else {
+    quizPlaylist.push({id:entry.id, title:entry.song.title, artist:entry.song.artist, cover:entry.song.cover||'', aiData:entry.analysis});
+    if(el){el.style.borderColor='var(--accent)';el.style.background='rgba(124,92,252,.12)';el.style.color='var(--accent2)'}
+  }
+  renderQuizPlaylistPreview();
+}
+
+function renderQuizPlaylistPreview(){
+  const el = document.getElementById('quizPlaylist');
+  const cnt = document.getElementById('quizPlCount');
+  const btn = document.getElementById('quizStartBtn');
+  if(!el) return;
+  el.innerHTML = quizPlaylist.map(s=>`
+    <div class="quiz-pl-item">
+      ${s.cover?`<img class="quiz-pl-thumb" src="${s.cover}">`:`<div class="quiz-pl-thumb-ph">♪</div>`}
+      <div class="quiz-pl-info">
+        <div class="quiz-pl-title">${s.title}</div>
+        <div class="quiz-pl-artist">${s.artist}</div>
+      </div>
+      <button class="quiz-pl-del" onclick="toggleQuizSong(${s.id})">✕</button>
+    </div>`).join('');
+  const n = quizPlaylist.length;
+  cnt.textContent = n + ' Song' + (n!==1?'s':'') + ' in der Playlist';
+  btn.disabled = n < 2;
+  btn.style.opacity = n >= 2 ? '1' : '.4';
+}
+
+async function startQuiz(){
+  if(quizPlaylist.length < 2){ toast('Mindestens 2 Songs nötig!'); return; }
+  document.getElementById('quizBuilder').style.display='none';
+  document.getElementById('quizResult').classList.remove('active');
+  document.getElementById('quizArea').classList.add('active');
+
+  // Build questions — for each song pick a highlight line or use aiData
+  quizQuestions = [];
+  for(const song of quizPlaylist){
+    // Use highlight lines from AI data if available
+    const lines = song.aiData?.highlights || [];
+    const line = lines[Math.floor(Math.random()*lines.length)] || null;
+    if(line) quizQuestions.push({line, correct: song});
+  }
+  // If we have fewer questions than songs, generate with AI
+  if(quizQuestions.length < quizPlaylist.length){
+    toast('Generiere Quiz-Fragen…');
+    for(const song of quizPlaylist){
+      if(quizQuestions.find(q=>q.correct.id===song.id)) continue;
+      try{
+        const p = `Give me ONE memorable, recognizable lyric line from the song "${song.title}" by ${song.artist}. Return ONLY the lyric line itself, nothing else, no quotes, no attribution.`;
+        const r = await puter.ai.chat(p,{model:'gpt-4o-mini'});
+        const txt = (typeof r==='string'?r:r?.message?.content?.[0]?.text||r?.message?.content||'').trim();
+        if(txt) quizQuestions.push({line:txt, correct:song});
+      }catch(e){}
+    }
+  }
+  // Shuffle
+  quizQuestions = quizQuestions.sort(()=>Math.random()-.5);
+  quizCurrent = 0; quizCorrect = 0;
+  renderQuizProgress();
+  showQuestion();
+}
+
+function renderQuizProgress(){
+  const el = document.getElementById('quizProgress');
+  if(!el) return;
+  el.innerHTML = quizQuestions.map((q,i)=>
+    `<div class="quiz-prog-dot${i<quizCurrent?(quizQuestions[i]?.wasCorrect?' correct':' wrong'):(i===quizCurrent?' done':'')}" id="qdot_${i}"></div>`
+  ).join('');
+}
+
+function showQuestion(){
+  if(quizCurrent >= quizQuestions.length){ showQuizResult(); return; }
+  const q = quizQuestions[quizCurrent];
+  quizAnswered = false;
+  document.getElementById('quizLine').textContent = '"' + q.line + '"';
+  document.getElementById('quizScore').textContent = quizCorrect + ' / ' + quizCurrent + ' richtig';
+  document.getElementById('quizNextBtn').style.display='none';
+
+  // Build options: correct + 3 random wrong
+  const wrong = quizPlaylist.filter(s=>s.id!==q.correct.id).sort(()=>Math.random()-.5).slice(0,3);
+  const opts = [...wrong, q.correct].sort(()=>Math.random()-.5);
+  const optsEl = document.getElementById('quizOptions');
+  optsEl.innerHTML = opts.map(s=>`
+    <button class="quiz-opt" onclick="answerQuiz(${s.id})">
+      <div style="font-weight:600;font-size:13px">${s.title}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${s.artist}</div>
+    </button>`).join('');
+  renderQuizProgress();
+}
+
+function answerQuiz(songId){
+  if(quizAnswered) return;
+  quizAnswered = true;
+  const q = quizQuestions[quizCurrent];
+  const correct = String(songId) === String(q.correct.id);
+  if(correct){ quizCorrect++; q.wasCorrect=true; } else { q.wasCorrect=false; }
+  // color options
+  document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.disabled = true;
+    const txt = btn.querySelector('div')?.textContent;
+    if(txt===q.correct.title){ btn.classList.add('correct'); }
+    else if(!correct && txt===quizPlaylist.find(s=>String(s.id)===String(songId))?.title){ btn.classList.add('wrong'); }
+  });
+  document.getElementById('quizScore').textContent = quizCorrect + ' / ' + (quizCurrent+1) + ' richtig';
+  renderQuizProgress();
+  quizCurrent++;
+  if(quizCurrent < quizQuestions.length){
+    document.getElementById('quizNextBtn').style.display='block';
+  } else {
+    setTimeout(showQuizResult, 800);
+  }
+}
+
+function nextQuestion(){
+  document.getElementById('quizNextBtn').style.display='none';
+  showQuestion();
+}
+
+function showQuizResult(){
+  document.getElementById('quizArea').classList.remove('active');
+  document.getElementById('quizResult').classList.add('active');
+  const total = quizQuestions.length;
+  const pct = total>0?Math.round(quizCorrect/total*100):0;
+  document.getElementById('quizFinalScore').textContent = quizCorrect + '/' + total;
+  const labels = pct===100?'Perfekt! Du kennst jede Zeile 🔥':pct>=75?'Stark! Fast alles richtig 🎵':pct>=50?'Nicht schlecht! Noch etwas üben 🎧':'Mehr Musik hören 😅';
+  document.getElementById('quizFinalLabel').textContent = labels;
+}
+
+function resetQuiz(){
+  quizPlaylist=[]; quizQuestions=[]; quizCurrent=0; quizCorrect=0;
+  document.getElementById('quizBuilder').style.display='block';
+  document.getElementById('quizArea').classList.remove('active');
+  document.getElementById('quizResult').classList.remove('active');
+  // reset song selection UI
+  document.querySelectorAll('[id^="qsong_"]').forEach(el=>{
+    el.style.borderColor='var(--border2)'; el.style.background='var(--bg3)'; el.style.color='var(--text)';
+  });
+  renderQuizPlaylistPreview();
+}
+
+// Re-render quiz saved list when entering tools screen
+const _origShowScreen = showScreen;
+window.showScreen = function(id){
+  _origShowScreen(id);
+  if(id==='toolsScreen') renderQuizSavedList();
+};
+
+// ─────────────────── TOOLS ───────────────────
+async function runExplainer(){
+  const line=document.getElementById('explainInput').value.trim();
+  if(!line){toast('Bitte eine Zeile eingeben');return;}
+  const context=document.getElementById('explainSong').value.trim();
+  const spinner=document.getElementById('explainSpinner');
+  const result=document.getElementById('explainResult');
+  const btn=result.parentElement.querySelector('.tool-run');
+  btn.disabled=true;spinner.classList.add('show');result.classList.remove('show');
+  const prompt='Du bist Musikexperte. Erklaere diese Songzeile auf Deutsch praezise:\n\n"'+line+'"\n'+(context?'Song/Artist: '+context:'')+'\n\nWas bedeutet sie woertlich und metaphorisch? Welche Stilmittel? Emotionale Wirkung? 3-4 Saetze, kein Fuelltext.';
+  try{
+    const resp=await puter.ai.chat(prompt,{model:'gpt-4o-mini'});
+    const txt=typeof resp==='string'?resp:resp?.message?.content?.[0]?.text||resp?.message?.content||'';
+    result.textContent=txt.trim();result.classList.add('show');
+  }catch(e){result.textContent='Fehler: '+e.message;result.classList.add('show');}
+  btn.disabled=false;spinner.classList.remove('show');
+}
+
+async function runTranslator(){
+  const text=document.getElementById('translateInput').value.trim();
+  if(!text){toast('Bitte Text eingeben');return;}
+  const target=document.getElementById('translateTarget').value;
+  const spinner=document.getElementById('translateSpinner');
+  const result=document.getElementById('translateResult');
+  const btn=result.parentElement.querySelector('.tool-run');
+  btn.disabled=true;spinner.classList.add('show');result.classList.remove('show');
+  const prompt='Translate the following text to '+target+'. Return ONLY the translation, nothing else:\n\n'+text;
+  try{
+    const resp=await puter.ai.chat(prompt,{model:'gpt-4o-mini'});
+    const txt=typeof resp==='string'?resp:resp?.message?.content?.[0]?.text||resp?.message?.content||'';
+    result.textContent=txt.trim();result.classList.add('show');
+  }catch(e){result.textContent='Fehler: '+e.message;result.classList.add('show');}
+  btn.disabled=false;spinner.classList.remove('show');
+}
+
+async function runArtistDive(){
+  const artist=document.getElementById('artistInput').value.trim();
+  if(!artist){toast('Bitte einen Artist eingeben');return;}
+  const spinner=document.getElementById('artistSpinner');
+  const result=document.getElementById('artistResult');
+  const btn=result.parentElement.querySelector('.tool-run');
+  btn.disabled=true;spinner.classList.add('show');result.classList.remove('show');result.textContent='';
+  const prompt='Du bist Musikjournalist. Analysiere den Kuenstler "'+artist+'" auf Deutsch mit diesen Labels:\nSTIL: Musikalischer Stil (3-4 Saetze)\nTHEMEN: Lyrische Themen (3-4 Saetze)\nEINFLUESSE: Musikalische Einfluesse (2-3 Saetze)\nBESONDERHEIT: Was macht ihn einzigartig? (3-4 Saetze)\nMEISTERWERK: Bester Song oder Album? (2-3 Saetze)\n\nSei konkret, echte Songs/Alben nennen. Kein Fuelltext.';
+  try{
+    const resp=await puter.ai.chat(prompt,{model:'gpt-4o-mini'});
+    const txt=typeof resp==='string'?resp:resp?.message?.content?.[0]?.text||resp?.message?.content||'';
+    const formatted=txt.trim().replace(/^(STIL|THEMEN|EINFL[^:]+|BESONDERHEIT|MEISTERWERK):/gm,'\u25b8 $1:');
+    result.textContent=formatted;result.classList.add('show');
+  }catch(e){result.textContent='Fehler: '+e.message;result.classList.add('show');}
+  btn.disabled=false;spinner.classList.remove('show');
+}
+
+updateBadge();
+</script>
+</body>
+</html>
