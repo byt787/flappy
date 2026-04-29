@@ -219,16 +219,47 @@
 </div>
 
 <script>
-const BIN_ID = "69f228cc36566621a807321a";
-const API_KEY = "$2a$10$XkmvBsUBYAPnsNpIMUNLYuqX7.nSKkHUH3socTyvwDPZJNgKKEu8i";
-const BASE = "https://api.jsonbin.io/v3/b/" + BIN_ID;
+// ---- CONFIG ----
+const SB_URL = "https://zmabwmuaixhhblvlzccj.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptYWJ3bXVhaXhoaGJsdmx6Y2NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODcyMjYsImV4cCI6MjA5MzA2MzIyNn0.yfG9FAW7VvcWMHv8kTKJoYQlPKXtvkTkyoDPLtaG3ts";
+const HEADERS = { "Content-Type": "application/json", "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY };
 const ADMIN_USER = "admin";
 const ADMIN_PASS = "byt666";
 
-let state = { groups: {} };
-let cur = null, claimId = null, commentId = null;
+let curGroup = null; // full row from supabase: { id, slug, name, pass, data }
+let claimId = null, commentId = null;
 
-// LOGS
+// ---- SUPABASE API ----
+async function sbGet(slug) {
+  const r = await fetch(`${SB_URL}/rest/v1/groups?slug=eq.${encodeURIComponent(slug)}&select=*`, { headers: HEADERS });
+  if (!r.ok) throw new Error("GET " + r.status + " " + await r.text());
+  const rows = await r.json();
+  return rows[0] || null;
+}
+
+async function sbInsert(slug, name, pass) {
+  const r = await fetch(`${SB_URL}/rest/v1/groups`, {
+    method: "POST",
+    headers: { ...HEADERS, "Prefer": "return=representation" },
+    body: JSON.stringify({ slug, name, pass, data: { ideas: [] } })
+  });
+  if (!r.ok) throw new Error("INSERT " + r.status + " " + await r.text());
+  const rows = await r.json();
+  return rows[0];
+}
+
+async function sbUpdate(slug, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/groups?slug=eq.${encodeURIComponent(slug)}`, {
+    method: "PATCH",
+    headers: { ...HEADERS, "Prefer": "return=representation" },
+    body: JSON.stringify({ data })
+  });
+  if (!r.ok) throw new Error("PATCH " + r.status + " " + await r.text());
+  const rows = await r.json();
+  return rows[0];
+}
+
+// ---- LOGS ----
 function addLog(type, message) {
   try {
     const logs = JSON.parse(localStorage.getItem("ib_logs") || "[]");
@@ -244,35 +275,18 @@ function renderLogs() {
   el.innerHTML = logs.map(l => `<div class="log-entry ${l.type}-log"><div class="lt">${l.t}</div><div class="lmsg">${esc(l.msg)}</div></div>`).join("");
 }
 
-// SPINNER
+// ---- UI HELPERS ----
 function showSpinner(m) { document.getElementById("pageSpinner").classList.add("show"); document.getElementById("spinnerMsg").textContent = m || "Laden..."; }
 function hideSpinner() { document.getElementById("pageSpinner").classList.remove("show"); }
 function setBtn(id, loading) { const b = document.getElementById(id); if (!b) return; b.disabled = loading; b.classList.toggle("loading", loading); }
+function setMsg(id, t, c) { const e = document.getElementById(id); if (!e) return; e.textContent = t; e.style.color = c||"#888"; if (t && c !== "#c0392b") setTimeout(()=>{ if(e.textContent===t) e.textContent=""; }, 3500); }
+function closeModal() { document.querySelectorAll(".modal-bg").forEach(m=>m.classList.remove("open")); }
 
-// DATA
-async function load() {
-  addLog("info", "Lade Daten...");
-  const r = await fetch(BASE + "/latest", { headers: { "X-Master-Key": API_KEY } });
-  if (!r.ok) { addLog("err", "HTTP " + r.status + " beim Laden"); throw new Error("fetch " + r.status); }
-  const d = await r.json();
-  state = (d.record && d.record.groups) ? d.record : { groups: {} };
-  addLog("ok", Object.keys(state.groups).length + " Gruppe(n) geladen");
-}
-async function save() {
-  addLog("info", "Speichere...");
-  const r = await fetch(BASE, { method: "PUT", headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY }, body: JSON.stringify(state) });
-  if (!r.ok) { addLog("err", "HTTP " + r.status + " beim Speichern"); throw new Error("save " + r.status); }
-  addLog("ok", "Gespeichert");
-}
-
-// UTILS
 function slug(s) { return s.trim().toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,""); }
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function setMsg(id, t, c) { const e = document.getElementById(id); if (!e) return; e.textContent = t; e.style.color = c||"#888"; if (t && c !== "#c0392b") setTimeout(()=>{ if(e.textContent===t) e.textContent=""; },3500); }
+
 function recent() { try { return JSON.parse(localStorage.getItem("ib_recent")||"[]"); } catch { return []; } }
 function saveRecent(sl, name) { let r = recent().filter(x=>x.sl!==sl); r.unshift({sl,name}); localStorage.setItem("ib_recent", JSON.stringify(r.slice(0,6))); }
-function closeModal() { document.querySelectorAll(".modal-bg").forEach(m=>m.classList.remove("open")); }
-function g() { return state.groups[cur]; }
 
 function showView(name) {
   document.getElementById("homeView").style.display = name==="home" ? "block" : "none";
@@ -288,26 +302,30 @@ function renderRecent() {
   el.innerHTML = r.map(x=>`<div class="group-item" onclick="openRecent('${x.sl}')"><div><div class="gname">${esc(x.name)}</div><div class="gmeta">${x.sl}</div></div><span>›</span></div>`).join("");
 }
 
+// ---- CREATE / JOIN ----
 async function createGroup() {
   const name = document.getElementById("newName").value.trim();
   const pass = document.getElementById("newPass").value.trim();
   if (!name||!pass) { setMsg("createMsg","Name und Passwort angeben!","#c0392b"); return; }
   const sl = slug(name);
   if (!sl) { setMsg("createMsg","Ungültiger Name.","#c0392b"); return; }
+
   setBtn("createBtn",true); showSpinner("Gruppe wird erstellt...");
   try {
-    await load();
-    if (state.groups[sl]) { setMsg("createMsg","Name schon vergeben! Anderen Namen wählen.","#c0392b"); addLog("err","Gruppe bereits vorhanden: "+sl); return; }
-    state.groups[sl] = { name, pass, ideas: [], created: Date.now() };
-    await save();
-    cur = sl; saveRecent(sl, name);
+    // check if exists
+    const existing = await sbGet(sl);
+    if (existing) { setMsg("createMsg","Name schon vergeben! Anderen wählen.","#c0392b"); addLog("err","Gruppe existiert bereits: "+sl); return; }
+
+    const row = await sbInsert(sl, name, pass);
+    curGroup = row;
+    saveRecent(sl, name);
     addLog("ok","Gruppe erstellt: "+sl);
     document.getElementById("newName").value = "";
     document.getElementById("newPass").value = "";
     setMsg("createMsg","✓ Gruppe erstellt!","#27ae60");
     setTimeout(() => openGroup(), 500);
   } catch(e) {
-    setMsg("createMsg","Fehler! Verbindung prüfen.","#c0392b");
+    setMsg("createMsg","Fehler: "+e.message,"#c0392b");
     addLog("err","createGroup: "+e.message);
   } finally { setBtn("createBtn",false); hideSpinner(); }
 }
@@ -317,38 +335,49 @@ async function joinGroup() {
   const pass = document.getElementById("joinPass").value.trim();
   if (!name||!pass) { setMsg("joinMsg","Name und Passwort angeben!","#c0392b"); return; }
   const sl = slug(name);
+
   setBtn("joinBtn",true); showSpinner("Suche Gruppe...");
   try {
-    await load();
-    const grp = state.groups[sl];
-    if (!grp) { setMsg("joinMsg","Gruppe nicht gefunden!","#c0392b"); addLog("err","Nicht gefunden: "+sl); return; }
-    if (grp.pass !== pass) { setMsg("joinMsg","Falsches Passwort!","#c0392b"); addLog("err","Falsches PW für: "+sl); return; }
-    cur = sl; saveRecent(sl, grp.name);
+    const row = await sbGet(sl);
+    if (!row) { setMsg("joinMsg","Gruppe nicht gefunden!","#c0392b"); addLog("err","Nicht gefunden: "+sl); return; }
+    if (row.pass !== pass) { setMsg("joinMsg","Falsches Passwort!","#c0392b"); addLog("err","Falsches PW für: "+sl); return; }
+
+    curGroup = row;
+    saveRecent(sl, row.name);
     addLog("ok","Beigetreten: "+sl);
     document.getElementById("joinName").value = "";
     document.getElementById("joinPass").value = "";
     openGroup();
   } catch(e) {
-    setMsg("joinMsg","Fehler! Verbindung prüfen.","#c0392b");
+    setMsg("joinMsg","Fehler: "+e.message,"#c0392b");
     addLog("err","joinGroup: "+e.message);
   } finally { setBtn("joinBtn",false); hideSpinner(); }
 }
 
 function openGroup() {
   showView("group");
-  document.getElementById("gTitle").textContent = g().name;
-  document.getElementById("gCode").textContent = "Gruppenname zum Beitreten: " + cur;
+  document.getElementById("gTitle").textContent = curGroup.name;
+  document.getElementById("gCode").textContent = "Gruppenname zum Beitreten: " + curGroup.slug;
   renderIdeas();
 }
 
 async function openRecent(sl) {
   showSpinner("Lade Gruppe...");
   try {
-    await load();
-    if (!state.groups[sl]) { alert("Gruppe nicht mehr vorhanden."); renderRecent(); return; }
-    cur = sl; openGroup();
-  } catch(e) { alert("Fehler beim Laden."); addLog("err","openRecent: "+e.message); }
+    const row = await sbGet(sl);
+    if (!row) { alert("Gruppe nicht mehr vorhanden."); renderRecent(); hideSpinner(); return; }
+    curGroup = row;
+    openGroup();
+  } catch(e) { alert("Fehler: "+e.message); addLog("err","openRecent: "+e.message); }
   finally { hideSpinner(); }
+}
+
+// ---- IDEAS ----
+function ideas() { return curGroup.data?.ideas || []; }
+
+async function saveIdeas(newIdeas) {
+  const updated = await sbUpdate(curGroup.slug, { ...curGroup.data, ideas: newIdeas });
+  curGroup = updated;
 }
 
 async function addIdea() {
@@ -356,22 +385,23 @@ async function addIdea() {
   if (!text) return;
   setBtn("ideaBtn",true);
   try {
-    await load();
-    if (!state.groups[cur]) throw new Error("Gruppe weg");
-    state.groups[cur].ideas.push({ id: Date.now(), text, by: null, comments: [] });
-    await save();
+    // fetch fresh to avoid conflicts
+    const fresh = await sbGet(curGroup.slug);
+    const newIdeas = [...(fresh.data?.ideas||[]), { id: Date.now(), text, by: null, comments: [] }];
+    const updated = await sbUpdate(fresh.slug, { ...fresh.data, ideas: newIdeas });
+    curGroup = updated;
     document.getElementById("ideaInput").value = "";
-    addLog("ok","Idee hinzugefügt in "+cur+": "+text);
+    addLog("ok","Idee hinzugefügt: "+text);
     renderIdeas();
-  } catch(e) { addLog("err","addIdea: "+e.message); alert("Fehler beim Speichern."); }
+  } catch(e) { addLog("err","addIdea: "+e.message); alert("Fehler: "+e.message); }
   finally { setBtn("ideaBtn",false); }
 }
 
 function renderIdeas() {
-  const ideas = g().ideas;
+  const list = ideas();
   const el = document.getElementById("ideasList");
-  if (!ideas.length) { el.innerHTML = '<div class="empty">Noch keine Ideen. Füg eine hinzu!</div>'; return; }
-  el.innerHTML = [...ideas].reverse().map(idea=>`
+  if (!list.length) { el.innerHTML = '<div class="empty">Noch keine Ideen. Füg eine hinzu!</div>'; return; }
+  el.innerHTML = [...list].reverse().map(idea=>`
     <div class="idea ${idea.by?'taken':''}">
       <div class="idea-top">
         <div>
@@ -396,7 +426,7 @@ function renderIdeas() {
 
 function openClaim(id) {
   claimId = id;
-  const idea = g().ideas.find(x=>x.id===id);
+  const idea = ideas().find(x=>x.id===id);
   document.getElementById("claimTitle").textContent = `Wer macht: "${idea.text}"?`;
   document.getElementById("claimName").value = "";
   document.getElementById("claimErr").textContent = "";
@@ -409,23 +439,23 @@ async function confirmClaim() {
   if (!name) { document.getElementById("claimErr").textContent = "Bitte Namen eingeben!"; return; }
   setBtn("claimBtn",true);
   try {
-    await load();
-    const idea = state.groups[cur].ideas.find(x=>x.id===claimId);
-    if (idea) idea.by = name;
-    await save();
-    addLog("ok",`"${name}" übernimmt "${idea?.text}" in ${cur}`);
+    const fresh = await sbGet(curGroup.slug);
+    const newIdeas = (fresh.data?.ideas||[]).map(x => x.id===claimId ? {...x, by: name} : x);
+    const updated = await sbUpdate(fresh.slug, { ...fresh.data, ideas: newIdeas });
+    curGroup = updated;
+    addLog("ok",`"${name}" übernimmt Idee ${claimId}`);
     closeModal(); renderIdeas();
-  } catch(e) { addLog("err","confirmClaim: "+e.message); }
+  } catch(e) { addLog("err","confirmClaim: "+e.message); document.getElementById("claimErr").textContent = "Fehler!"; }
   finally { setBtn("claimBtn",false); }
 }
 
 async function unclaim(id) {
   showSpinner("Wird freigegeben...");
   try {
-    await load();
-    const idea = state.groups[cur].ideas.find(x=>x.id===id);
-    if (idea) idea.by = null;
-    await save(); renderIdeas();
+    const fresh = await sbGet(curGroup.slug);
+    const newIdeas = (fresh.data?.ideas||[]).map(x => x.id===id ? {...x, by: null} : x);
+    const updated = await sbUpdate(fresh.slug, { ...fresh.data, ideas: newIdeas });
+    curGroup = updated; renderIdeas();
   } catch(e) { addLog("err","unclaim: "+e.message); }
   finally { hideSpinner(); }
 }
@@ -434,13 +464,17 @@ async function deleteIdea(id) {
   if (!confirm("Löschen?")) return;
   showSpinner("Löschen...");
   try {
-    await load();
-    state.groups[cur].ideas = state.groups[cur].ideas.filter(x=>x.id!==id);
-    await save(); addLog("ok","Idee gelöscht in "+cur); renderIdeas();
+    const fresh = await sbGet(curGroup.slug);
+    const newIdeas = (fresh.data?.ideas||[]).filter(x=>x.id!==id);
+    const updated = await sbUpdate(fresh.slug, { ...fresh.data, ideas: newIdeas });
+    curGroup = updated;
+    addLog("ok","Idee gelöscht: "+id);
+    renderIdeas();
   } catch(e) { addLog("err","deleteIdea: "+e.message); }
   finally { hideSpinner(); }
 }
 
+// ---- COMMENTS ----
 function openComment(id) {
   commentId = id;
   document.getElementById("commentAuthor").value = "";
@@ -456,15 +490,20 @@ async function confirmComment() {
   if (!author||!text) { document.getElementById("commentErr").textContent = "Name und Kommentar angeben!"; return; }
   setBtn("commentBtn",true);
   try {
-    await load();
-    const idea = state.groups[cur].ideas.find(x=>x.id===commentId);
-    if (idea) { if (!idea.comments) idea.comments=[]; idea.comments.push({author,text}); }
-    await save(); addLog("ok",`Kommentar von "${author}" in ${cur}`);
+    const fresh = await sbGet(curGroup.slug);
+    const newIdeas = (fresh.data?.ideas||[]).map(x => {
+      if (x.id !== commentId) return x;
+      return { ...x, comments: [...(x.comments||[]), { author, text }] };
+    });
+    const updated = await sbUpdate(fresh.slug, { ...fresh.data, ideas: newIdeas });
+    curGroup = updated;
+    addLog("ok",`Kommentar von "${author}"`);
     closeModal(); renderIdeas();
-  } catch(e) { addLog("err","confirmComment: "+e.message); }
+  } catch(e) { addLog("err","confirmComment: "+e.message); document.getElementById("commentErr").textContent = "Fehler!"; }
   finally { setBtn("commentBtn",false); }
 }
 
+// ---- ADMIN ----
 function showAdminLogin() {
   document.getElementById("adminUser").value = "";
   document.getElementById("adminPass").value = "";
@@ -472,7 +511,6 @@ function showAdminLogin() {
   document.getElementById("adminModal").classList.add("open");
   setTimeout(()=>document.getElementById("adminUser").focus(),100);
 }
-
 function confirmAdmin() {
   const user = document.getElementById("adminUser").value.trim();
   const pass = document.getElementById("adminPass").value.trim();
@@ -484,6 +522,7 @@ function confirmAdmin() {
   }
 }
 
+// ---- INIT ----
 showView("home");
 renderRecent();
 </script>
