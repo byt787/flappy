@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAGISTER — Latein KI-Löser</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<script src="https://js.puter.com/v2/"></script>
+<style>
+:root {
+  --sand: #f5ede0;
+  --sand-light: #e8d5b7;
+  --sand-mid: #c9a97a;
+  --sand-dark: #8b6340;
+  --sand-deep: #5c3d1e;
+  --stone: #6b5a47;
+  --stone-light: #9c8570;
+  --ink: #2a1a0e;
+  --ink-mid: #4a2f1a;
+  --gold: #c9973a;
+  --gold-light: #e8c06a;
+  --parchment: #f0e3c8;
+  --parchment-dark: #dcc8a0;
+  --red: #8b2020;
+  --cream: #faf4e8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Crimson Pro',Georgia,serif;background:var(--sand);color:var(--ink);min-height:100vh;}
+
+#puterOverlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(42,26,14,0.93);
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:1.5rem;text-align:center;padding:2rem;
+}
+#puterOverlay.show{display:flex;}
+#puterOverlay h2{font-family:'Cinzel',serif;font-size:2rem;font-weight:900;color:var(--gold-light);letter-spacing:0.15em;}
+#puterOverlay p{color:var(--parchment);font-size:1.1rem;line-height:1.7;max-width:420px;}
+#puterOverlay em{color:var(--gold);}
+#puterOverlay small{color:var(--stone-light);font-style:italic;font-size:0.9rem;}
+.puter-btn{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 2.5rem;background:var(--gold);color:var(--ink);border:none;border-radius:3px;cursor:pointer;transition:background 0.2s;}
+.puter-btn:hover{background:var(--gold-light);}
+
+.col-border{position:fixed;top:0;bottom:0;width:6px;background:linear-gradient(to bottom,var(--gold),var(--sand-mid),var(--sand-dark));opacity:0.45;}
+.col-border.l{left:0;}.col-border.r{right:0;}
+
+header{text-align:center;padding:2.5rem 2rem 1.8rem;border-bottom:2px solid var(--sand-mid);background:linear-gradient(to bottom,var(--parchment),transparent);}
+.pretitle{font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:0.6em;color:var(--gold);text-transform:uppercase;margin-bottom:0.4rem;opacity:0.9;}
+h1{font-family:'Cinzel',serif;font-size:clamp(2.8rem,7vw,5rem);font-weight:900;letter-spacing:0.15em;color:var(--ink);text-shadow:2px 2px 0 var(--parchment-dark),4px 4px 0 rgba(139,99,64,0.18);line-height:1;}
+h1 span{color:var(--red);}
+.subtitle{font-size:1.15rem;font-style:italic;color:var(--stone);margin-top:0.6rem;}
+.divider{display:flex;align-items:center;gap:1rem;max-width:360px;margin:1.2rem auto 0;}
+.divline{flex:1;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);}
+.divsym{color:var(--gold);font-family:'Cinzel',serif;font-size:1.3rem;}
+
+#statusBar{background:var(--ink-mid);padding:0.45rem 2rem;display:flex;align-items:center;gap:0.6rem;font-family:'Cinzel',serif;font-size:0.78rem;letter-spacing:0.08em;color:var(--stone-light);text-transform:uppercase;}
+#statusDot{width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0;transition:background 0.3s;}
+#statusDot.green{background:#4caf50;box-shadow:0 0 6px #4caf5088;}
+#statusDot.red{background:var(--red);}
+#statusText{color:var(--parchment-dark);}
+
+main{max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+
+.card{background:var(--parchment);border:1px solid var(--sand-mid);border-radius:4px;padding:2rem;margin-bottom:1.5rem;box-shadow:0 3px 18px rgba(92,61,30,0.09);position:relative;}
+.card::before{content:'';position:absolute;top:5px;left:5px;right:5px;bottom:5px;border:1px solid var(--sand-light);border-radius:2px;pointer-events:none;}
+
+.sec-title{font-family:'Cinzel',serif;font-size:0.9rem;font-weight:600;letter-spacing:0.1em;color:var(--ink-mid);text-transform:uppercase;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.75rem;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--sand-mid);}
+
+.chips{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.4rem;}
+.chip{font-family:'Cinzel',serif;font-size:0.76rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;padding:0.38rem 0.9rem;border:1.5px solid var(--sand-mid);background:transparent;color:var(--stone);border-radius:2px;cursor:pointer;transition:all 0.18s;}
+.chip.active{background:var(--sand-dark);color:var(--cream);border-color:var(--sand-dark);}
+.chip:hover:not(.active){color:var(--ink);border-color:var(--sand-dark);}
+
+.tabs{display:flex;border-bottom:2px solid var(--sand-mid);margin-bottom:1.3rem;}
+.tab{font-family:'Cinzel',serif;font-size:0.82rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--stone);background:none;border:none;padding:0.6rem 1.2rem;cursor:pointer;position:relative;transition:color 0.18s;}
+.tab.active{color:var(--ink);}
+.tab.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--gold);}
+.tab-panel{display:none;}.tab-panel.active{display:block;}
+
+.dropzone{border:2px dashed var(--sand-mid);border-radius:4px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(255,255,255,0.25);}
+.dropzone:hover,.dropzone.over{border-color:var(--gold);background:rgba(201,151,58,0.06);}
+.dropzone p{color:var(--stone);font-size:1.05rem;margin:0.4rem 0 0;}
+.dropzone small{color:var(--stone-light);font-style:italic;font-size:0.9rem;}
+.dz-icon{font-size:2.5rem;opacity:0.55;}
+
+#previewImg{max-width:100%;max-height:280px;border:1px solid var(--sand-mid);border-radius:3px;margin:0.8rem auto;display:none;object-fit:contain;}
+input[type=file]{display:none;}
+
+.btn-row{display:flex;gap:0.6rem;margin-top:0.8rem;justify-content:center;flex-wrap:wrap;}
+.btn{font-family:'Cinzel',serif;font-size:0.82rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;padding:0.55rem 1.4rem;border:1.5px solid var(--sand-dark);background:var(--parchment-dark);color:var(--ink-mid);border-radius:2px;cursor:pointer;transition:all 0.18s;}
+.btn:hover{background:var(--sand-dark);color:var(--cream);}
+.btn-red{background:var(--red);color:var(--cream);border-color:var(--red);}
+.btn-red:hover{background:#6b1515;border-color:#6b1515;}
+
+#inlineVideo{max-width:100%;border-radius:3px;border:1px solid var(--sand-mid);display:none;}
+#capturedPreview{max-width:100%;max-height:280px;border-radius:3px;border:1px solid var(--sand-mid);display:none;margin:0 auto;}
+#inlineCanvas{display:none;}
+
+textarea{width:100%;background:rgba(255,255,255,0.45);border:1px solid var(--sand-mid);border-radius:3px;padding:0.85rem 1rem;font-family:'Crimson Pro',serif;font-size:1.1rem;color:var(--ink);line-height:1.7;resize:vertical;min-height:110px;transition:border-color 0.2s;}
+textarea:focus{outline:none;border-color:var(--gold);background:rgba(255,255,255,0.65);}
+textarea::placeholder{color:var(--stone-light);font-style:italic;}
+.field-label{display:block;font-family:'Cinzel',serif;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--stone);margin-bottom:0.4rem;}
+
+.solve-btn{width:100%;padding:0.95rem;font-family:'Cinzel',serif;font-size:0.95rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;background:linear-gradient(135deg,var(--ink),var(--ink-mid));color:var(--gold-light);border:2px solid var(--ink);border-radius:3px;cursor:pointer;margin-top:1.2rem;transition:all 0.25s;}
+.solve-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold);box-shadow:0 0 20px rgba(201,151,58,0.18);}
+.solve-btn:disabled{opacity:0.55;cursor:not-allowed;}
+
+.error{display:none;background:rgba(139,32,32,0.1);border:1px solid var(--red);border-radius:3px;padding:0.7rem 1rem;color:var(--red);font-size:1rem;margin-top:0.8rem;}
+.error.show{display:block;}
+
+#loading{display:none;text-align:center;padding:2rem;color:var(--stone);font-style:italic;font-size:1.1rem;}
+#loading.show{display:block;}
+.spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--sand-light);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:0.6rem;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+#result{display:none;margin-top:1.5rem;}
+#result.show{display:block;}
+.result-box{background:var(--cream);border:1px solid var(--sand-mid);border-left:4px solid var(--gold);border-radius:3px;padding:1.5rem 2rem;box-shadow:0 2px 14px rgba(92,61,30,0.08);position:relative;}
+.result-header{font-family:'Cinzel',serif;font-size:0.85rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);padding-bottom:0.75rem;margin-bottom:1rem;border-bottom:1px solid var(--sand-light);}
+.result-body{font-size:1.1rem;line-height:1.85;color:var(--ink);}
+.result-body h3{font-family:'Cinzel',serif;font-size:0.95rem;color:var(--red);letter-spacing:0.07em;margin:1.1rem 0 0.4rem;text-transform:uppercase;}
+.result-body strong{font-weight:600;}
+.seal{position:absolute;bottom:-18px;right:1.5rem;width:38px;height:38px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1rem;font-weight:900;color:var(--cream);border:2px solid #6b1515;box-shadow:0 2px 8px rgba(139,32,32,0.4);}
+
+#camOverlay{position:fixed;inset:0;z-index:500;background:rgba(42,26,14,0.93);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1rem;}
+#camOverlay.show{display:flex;}
+#camOverlay video{max-width:min(600px,95vw);max-height:65vh;border-radius:4px;border:2px solid var(--gold);}
+#camOverlay canvas{display:none;}
+.cam-btns{display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;}
+
+footer{text-align:center;padding:1.5rem;color:var(--stone-light);font-size:0.9rem;font-style:italic;border-top:1px solid var(--sand-light);}
+
+@media(max-width:600px){.card{padding:1.2rem 1rem;}h1{font-size:2.4rem;}main{padding:1.2rem 0.8rem 3rem;}}
+</style>
+</head>
+<body>
+
+<!-- PUTER LOGIN -->
+<div id="puterOverlay">
+  <h2>✦ MAGISTER ✦</h2>
+  <p>Für die kostenlose KI brauchst du einen <em>gratis</em> Puter-Account.<br>
+  Einmal anmelden — dann läuft alles automatisch, unbegrenzt und kostenlos.</p>
+  <button class="puter-btn" id="loginBtn">🏛 &nbsp; Kostenlos mit Puter anmelden</button>
+  <small>Kein Abo · Kein Limit · Keine Kreditkarte · 100% gratis</small>
+</div>
+
+<div class="col-border l"></div>
+<div class="col-border r"></div>
+
+<header>
+  <p class="pretitle">✦ &nbsp; A · R · S · L · A · T · I · N · A &nbsp; ✦</p>
+  <h1>MAGI<span>S</span>TER</h1>
+  <p class="subtitle">Dein KI-Gelehrter für lateinische Texte &amp; Schulaufgaben</p>
+  <div class="divider">
+    <div class="divline"></div>
+    <span class="divsym">⚔</span>
+    <div class="divline"></div>
+  </div>
+</header>
+
+<div id="statusBar">
+  <div id="statusDot"></div>
+  <span id="statusText">Verbinde mit Puter…</span>
+</div>
+
+<main>
+  <div class="card">
+    <div class="sec-title">Modus</div>
+    <div class="chips">
+      <button class="chip active" data-mode="translate">Übersetzen</button>
+      <button class="chip" data-mode="solve">Aufgaben lösen</button>
+      <button class="chip" data-mode="both">Beides</button>
+      <button class="chip" data-mode="grammar">Grammatik</button>
+      <button class="chip" data-mode="vocab">Vokabeln</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="img">📜 Bild</button>
+      <button class="tab" data-tab="cam">📸 Kamera</button>
+      <button class="tab" data-tab="txt">✍ Text</button>
+    </div>
+
+    <div class="tab-panel active" id="panel-img">
+      <div class="dropzone" id="dropzone">
+        <div class="dz-icon">🏛</div>
+        <p>Bild hier ablegen oder auswählen</p>
+        <small>JPG · PNG · WEBP</small>
+      </div>
+      <img id="previewImg" alt="Vorschau">
+      <div class="btn-row">
+        <button class="btn" id="btnGallery">📁 Aus Galerie</button>
+        <button class="btn btn-red" id="btnOpenCam">📸 Vollbild-Kamera</button>
+      </div>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="tab-panel" id="panel-cam">
+      <div style="text-align:center">
+        <video id="inlineVideo" autoplay playsinline></video>
+        <canvas id="inlineCanvas"></canvas>
+        <img id="capturedPreview" alt="Aufgenommen">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-red" id="btnStartCam">📸 Kamera starten</button>
+        <button class="btn" id="btnCapture" style="display:none">⊙ Aufnehmen</button>
+        <button class="btn" id="btnRetake" style="display:none">↺ Neu aufnehmen</button>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-txt">
+      <label class="field-label">Lateinischer Text</label>
+      <textarea id="latinText" placeholder="z.B. »Gallia est omnis divisa in partes tres…«" rows="5"></textarea>
+    </div>
+
+    <div style="margin-top:1rem">
+      <label class="field-label">Aufgabe / Frage (optional)</label>
+      <textarea id="taskText" placeholder="z.B. »Übersetze den Text« · »Bestimme alle Kasus« · »Erkläre den AcI«" rows="3"></textarea>
+    </div>
+
+    <div class="error" id="errMsg"></div>
+    <button class="solve-btn" id="solveBtn">⚔ &nbsp; Lösung von Magister erhalten</button>
+  </div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Magister denkt nach… <em>cogito ergo respondeo</em></p>
+  </div>
+
+  <div id="result">
+    <div class="result-box">
+      <div class="result-header">✦ &nbsp; Antwort des Magisters</div>
+      <div class="result-body" id="resultBody"></div>
+      <div class="seal">M</div>
+    </div>
+  </div>
+</main>
+
+<div id="camOverlay">
+  <video id="camVideo" autoplay playsinline></video>
+  <canvas id="camCanvas"></canvas>
+  <div class="cam-btns">
+    <button class="btn btn-red" id="btnSnap">⊙ &nbsp; Aufnehmen</button>
+    <button class="btn" id="btnCloseCam">✕ &nbsp; Schließen</button>
+  </div>
+</div>
+
+<footer>MAGISTER · Puter.js AI · kostenlos &amp; unbegrenzt · <em>In nomine scientiae</em></footer>
+
+<script>
+let currentImage = null;
+let currentMode = 'translate';
+let camStream = null;
+let inlineCamStream = null;
+let puterReady = false;
+
+const modePrompts = {
+  translate: 'Übersetze den folgenden lateinischen Text präzise und vollständig ins Deutsche. Erkläre kurz schwierige Stellen.',
+  solve:     'Löse die folgende Aufgabe zum lateinischen Text. Gib klare, strukturierte Antworten mit Erklärungen.',
+  both:      'Übersetze den Text vollständig ins Deutsche UND löse die Aufgabe. Trenne die Abschnitte mit klaren Überschriften.',
+  grammar:   'Analysiere die Grammatik dieses lateinischen Textes detailliert: Satzteile, Kasus, Modi, Tempora, Genera. Erkläre alle wichtigen grammatischen Strukturen auf Deutsch.',
+  vocab:     'Liste alle wichtigen Vokabeln aus dem Text. Format: Latein | Deutsch | Stammformen | Wortart. Erkläre unregelmäßige Formen.'
+};
+
+// PUTER INIT
+async function initPuter() {
+  try {
+    const user = await puter.auth.getUser();
+    if (user && user.username) {
+      onLoggedIn(user.username);
+    } else {
+      document.getElementById('puterOverlay').classList.add('show');
+      setStatus('red', 'Nicht angemeldet');
+    }
+  } catch {
+    document.getElementById('puterOverlay').classList.add('show');
+    setStatus('red', 'Nicht angemeldet');
+  }
+}
+
+function onLoggedIn(name) {
+  document.getElementById('puterOverlay').classList.remove('show');
+  puterReady = true;
+  setStatus('green', 'Angemeldet als ' + name + ' · Bereit');
+}
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  try {
+    await puter.auth.signIn();
+    const user = await puter.auth.getUser();
+    if (user) onLoggedIn(user.username);
+  } catch(e) {
+    alert('Anmeldung fehlgeschlagen: ' + (e.message || e));
+  }
+});
+
+function setStatus(color, text) {
+  document.getElementById('statusDot').className = color;
+  document.getElementById('statusText').textContent = text;
+}
+
+// TABS
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+// CHIPS
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    currentMode = c.dataset.mode;
+  });
+});
+
+// DRAG & DROP
+const dz = document.getElementById('dropzone');
+dz.addEventListener('click', () => document.getElementById('fileInput').click());
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) loadFile(f);
+});
+document.getElementById('fileInput').addEventListener('change', e => {
+  if (e.target.files[0]) loadFile(e.target.files[0]);
+});
+document.getElementById('btnGallery').addEventListener('click', () => document.getElementById('fileInput').click());
+
+function loadFile(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    currentImage = e.target.result;
+    const img = document.getElementById('previewImg');
+    img.src = currentImage;
+    img.style.display = 'block';
+    dz.style.display = 'none';
+  };
+  r.readAsDataURL(file);
+}
+
+// FULLSCREEN CAMERA
+document.getElementById('btnOpenCam').addEventListener('click', async () => {
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+    document.getElementById('camVideo').srcObject = camStream;
+    document.getElementById('camOverlay').classList.add('show');
+  } catch { showErr('Kamera-Zugriff verweigert.'); }
+});
+document.getElementById('btnSnap').addEventListener('click', () => {
+  const v = document.getElementById('camVideo');
+  const c = document.getElementById('camCanvas');
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  currentImage = c.toDataURL('image/jpeg', 0.88);
+  stopStream(camStream);
+  document.getElementById('camOverlay').classList.remove('show');
+  const img = document.getElementById('previewImg');
+  img.src = currentImage; img.style.display = 'block';
+  dz.style.display = 'none';
+  document.querySelector('.tab[data-tab=img]').click();
+});
+document.getElementById('btnCloseCam').addEventListener('click', () => {
+  stopStream(camStream);
+  document.getElementById('camOverlay').classList.remove('show');
+});
+
+// INLINE CAMERA
+document.getElementById('btnStartCam').addEventListener('click', async () => {
+  try {
+    inlineCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+    const v = document.getElementById('inlineVideo');
+    v.srcObject = inlineCamStream; v.style.display = 'block';
+    document.getElementById('btnStartCam').style.display = 'none';
+    document.getElementById('btnCapture').style.display = 'inline-block';
+    document.getElementById('capturedPreview').style.display = 'none';
+  } catch { showErr('Kamera-Zugriff verweigert.'); }
+});
+document.getElementById('btnCapture').addEventListener('click', () => {
+  const v = document.getElementById('inlineVideo');
+  const c = document.getElementById('inlineCanvas');
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  currentImage = c.toDataURL('image/jpeg', 0.88);
+  stopStream(inlineCamStream);
+  v.style.display = 'none';
+  const p = document.getElementById('capturedPreview');
+  p.src = currentImage; p.style.display = 'block';
+  document.getElementById('btnCapture').style.display = 'none';
+  document.getElementById('btnRetake').style.display = 'inline-block';
+});
+document.getElementById('btnRetake').addEventListener('click', () => {
+  currentImage = null;
+  document.getElementById('capturedPreview').style.display = 'none';
+  document.getElementById('btnRetake').style.display = 'none';
+  document.getElementById('btnStartCam').style.display = 'inline-block';
+});
+
+function stopStream(s) { if (s) s.getTracks().forEach(t => t.stop()); }
+
+// SOLVE
+document.getElementById('solveBtn').addEventListener('click', solve);
+
+async function solve() {
+  hideErr();
+  if (!puterReady) { showErr('Bitte melde dich zuerst bei Puter an.'); return; }
+
+  const task = document.getElementById('taskText').value.trim();
+  const latin = document.getElementById('latinText').value.trim();
+  const activeTab = document.querySelector('.tab.active').dataset.tab;
+
+  if (activeTab === 'txt' && !latin) { showErr('Bitte gib einen lateinischen Text ein.'); return; }
+  if (activeTab !== 'txt' && !currentImage) { showErr('Bitte lade ein Bild hoch oder nimm eines auf.'); return; }
+
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('solveBtn').disabled = true;
+  setStatus('green', 'Magister denkt…');
+
+  try {
+    let prompt = modePrompts[currentMode] + '\n\n';
+    if (latin) prompt += 'LATEINISCHER TEXT:\n' + latin + '\n\n';
+    if (!latin && currentImage) prompt += 'Erkenne den lateinischen Text im Bild und bearbeite ihn entsprechend.\n\n';
+    if (task) prompt += 'AUFGABE:\n' + task + '\n\n';
+    prompt += 'Antworte vollständig auf Deutsch. Sei präzise wie ein erfahrener Lateinlehrer.';
+
+    let response;
+    if (currentImage) {
+      response = await puter.ai.chat([
+        { role: 'user', content: [
+          { type: 'image_url', image_url: { url: currentImage } },
+          { type: 'text', text: prompt }
+        ]}
+      ]);
+    } else {
+      response = await puter.ai.chat(prompt);
+    }
+
+    // Puter returns: { message: { content: "text..." } }
+    const rawContent = response?.message?.content;
+    const text = typeof response === 'string' ? response
+      : typeof rawContent === 'string' ? rawContent
+      : Array.isArray(rawContent) ? rawContent.map(b => b.text||'').join('')
+      : response?.text || '';
+
+    showResult(text);
+    const u = await puter.auth.getUser();
+    setStatus('green', 'Angemeldet als ' + (u?.username||'') + ' · Bereit');
+  } catch(e) {
+    console.error(e);
+    showErr('Fehler: ' + (e.message || 'Unbekannt. Bitte nochmal versuchen.'));
+    setStatus('red', 'Fehler');
+  } finally {
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('solveBtn').disabled = false;
+  }
+}
+
+function showResult(text) {
+  const safe = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^#{1,3} (.+)$/gm,'<h3>$1</h3>')
+    .replace(/\n{2,}/g,'</p><p>')
+    .replace(/^/,'<p>').replace(/$/,'</p>');
+  document.getElementById('resultBody').innerHTML = safe;
+  document.getElementById('result').classList.add('show');
+  document.getElementById('result').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function showErr(msg) {
+  const e = document.getElementById('errMsg');
+  e.textContent = msg; e.classList.add('show');
+}
+function hideErr() { document.getElementById('errMsg').classList.remove('show'); }
+
+window.addEventListener('load', initPuter);
+</script>
+</body>
+</html>
