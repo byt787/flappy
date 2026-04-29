@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ideenboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f5f5f5; color: #222; min-height: 100vh; }
+
+  header { background: #333; color: white; padding: 14px 20px; font-size: 18px; font-weight: bold; }
+
+  .wrap { max-width: 600px; margin: 0 auto; padding: 20px 16px; }
+
+  input, textarea, select {
+    width: 100%; padding: 9px 11px; border: 1px solid #ccc;
+    border-radius: 5px; font-size: 14px; font-family: sans-serif;
+    background: white; color: #222;
+  }
+  input:focus, textarea:focus { outline: 2px solid #333; border-color: #333; }
+  textarea { resize: vertical; min-height: 65px; }
+
+  button {
+    padding: 9px 16px; border: 1px solid #333; border-radius: 5px;
+    font-size: 14px; cursor: pointer; background: #333; color: white; font-family: sans-serif;
+  }
+  button:hover { background: #111; }
+  button.secondary { background: white; color: #333; }
+  button.secondary:hover { background: #eee; }
+  button.small { padding: 5px 11px; font-size: 12px; }
+  button.red { background: #c0392b; border-color: #c0392b; color: white; }
+  button.red:hover { background: #a93226; }
+  button.green { background: #27ae60; border-color: #27ae60; color: white; }
+  button.green:hover { background: #1e8449; }
+
+  .card { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 14px; margin-bottom: 10px; }
+  .card h3 { font-size: 15px; margin-bottom: 6px; }
+
+  .row { display: flex; gap: 8px; }
+  .row input { flex: 1; }
+
+  .section-title { font-size: 13px; color: #888; margin: 18px 0 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .idea {
+    background: white; border: 1px solid #ddd; border-radius: 6px;
+    padding: 12px 14px; margin-bottom: 8px;
+  }
+  .idea.taken { border-left: 4px solid #27ae60; }
+  .idea-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .idea-text { font-size: 15px; line-height: 1.4; }
+  .idea-by { font-size: 12px; color: #27ae60; margin-top: 5px; font-weight: bold; }
+  .idea-btns { display: flex; gap: 5px; flex-shrink: 0; }
+
+  .comment { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; }
+  .comment-author { font-size: 12px; font-weight: bold; color: #555; }
+  .comment-text { font-size: 13px; margin-top: 3px; line-height: 1.4; }
+
+  .empty { color: #aaa; font-size: 14px; text-align: center; padding: 24px; }
+  .status { font-size: 13px; color: #888; margin-top: 6px; min-height: 18px; }
+
+  .back { background: none; border: none; color: #333; font-size: 15px; cursor: pointer; padding: 0; margin-bottom: 14px; display: inline-block; }
+  .back:hover { text-decoration: underline; background: none; }
+
+  .group-item { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 13px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .group-item:hover { border-color: #333; }
+  .group-item .gname { font-size: 15px; font-weight: bold; }
+  .group-item .gmeta { font-size: 12px; color: #999; margin-top: 2px; }
+
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 10; align-items: center; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: white; border-radius: 8px; padding: 20px; width: 300px; max-width: 90vw; }
+  .modal h3 { margin-bottom: 12px; font-size: 16px; }
+  .modal input { margin-bottom: 10px; }
+  .modal .row { justify-content: flex-end; }
+  .err { color: #c0392b; font-size: 13px; margin-bottom: 8px; }
+
+  #groupView { display: none; }
+</style>
+</head>
+<body>
+
+<header>💡 Ideenboard</header>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <div id="homeView">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div class="card">
+        <h3>Neue Gruppe</h3>
+        <input id="newName" placeholder="Name z.B. WM Abend" style="margin-bottom:8px">
+        <input id="newPass" type="password" placeholder="Passwort" style="margin-bottom:8px">
+        <button onclick="createGroup()" style="width:100%">Erstellen</button>
+        <div class="status" id="createMsg"></div>
+      </div>
+      <div class="card">
+        <h3>Beitreten</h3>
+        <input id="joinName" placeholder="Gruppenname" style="margin-bottom:8px">
+        <input id="joinPass" type="password" placeholder="Passwort" style="margin-bottom:8px">
+        <button onclick="joinGroup()" style="width:100%;background:white;color:#333;border:1px solid #333" class="secondary">Beitreten</button>
+        <div class="status" id="joinMsg"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Zuletzt besucht</div>
+    <div id="recentList"><div class="empty">Noch keine Gruppen.</div></div>
+  </div>
+
+  <!-- GROUP VIEW -->
+  <div id="groupView">
+    <button class="back" onclick="goHome()">← Zurück</button>
+    <div style="margin-bottom:14px">
+      <div style="font-size:20px;font-weight:bold" id="gTitle"></div>
+      <div style="font-size:12px;color:#999" id="gCode"></div>
+    </div>
+
+    <!-- Add idea -->
+    <div class="card">
+      <div class="row" style="margin-bottom:0">
+        <input id="ideaInput" placeholder="Neue Idee eingeben...">
+        <button onclick="addIdea()" style="white-space:nowrap">+ Idee</button>
+      </div>
+    </div>
+
+    <div class="section-title">Ideen</div>
+    <div id="ideasList"></div>
+  </div>
+
+</div>
+
+<!-- CLAIM MODAL -->
+<div class="modal-bg" id="claimModal">
+  <div class="modal">
+    <h3 id="claimTitle">Wer macht das?</h3>
+    <input id="claimName" placeholder="Dein Name">
+    <div class="err" id="claimErr"></div>
+    <div class="row">
+      <button class="secondary" onclick="closeModal()">Abbrechen</button>
+      <button class="green" onclick="confirmClaim()">Ich mach's!</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMMENT MODAL -->
+<div class="modal-bg" id="commentModal">
+  <div class="modal">
+    <h3>Kommentar hinzufügen</h3>
+    <input id="commentAuthor" placeholder="Dein Name" style="margin-bottom:8px">
+    <textarea id="commentText" placeholder="Kommentar..." style="margin-bottom:10px"></textarea>
+    <div class="err" id="commentErr"></div>
+    <div class="row">
+      <button class="secondary" onclick="closeModal()">Abbrechen</button>
+      <button onclick="confirmComment()">Senden</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BIN_ID = "69f1fb17856a68218987e821";
+const API_KEY = "$2a$10$mvVnRI.tRuc1NQUvAY9i4.4mbPRtnvIUVMePigZEKxJNuRAZJny7O";
+const BASE = "https://api.jsonbin.io/v3/b/" + BIN_ID;
+
+let state = { groups: {} };
+let cur = null;
+let claimId = null;
+let commentId = null;
+
+async function load() {
+  const r = await fetch(BASE + "/latest", { headers: { "X-Master-Key": API_KEY } });
+  const d = await r.json();
+  state = (d.record && d.record.groups) ? d.record : { groups: {} };
+}
+
+async function save() {
+  await fetch(BASE, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+    body: JSON.stringify(state)
+  });
+}
+
+function slug(s) { return s.trim().toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,""); }
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function msg(id, t, c) { const e = document.getElementById(id); e.textContent = t; e.style.color = c||"#888"; setTimeout(()=>{ if(e.textContent===t) e.textContent=""; },3000); }
+function recent() { try { return JSON.parse(localStorage.getItem("ib_recent")||"[]"); } catch { return []; } }
+function saveRecent(sl, name) { let r = recent().filter(x=>x.sl!==sl); r.unshift({sl,name}); localStorage.setItem("ib_recent", JSON.stringify(r.slice(0,6))); }
+function closeModal() { document.querySelectorAll(".modal-bg").forEach(m=>m.classList.remove("open")); }
+function g() { return state.groups[cur]; }
+
+async function createGroup() {
+  const name = document.getElementById("newName").value.trim();
+  const pass = document.getElementById("newPass").value.trim();
+  if (!name||!pass) { msg("createMsg","Name und Passwort angeben!","#c0392b"); return; }
+  const sl = slug(name);
+  if (!sl) { msg("createMsg","Ungültiger Name.","#c0392b"); return; }
+  msg("createMsg","...");
+  await load();
+  if (state.groups[sl]) { msg("createMsg","Name schon vergeben!","#c0392b"); return; }
+  state.groups[sl] = { name, pass, ideas: [] };
+  await save();
+  cur = sl; saveRecent(sl, name);
+  document.getElementById("newName").value = "";
+  document.getElementById("newPass").value = "";
+  openGroup();
+}
+
+async function joinGroup() {
+  const name = document.getElementById("joinName").value.trim();
+  const pass = document.getElementById("joinPass").value.trim();
+  if (!name||!pass) { msg("joinMsg","Name und Passwort angeben!","#c0392b"); return; }
+  const sl = slug(name);
+  msg("joinMsg","...");
+  await load();
+  const grp = state.groups[sl];
+  if (!grp) { msg("joinMsg","Nicht gefunden!","#c0392b"); return; }
+  if (grp.pass !== pass) { msg("joinMsg","Falsches Passwort!","#c0392b"); return; }
+  cur = sl; saveRecent(sl, grp.name);
+  document.getElementById("joinName").value = "";
+  document.getElementById("joinPass").value = "";
+  openGroup();
+}
+
+function openGroup() {
+  document.getElementById("homeView").style.display = "none";
+  document.getElementById("groupView").style.display = "block";
+  document.getElementById("gTitle").textContent = g().name;
+  document.getElementById("gCode").textContent = "Gruppenname: " + cur;
+  renderIdeas();
+}
+
+function goHome() {
+  document.getElementById("groupView").style.display = "none";
+  document.getElementById("homeView").style.display = "block";
+  renderRecent();
+}
+
+function renderRecent() {
+  const r = recent();
+  const el = document.getElementById("recentList");
+  if (!r.length) { el.innerHTML = '<div class="empty">Noch keine Gruppen besucht.</div>'; return; }
+  el.innerHTML = r.map(x => `<div class="group-item" onclick="openRecent('${x.sl}')"><div><div class="gname">${esc(x.name)}</div><div class="gmeta">${x.sl}</div></div><span>›</span></div>`).join("");
+}
+
+async function openRecent(sl) {
+  await load();
+  if (!state.groups[sl]) { alert("Gruppe nicht mehr vorhanden."); return; }
+  cur = sl;
+  openGroup();
+}
+
+async function addIdea() {
+  const text = document.getElementById("ideaInput").value.trim();
+  if (!text) return;
+  g().ideas.push({ id: Date.now(), text, by: null, comments: [] });
+  document.getElementById("ideaInput").value = "";
+  await save();
+  renderIdeas();
+}
+
+function renderIdeas() {
+  const ideas = g().ideas;
+  const el = document.getElementById("ideasList");
+  if (!ideas.length) { el.innerHTML = '<div class="empty">Noch keine Ideen. Füg eine hinzu!</div>'; return; }
+  el.innerHTML = [...ideas].reverse().map(idea => `
+    <div class="idea ${idea.by ? 'taken' : ''}">
+      <div class="idea-top">
+        <div>
+          <div class="idea-text">${esc(idea.text)}</div>
+          ${idea.by ? `<div class="idea-by">✓ ${esc(idea.by)}</div>` : ""}
+        </div>
+        <div class="idea-btns">
+          ${!idea.by
+            ? `<button class="green small" onclick="openClaim(${idea.id})">Ich mach's</button>`
+            : `<button class="secondary small" onclick="unclaim(${idea.id})">Freigeben</button>`}
+          <button class="secondary small" onclick="openComment(${idea.id})">💬</button>
+          <button class="red small" onclick="deleteIdea(${idea.id})">✕</button>
+        </div>
+      </div>
+      ${idea.comments && idea.comments.length ? idea.comments.map(c => `
+        <div class="comment">
+          <div class="comment-author">${esc(c.author)}</div>
+          <div class="comment-text">${esc(c.text)}</div>
+        </div>`).join("") : ""}
+    </div>`).join("");
+}
+
+function openClaim(id) {
+  claimId = id;
+  const idea = g().ideas.find(x=>x.id===id);
+  document.getElementById("claimTitle").textContent = `Wer macht: "${idea.text}"?`;
+  document.getElementById("claimName").value = "";
+  document.getElementById("claimErr").textContent = "";
+  document.getElementById("claimModal").classList.add("open");
+}
+
+async function confirmClaim() {
+  const name = document.getElementById("claimName").value.trim();
+  if (!name) { document.getElementById("claimErr").textContent = "Bitte Namen eingeben!"; return; }
+  const idea = g().ideas.find(x=>x.id===claimId);
+  if (idea) idea.by = name;
+  await save(); closeModal(); renderIdeas();
+}
+
+async function unclaim(id) {
+  const idea = g().ideas.find(x=>x.id===id);
+  if (idea) idea.by = null;
+  await save(); renderIdeas();
+}
+
+async function deleteIdea(id) {
+  if (!confirm("Löschen?")) return;
+  g().ideas = g().ideas.filter(x=>x.id!==id);
+  await save(); renderIdeas();
+}
+
+function openComment(id) {
+  commentId = id;
+  document.getElementById("commentAuthor").value = "";
+  document.getElementById("commentText").value = "";
+  document.getElementById("commentErr").textContent = "";
+  document.getElementById("commentModal").classList.add("open");
+}
+
+async function confirmComment() {
+  const author = document.getElementById("commentAuthor").value.trim();
+  const text = document.getElementById("commentText").value.trim();
+  if (!author||!text) { document.getElementById("commentErr").textContent = "Name und Kommentar angeben!"; return; }
+  const idea = g().ideas.find(x=>x.id===commentId);
+  if (idea) { if (!idea.comments) idea.comments = []; idea.comments.push({ author, text }); }
+  await save(); closeModal(); renderIdeas();
+}
+
+document.getElementById("groupView").style.display = "none";
+renderRecent();
+</script>
+</body>
+</html>
