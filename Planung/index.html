@@ -1,1 +1,491 @@
-<h1>Julius hab morgen keine Zeit... Nur nach Schule bis 15 Uhr oder so</h1>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ideenboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f5f5f5; color: #222; min-height: 100vh; }
+
+  header { background: #333; color: white; padding: 14px 20px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+  header a { color: #aaa; font-size: 12px; text-decoration: none; cursor: pointer; }
+  header a:hover { color: white; }
+
+  .wrap { max-width: 600px; margin: 0 auto; padding: 20px 16px; }
+
+  input, textarea {
+    width: 100%; padding: 9px 11px; border: 1px solid #ccc;
+    border-radius: 5px; font-size: 14px; font-family: sans-serif;
+    background: white; color: #222;
+  }
+  input:focus, textarea:focus { outline: 2px solid #333; border-color: #333; }
+  textarea { resize: vertical; min-height: 65px; }
+
+  button {
+    padding: 9px 16px; border: 1px solid #333; border-radius: 5px;
+    font-size: 14px; cursor: pointer; background: #333; color: white; font-family: sans-serif;
+    position: relative; min-width: 80px;
+  }
+  button:hover:not(:disabled) { background: #111; }
+  button:disabled { opacity: 0.6; cursor: default; }
+  button.secondary { background: white; color: #333; }
+  button.secondary:hover:not(:disabled) { background: #eee; }
+  button.small { padding: 5px 11px; font-size: 12px; min-width: unset; }
+  button.red { background: #c0392b; border-color: #c0392b; color: white; }
+  button.red:hover:not(:disabled) { background: #a93226; }
+  button.green { background: #27ae60; border-color: #27ae60; color: white; }
+  button.green:hover:not(:disabled) { background: #1e8449; }
+
+  .spinner {
+    display: none; width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.4); border-top-color: white;
+    border-radius: 50%; animation: spin 0.6s linear infinite;
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  }
+  .spinner.dark { border-color: rgba(0,0,0,0.2); border-top-color: #333; }
+  button.loading .spinner { display: inline-block; }
+  button.loading .btn-text { margin-right: 20px; }
+  @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+  .page-spinner {
+    display: none; position: fixed; inset: 0;
+    background: rgba(255,255,255,0.75); z-index: 50;
+    align-items: center; justify-content: center; flex-direction: column; gap: 12px;
+  }
+  .page-spinner.show { display: flex; }
+  .big-spin { width: 36px; height: 36px; border: 3px solid #ddd; border-top-color: #333; border-radius: 50%; animation: spin2 0.7s linear infinite; }
+  @keyframes spin2 { to { transform: rotate(360deg); } }
+  .page-spinner p { font-size: 14px; color: #555; }
+
+  .card { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 14px; margin-bottom: 10px; }
+  .card h3 { font-size: 15px; margin-bottom: 10px; }
+  .row { display: flex; gap: 8px; }
+  .row input { flex: 1; }
+
+  .section-title { font-size: 13px; color: #888; margin: 18px 0 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .idea { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 12px 14px; margin-bottom: 8px; }
+  .idea.taken { border-left: 4px solid #27ae60; }
+  .idea-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .idea-text { font-size: 15px; line-height: 1.4; }
+  .idea-by { font-size: 12px; color: #27ae60; margin-top: 5px; font-weight: bold; }
+  .idea-btns { display: flex; gap: 5px; flex-shrink: 0; }
+
+  .comment { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; }
+  .comment-author { font-size: 12px; font-weight: bold; color: #555; }
+  .comment-text { font-size: 13px; margin-top: 3px; line-height: 1.4; }
+
+  .empty { color: #aaa; font-size: 14px; text-align: center; padding: 24px; }
+  .status { font-size: 13px; margin-top: 8px; min-height: 18px; }
+
+  .back { background: none; border: none; color: #333; font-size: 15px; cursor: pointer; padding: 0; margin-bottom: 14px; display: inline-block; min-width: unset; }
+  .back:hover { text-decoration: underline; background: none; }
+
+  .group-item { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 13px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .group-item:hover { border-color: #333; }
+  .group-item .gname { font-size: 15px; font-weight: bold; }
+  .group-item .gmeta { font-size: 12px; color: #999; margin-top: 2px; }
+
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 20; align-items: center; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: white; border-radius: 8px; padding: 20px; width: 320px; max-width: 90vw; }
+  .modal h3 { margin-bottom: 12px; font-size: 16px; }
+  .modal input { margin-bottom: 10px; }
+  .err { color: #c0392b; font-size: 13px; margin-bottom: 8px; }
+
+  .log-entry { background: white; border: 1px solid #ddd; border-radius: 5px; padding: 10px 12px; margin-bottom: 6px; font-size: 13px; font-family: monospace; }
+  .log-entry .lt { color: #999; font-size: 11px; }
+  .log-entry .lmsg { margin-top: 3px; word-break: break-all; }
+  .log-entry.err-log .lmsg { color: #c0392b; }
+  .log-entry.ok-log .lmsg { color: #27ae60; }
+  .log-entry.info-log .lmsg { color: #2980b9; }
+
+  #groupView, #adminView { display: none; }
+</style>
+</head>
+<body>
+
+<div class="page-spinner" id="pageSpinner">
+  <div class="big-spin"></div>
+  <p id="spinnerMsg">Laden...</p>
+</div>
+
+<header>
+  💡 Ideenboard
+  <a onclick="showAdminLogin()">Admin</a>
+</header>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <div id="homeView">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;margin-top:4px">
+      <div class="card">
+        <h3>Neue Gruppe</h3>
+        <input id="newName" placeholder="Name z.B. WM Abend" style="margin-bottom:8px">
+        <input id="newPass" type="password" placeholder="Passwort" style="margin-bottom:10px">
+        <button id="createBtn" onclick="createGroup()" style="width:100%">
+          <span class="btn-text">Erstellen</span><span class="spinner"></span>
+        </button>
+        <div class="status" id="createMsg"></div>
+      </div>
+      <div class="card">
+        <h3>Beitreten</h3>
+        <input id="joinName" placeholder="Gruppenname" style="margin-bottom:8px">
+        <input id="joinPass" type="password" placeholder="Passwort" style="margin-bottom:10px">
+        <button id="joinBtn" onclick="joinGroup()" style="width:100%" class="secondary">
+          <span class="btn-text">Beitreten</span><span class="spinner dark"></span>
+        </button>
+        <div class="status" id="joinMsg"></div>
+      </div>
+    </div>
+    <div class="section-title">Zuletzt besucht</div>
+    <div id="recentList"><div class="empty">Noch keine Gruppen.</div></div>
+  </div>
+
+  <!-- GROUP VIEW -->
+  <div id="groupView">
+    <button class="back" onclick="goHome()">← Zurück</button>
+    <div style="margin-bottom:14px">
+      <div style="font-size:20px;font-weight:bold" id="gTitle"></div>
+      <div style="font-size:12px;color:#999" id="gCode"></div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <input id="ideaInput" placeholder="Neue Idee eingeben..." onkeydown="if(event.key==='Enter')addIdea()">
+        <button id="ideaBtn" onclick="addIdea()" style="white-space:nowrap">
+          <span class="btn-text">+ Idee</span><span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+    <div class="section-title">Ideen</div>
+    <div id="ideasList"></div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="adminView">
+    <button class="back" onclick="goHome()">← Zurück</button>
+    <div style="font-size:20px;font-weight:bold;margin-bottom:14px">🔧 Admin Logs</div>
+    <button onclick="clearLogs()" class="red small" style="margin-bottom:14px">Logs löschen</button>
+    <div id="logsList"></div>
+  </div>
+
+</div>
+
+<!-- CLAIM MODAL -->
+<div class="modal-bg" id="claimModal">
+  <div class="modal">
+    <h3 id="claimTitle">Wer macht das?</h3>
+    <input id="claimName" placeholder="Dein Name" onkeydown="if(event.key==='Enter')confirmClaim()">
+    <div class="err" id="claimErr"></div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="secondary" onclick="closeModal()">Abbrechen</button>
+      <button class="green" id="claimBtn" onclick="confirmClaim()">
+        <span class="btn-text">Ich mach's!</span><span class="spinner"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- COMMENT MODAL -->
+<div class="modal-bg" id="commentModal">
+  <div class="modal">
+    <h3>Kommentar</h3>
+    <input id="commentAuthor" placeholder="Dein Name" style="margin-bottom:8px">
+    <textarea id="commentText" placeholder="Kommentar..." style="margin-bottom:10px"></textarea>
+    <div class="err" id="commentErr"></div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="secondary" onclick="closeModal()">Abbrechen</button>
+      <button id="commentBtn" onclick="confirmComment()">
+        <span class="btn-text">Senden</span><span class="spinner"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal-bg" id="adminModal">
+  <div class="modal">
+    <h3>🔐 Admin Login</h3>
+    <input id="adminUser" placeholder="Benutzername" style="margin-bottom:8px">
+    <input id="adminPass" type="password" placeholder="Passwort" style="margin-bottom:10px" onkeydown="if(event.key==='Enter')confirmAdmin()">
+    <div class="err" id="adminErr"></div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="secondary" onclick="closeModal()">Abbrechen</button>
+      <button onclick="confirmAdmin()">Login</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BIN_ID = "69f228cc36566621a807321a";
+const API_KEY = "$2a$10$XkmvBsUBYAPnsNpIMUNLYuqX7.nSKkHUH3socTyvwDPZJNgKKEu8i";
+const BASE = "https://api.jsonbin.io/v3/b/" + BIN_ID;
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "byt666";
+
+let state = { groups: {} };
+let cur = null, claimId = null, commentId = null;
+
+// LOGS
+function addLog(type, message) {
+  try {
+    const logs = JSON.parse(localStorage.getItem("ib_logs") || "[]");
+    logs.unshift({ type, msg: message, t: new Date().toLocaleString("de-DE") });
+    localStorage.setItem("ib_logs", JSON.stringify(logs.slice(0, 100)));
+  } catch(e) {}
+}
+function clearLogs() { localStorage.removeItem("ib_logs"); renderLogs(); }
+function renderLogs() {
+  const logs = JSON.parse(localStorage.getItem("ib_logs") || "[]");
+  const el = document.getElementById("logsList");
+  if (!logs.length) { el.innerHTML = '<div class="empty">Keine Logs vorhanden.</div>'; return; }
+  el.innerHTML = logs.map(l => `<div class="log-entry ${l.type}-log"><div class="lt">${l.t}</div><div class="lmsg">${esc(l.msg)}</div></div>`).join("");
+}
+
+// SPINNER
+function showSpinner(m) { document.getElementById("pageSpinner").classList.add("show"); document.getElementById("spinnerMsg").textContent = m || "Laden..."; }
+function hideSpinner() { document.getElementById("pageSpinner").classList.remove("show"); }
+function setBtn(id, loading) { const b = document.getElementById(id); if (!b) return; b.disabled = loading; b.classList.toggle("loading", loading); }
+
+// DATA
+async function load() {
+  addLog("info", "Lade Daten...");
+  const r = await fetch(BASE + "/latest", { headers: { "X-Master-Key": API_KEY } });
+  if (!r.ok) { addLog("err", "HTTP " + r.status + " beim Laden"); throw new Error("fetch " + r.status); }
+  const d = await r.json();
+  state = (d.record && d.record.groups) ? d.record : { groups: {} };
+  addLog("ok", Object.keys(state.groups).length + " Gruppe(n) geladen");
+}
+async function save() {
+  addLog("info", "Speichere...");
+  const r = await fetch(BASE, { method: "PUT", headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY }, body: JSON.stringify(state) });
+  if (!r.ok) { addLog("err", "HTTP " + r.status + " beim Speichern"); throw new Error("save " + r.status); }
+  addLog("ok", "Gespeichert");
+}
+
+// UTILS
+function slug(s) { return s.trim().toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,""); }
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function setMsg(id, t, c) { const e = document.getElementById(id); if (!e) return; e.textContent = t; e.style.color = c||"#888"; if (t && c !== "#c0392b") setTimeout(()=>{ if(e.textContent===t) e.textContent=""; },3500); }
+function recent() { try { return JSON.parse(localStorage.getItem("ib_recent")||"[]"); } catch { return []; } }
+function saveRecent(sl, name) { let r = recent().filter(x=>x.sl!==sl); r.unshift({sl,name}); localStorage.setItem("ib_recent", JSON.stringify(r.slice(0,6))); }
+function closeModal() { document.querySelectorAll(".modal-bg").forEach(m=>m.classList.remove("open")); }
+function g() { return state.groups[cur]; }
+
+function showView(name) {
+  document.getElementById("homeView").style.display = name==="home" ? "block" : "none";
+  document.getElementById("groupView").style.display = name==="group" ? "block" : "none";
+  document.getElementById("adminView").style.display = name==="admin" ? "block" : "none";
+}
+function goHome() { showView("home"); renderRecent(); }
+
+function renderRecent() {
+  const r = recent();
+  const el = document.getElementById("recentList");
+  if (!r.length) { el.innerHTML = '<div class="empty">Noch keine Gruppen besucht.</div>'; return; }
+  el.innerHTML = r.map(x=>`<div class="group-item" onclick="openRecent('${x.sl}')"><div><div class="gname">${esc(x.name)}</div><div class="gmeta">${x.sl}</div></div><span>›</span></div>`).join("");
+}
+
+async function createGroup() {
+  const name = document.getElementById("newName").value.trim();
+  const pass = document.getElementById("newPass").value.trim();
+  if (!name||!pass) { setMsg("createMsg","Name und Passwort angeben!","#c0392b"); return; }
+  const sl = slug(name);
+  if (!sl) { setMsg("createMsg","Ungültiger Name.","#c0392b"); return; }
+  setBtn("createBtn",true); showSpinner("Gruppe wird erstellt...");
+  try {
+    await load();
+    if (state.groups[sl]) { setMsg("createMsg","Name schon vergeben! Anderen Namen wählen.","#c0392b"); addLog("err","Gruppe bereits vorhanden: "+sl); return; }
+    state.groups[sl] = { name, pass, ideas: [], created: Date.now() };
+    await save();
+    cur = sl; saveRecent(sl, name);
+    addLog("ok","Gruppe erstellt: "+sl);
+    document.getElementById("newName").value = "";
+    document.getElementById("newPass").value = "";
+    setMsg("createMsg","✓ Gruppe erstellt!","#27ae60");
+    setTimeout(() => openGroup(), 500);
+  } catch(e) {
+    setMsg("createMsg","Fehler! Verbindung prüfen.","#c0392b");
+    addLog("err","createGroup: "+e.message);
+  } finally { setBtn("createBtn",false); hideSpinner(); }
+}
+
+async function joinGroup() {
+  const name = document.getElementById("joinName").value.trim();
+  const pass = document.getElementById("joinPass").value.trim();
+  if (!name||!pass) { setMsg("joinMsg","Name und Passwort angeben!","#c0392b"); return; }
+  const sl = slug(name);
+  setBtn("joinBtn",true); showSpinner("Suche Gruppe...");
+  try {
+    await load();
+    const grp = state.groups[sl];
+    if (!grp) { setMsg("joinMsg","Gruppe nicht gefunden!","#c0392b"); addLog("err","Nicht gefunden: "+sl); return; }
+    if (grp.pass !== pass) { setMsg("joinMsg","Falsches Passwort!","#c0392b"); addLog("err","Falsches PW für: "+sl); return; }
+    cur = sl; saveRecent(sl, grp.name);
+    addLog("ok","Beigetreten: "+sl);
+    document.getElementById("joinName").value = "";
+    document.getElementById("joinPass").value = "";
+    openGroup();
+  } catch(e) {
+    setMsg("joinMsg","Fehler! Verbindung prüfen.","#c0392b");
+    addLog("err","joinGroup: "+e.message);
+  } finally { setBtn("joinBtn",false); hideSpinner(); }
+}
+
+function openGroup() {
+  showView("group");
+  document.getElementById("gTitle").textContent = g().name;
+  document.getElementById("gCode").textContent = "Gruppenname zum Beitreten: " + cur;
+  renderIdeas();
+}
+
+async function openRecent(sl) {
+  showSpinner("Lade Gruppe...");
+  try {
+    await load();
+    if (!state.groups[sl]) { alert("Gruppe nicht mehr vorhanden."); renderRecent(); return; }
+    cur = sl; openGroup();
+  } catch(e) { alert("Fehler beim Laden."); addLog("err","openRecent: "+e.message); }
+  finally { hideSpinner(); }
+}
+
+async function addIdea() {
+  const text = document.getElementById("ideaInput").value.trim();
+  if (!text) return;
+  setBtn("ideaBtn",true);
+  try {
+    await load();
+    if (!state.groups[cur]) throw new Error("Gruppe weg");
+    state.groups[cur].ideas.push({ id: Date.now(), text, by: null, comments: [] });
+    await save();
+    document.getElementById("ideaInput").value = "";
+    addLog("ok","Idee hinzugefügt in "+cur+": "+text);
+    renderIdeas();
+  } catch(e) { addLog("err","addIdea: "+e.message); alert("Fehler beim Speichern."); }
+  finally { setBtn("ideaBtn",false); }
+}
+
+function renderIdeas() {
+  const ideas = g().ideas;
+  const el = document.getElementById("ideasList");
+  if (!ideas.length) { el.innerHTML = '<div class="empty">Noch keine Ideen. Füg eine hinzu!</div>'; return; }
+  el.innerHTML = [...ideas].reverse().map(idea=>`
+    <div class="idea ${idea.by?'taken':''}">
+      <div class="idea-top">
+        <div>
+          <div class="idea-text">${esc(idea.text)}</div>
+          ${idea.by?`<div class="idea-by">✓ ${esc(idea.by)}</div>`:""}
+        </div>
+        <div class="idea-btns">
+          ${!idea.by
+            ?`<button class="green small" onclick="openClaim(${idea.id})">Ich mach's</button>`
+            :`<button class="secondary small" onclick="unclaim(${idea.id})">Freigeben</button>`}
+          <button class="secondary small" onclick="openComment(${idea.id})">💬</button>
+          <button class="red small" onclick="deleteIdea(${idea.id})">✕</button>
+        </div>
+      </div>
+      ${idea.comments&&idea.comments.length?idea.comments.map(c=>`
+        <div class="comment">
+          <div class="comment-author">${esc(c.author)}</div>
+          <div class="comment-text">${esc(c.text)}</div>
+        </div>`).join(""):""}
+    </div>`).join("");
+}
+
+function openClaim(id) {
+  claimId = id;
+  const idea = g().ideas.find(x=>x.id===id);
+  document.getElementById("claimTitle").textContent = `Wer macht: "${idea.text}"?`;
+  document.getElementById("claimName").value = "";
+  document.getElementById("claimErr").textContent = "";
+  document.getElementById("claimModal").classList.add("open");
+  setTimeout(()=>document.getElementById("claimName").focus(),100);
+}
+
+async function confirmClaim() {
+  const name = document.getElementById("claimName").value.trim();
+  if (!name) { document.getElementById("claimErr").textContent = "Bitte Namen eingeben!"; return; }
+  setBtn("claimBtn",true);
+  try {
+    await load();
+    const idea = state.groups[cur].ideas.find(x=>x.id===claimId);
+    if (idea) idea.by = name;
+    await save();
+    addLog("ok",`"${name}" übernimmt "${idea?.text}" in ${cur}`);
+    closeModal(); renderIdeas();
+  } catch(e) { addLog("err","confirmClaim: "+e.message); }
+  finally { setBtn("claimBtn",false); }
+}
+
+async function unclaim(id) {
+  showSpinner("Wird freigegeben...");
+  try {
+    await load();
+    const idea = state.groups[cur].ideas.find(x=>x.id===id);
+    if (idea) idea.by = null;
+    await save(); renderIdeas();
+  } catch(e) { addLog("err","unclaim: "+e.message); }
+  finally { hideSpinner(); }
+}
+
+async function deleteIdea(id) {
+  if (!confirm("Löschen?")) return;
+  showSpinner("Löschen...");
+  try {
+    await load();
+    state.groups[cur].ideas = state.groups[cur].ideas.filter(x=>x.id!==id);
+    await save(); addLog("ok","Idee gelöscht in "+cur); renderIdeas();
+  } catch(e) { addLog("err","deleteIdea: "+e.message); }
+  finally { hideSpinner(); }
+}
+
+function openComment(id) {
+  commentId = id;
+  document.getElementById("commentAuthor").value = "";
+  document.getElementById("commentText").value = "";
+  document.getElementById("commentErr").textContent = "";
+  document.getElementById("commentModal").classList.add("open");
+  setTimeout(()=>document.getElementById("commentAuthor").focus(),100);
+}
+
+async function confirmComment() {
+  const author = document.getElementById("commentAuthor").value.trim();
+  const text = document.getElementById("commentText").value.trim();
+  if (!author||!text) { document.getElementById("commentErr").textContent = "Name und Kommentar angeben!"; return; }
+  setBtn("commentBtn",true);
+  try {
+    await load();
+    const idea = state.groups[cur].ideas.find(x=>x.id===commentId);
+    if (idea) { if (!idea.comments) idea.comments=[]; idea.comments.push({author,text}); }
+    await save(); addLog("ok",`Kommentar von "${author}" in ${cur}`);
+    closeModal(); renderIdeas();
+  } catch(e) { addLog("err","confirmComment: "+e.message); }
+  finally { setBtn("commentBtn",false); }
+}
+
+function showAdminLogin() {
+  document.getElementById("adminUser").value = "";
+  document.getElementById("adminPass").value = "";
+  document.getElementById("adminErr").textContent = "";
+  document.getElementById("adminModal").classList.add("open");
+  setTimeout(()=>document.getElementById("adminUser").focus(),100);
+}
+
+function confirmAdmin() {
+  const user = document.getElementById("adminUser").value.trim();
+  const pass = document.getElementById("adminPass").value.trim();
+  if (user===ADMIN_USER && pass===ADMIN_PASS) {
+    closeModal(); showView("admin"); renderLogs();
+  } else {
+    document.getElementById("adminErr").textContent = "Falscher Benutzername oder Passwort!";
+    addLog("err","Fehlgeschlagener Admin-Login: user="+user);
+  }
+}
+
+showView("home");
+renderRecent();
+</script>
+</body>
+</html>
