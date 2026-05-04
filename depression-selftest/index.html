@@ -1,0 +1,1387 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Selfscreen — Mental Clarity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #080808;
+  --surface: #0f0f0f;
+  --surface2: #141414;
+  --surface3: #1a1a1a;
+  --border: rgba(255,255,255,0.06);
+  --border-bright: rgba(255,255,255,0.12);
+  --text: #f0ede8;
+  --text-2: #8a8680;
+  --text-3: #4a4845;
+  --accent: #c8a96e;
+  --accent-dim: rgba(200,169,110,0.12);
+  --accent-glow: rgba(200,169,110,0.25);
+  --danger: #e06060;
+  --danger-dim: rgba(224,96,96,0.12);
+  --ok: #6eb5c8;
+  --ok-dim: rgba(110,181,200,0.12);
+  --radius: 16px;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-ui: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* NOISE OVERLAY */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events:none;
+  opacity:0.4;
+}
+
+/* AMBIENT LIGHT */
+.ambient {
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background: radial-gradient(ellipse 80vw 60vh at 15% 10%, rgba(200,169,110,0.04) 0%, transparent 70%),
+              radial-gradient(ellipse 60vw 80vh at 85% 90%, rgba(110,181,200,0.03) 0%, transparent 70%);
+}
+
+.app-wrapper {
+  position:relative; z-index:1;
+  display:grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+
+/* ============ HEADER ============ */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 0 0;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+  margin-bottom: 40px;
+}
+
+.logo-group {
+  display:flex; align-items:center; gap:12px;
+}
+
+.logo-mark {
+  width: 36px; height: 36px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  display:flex; align-items:center; justify-content:center;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-style: italic;
+}
+
+.logo-text {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.logo-sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.header-badge {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+}
+
+/* ============ LAYOUT ============ */
+.main-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 780px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .sidebar { display:none; }
+  .sidebar-mobile { display:flex !important; }
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar {
+  position: sticky;
+  top: 24px;
+}
+
+.sidebar-label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 12px;
+  padding-left: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content:'';
+  position:absolute; inset:0;
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  opacity:0; transition: opacity 0.2s;
+}
+
+.nav-item:hover { background: var(--surface2); }
+.nav-item.active {
+  background: var(--surface2);
+  border-color: var(--border-bright);
+}
+.nav-item.active::before { opacity:1; }
+
+.nav-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 15px;
+  background: var(--surface3);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.nav-item.active .nav-icon {
+  background: var(--accent-dim);
+}
+
+.nav-info { flex:1; min-width:0; }
+.nav-name {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  transition: color 0.2s;
+}
+.nav-item.active .nav-name { color: var(--text); }
+.nav-count {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.nav-progress-ring {
+  width: 28px; height: 28px;
+  flex-shrink: 0;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+.sidebar-info {
+  font-size: 12px;
+  color: var(--text-3);
+  line-height: 1.6;
+  padding: 0 2px;
+}
+
+/* Mobile tab bar */
+.sidebar-mobile {
+  display: none;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.mob-tab {
+  display:flex; align-items:center; gap:8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  transition: all 0.2s;
+  flex-shrink:0;
+}
+.mob-tab.active {
+  background: var(--accent-dim);
+  border-color: rgba(200,169,110,0.3);
+  color: var(--accent);
+}
+
+/* ============ MAIN CONTENT ============ */
+.content-area {
+  min-width: 0;
+}
+
+/* Question Card */
+.q-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+.q-card-header {
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%);
+}
+
+.q-meta {
+  display:flex; flex-direction:column; gap:4px;
+}
+
+.q-test-name {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.q-pos {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.q-pos span {
+  font-size: 16px;
+  color: var(--text-3);
+}
+
+.q-card-body {
+  padding: 32px 28px;
+}
+
+.q-number-badge {
+  display:inline-flex; align-items:center;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  margin-bottom: 16px;
+}
+
+.q-text {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--text);
+  margin-bottom: 28px;
+  font-weight: 400;
+}
+
+@media (max-width: 600px) { .q-text { font-size: 18px; } }
+
+/* Progress bar */
+.progress-track {
+  height: 3px;
+  background: var(--surface3);
+  border-radius: 99px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), rgba(200,169,110,0.6));
+  border-radius: 99px;
+  transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Answer options */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 560px) {
+  .options-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.opt-btn {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap: 6px;
+  padding: 16px 8px;
+  border-radius: 14px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.opt-btn::after {
+  content:'';
+  position:absolute; inset:0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent);
+  opacity:0; transition:opacity 0.2s;
+}
+
+.opt-btn:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+.opt-btn:hover::after { opacity:1; }
+
+.opt-btn.selected {
+  border-color: rgba(200,169,110,0.5);
+  background: linear-gradient(135deg, rgba(200,169,110,0.15), rgba(200,169,110,0.05));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(200,169,110,0.12);
+}
+
+.opt-label {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  transition: color 0.2s;
+}
+.opt-btn.selected .opt-label { color: var(--accent); }
+
+.opt-dot {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-bright);
+  display:flex; align-items:center; justify-content:center;
+  transition: all 0.2s;
+}
+.opt-btn.selected .opt-dot {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.opt-dot svg { display:none; }
+.opt-btn.selected .opt-dot svg { display:block; }
+
+.opt-score {
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--font-ui);
+  font-weight: 500;
+}
+
+/* Nav buttons */
+.q-nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 20px 28px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.btn-group { display:flex; gap:8px; }
+
+.btn {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #b8943e);
+  color: #0a0a0a;
+  box-shadow: 0 4px 16px rgba(200,169,110,0.25);
+}
+.btn-primary:hover { filter:brightness(1.1); transform:translateY(-1px); box-shadow:0 6px 20px rgba(200,169,110,0.35); }
+.btn-primary:disabled { opacity:0.3; cursor:not-allowed; transform:none; }
+
+.btn-ghost {
+  background: var(--surface3);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background:var(--surface2); color:var(--text); border-color:var(--border-bright); }
+.btn-ghost:disabled { opacity:0.3; cursor:not-allowed; }
+
+.btn-danger {
+  background: var(--danger-dim);
+  color: var(--danger);
+  border: 1px solid rgba(224,96,96,0.2);
+}
+.btn-danger:hover { background: rgba(224,96,96,0.2); }
+
+/* ============ SCORE WIDGET ============ */
+.score-widget {
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 24px;
+  animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+}
+
+.score-widget-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom: 16px;
+}
+
+.score-label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.score-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--text);
+}
+
+.score-value span { font-size: 14px; color: var(--text-3); }
+
+.score-bar-track {
+  height: 8px;
+  background: var(--surface3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ============ RESULT SCREEN ============ */
+.result-screen {
+  animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+
+.result-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.result-hero-header {
+  padding: 36px 32px;
+  background: linear-gradient(135deg, var(--surface2), var(--surface));
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.result-hero-header::before {
+  content:'';
+  position:absolute; top:-60px; right:-60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow), transparent 70%);
+  pointer-events: none;
+}
+
+.result-eyebrow {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.result-severity {
+  font-family: var(--font-display);
+  font-size: 36px;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.result-advice {
+  font-size: 15px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.result-score-pill {
+  display:inline-flex; align-items:center; gap:8px;
+  margin-top: 20px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(200,169,110,0.2);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.result-body {
+  padding: 28px 32px;
+}
+
+.result-section-title {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 14px;
+}
+
+.steps-list {
+  list-style: none;
+  display:flex; flex-direction:column; gap:10px;
+  margin-bottom: 24px;
+}
+
+.steps-list li {
+  display:flex; align-items:flex-start; gap:10px;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.step-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Severity visual bar */
+.severity-scale {
+  display:grid; grid-template-columns: repeat(4,1fr);
+  gap:4px; margin-bottom: 24px;
+}
+
+.severity-seg {
+  height: 6px; border-radius: 99px;
+  opacity: 0.25; transition: opacity 0.3s;
+}
+.severity-seg.active { opacity:1; }
+.severity-seg:nth-child(1) { background:#6eb5c8; }
+.severity-seg:nth-child(2) { background:#8bc86e; }
+.severity-seg:nth-child(3) { background:#c8b06e; }
+.severity-seg:nth-child(4) { background:#e06060; }
+
+.severity-labels {
+  display:grid; grid-template-columns: repeat(4,1fr);
+  gap:4px; margin-bottom: 20px;
+}
+.severity-labels span {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Crisis box */
+.crisis-box {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: var(--danger-dim);
+  border: 1px solid rgba(224,96,96,0.2);
+  display:flex; gap:14px; align-items:flex-start;
+  margin-top: 4px;
+}
+
+.crisis-icon {
+  font-size: 20px; flex-shrink:0; margin-top:1px;
+}
+
+.crisis-text {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.crisis-text strong { color: var(--danger); }
+
+.crisis-links { display:flex; gap:10px; margin-top:8px; flex-wrap:wrap; }
+.crisis-link {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--danger);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(224,96,96,0.12);
+  border: 1px solid rgba(224,96,96,0.2);
+  transition: all 0.2s;
+}
+.crisis-link:hover { background: rgba(224,96,96,0.2); }
+
+/* Results Chart */
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+/* Result nav */
+.result-actions {
+  display:flex; gap:10px; flex-wrap:wrap;
+  padding: 20px 32px;
+  border-top: 1px solid var(--border);
+}
+
+/* Disclaimer */
+.disclaimer {
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 12px;
+  color: var(--text-3);
+  line-height: 1.6;
+  display:flex; gap:10px;
+}
+
+/* Footer */
+footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+}
+
+.footer-left {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.footer-brand {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+}
+
+/* Tooltip-like scale legend */
+.scale-legend {
+  display:flex; gap:6px; flex-wrap:wrap;
+  margin-bottom: 20px;
+}
+
+.scale-pill {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  background: var(--surface2);
+  letter-spacing: 0.04em;
+}
+
+/* Transition animation */
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+
+/* Key press indicator */
+.key-hint {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--text-3);
+  display:flex; align-items:center; gap:6px;
+}
+.key {
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+  background: var(--surface3);
+}
+
+/* SVG check */
+.check-icon { fill:none; stroke:#0a0a0a; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="app-wrapper">
+
+  <header>
+    <div class="logo-group">
+      <div class="logo-mark">S</div>
+      <div>
+        <div class="logo-text">Selfscreen</div>
+        <div class="logo-sub">Mental Clarity</div>
+      </div>
+    </div>
+    <div class="header-badge">Anonym · Kostenlos</div>
+  </header>
+
+  <div class="main-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-label">Tests</div>
+      <div id="sidebar-nav"></div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-info">
+        Anonyme Selbsteinschätzung. Kein Ersatz für professionelle Beratung. Bei akuter Krise sofort Hilfe holen.
+      </div>
+    </aside>
+
+    <!-- MOBILE TABS -->
+    <div class="sidebar-mobile" id="mobile-tabs"></div>
+
+    <!-- MAIN -->
+    <main class="content-area" id="content"></main>
+
+  </div>
+
+  <footer>
+    <div class="footer-left">Skala: Nie (0) · Selten (1) · Manchmal (2) · Oft (3)</div>
+    <div class="footer-brand">© Selfscreen · Made with care</div>
+  </footer>
+
+</div>
+
+<script>
+// =================== DATA ===================
+const TESTS = {
+  social: {
+    id: 'social',
+    name: 'Social Anxiety',
+    icon: '👤',
+    color: '#6eb5c8',
+    questions: [
+      "Ich fühle mich nervös, wenn ich mit einer unbekannten Person sprechen muss.",
+      "Ich vermeide es, in Gruppen zu sprechen, weil ich befürchte, mich zu blamieren.",
+      "Bei sozialen Treffen habe ich Angst, im Mittelpunkt zu stehen.",
+      "Ich vermeide Partys oder Treffen, weil ich mich unwohl fühle.",
+      "Ich mache mir Sorgen, dass andere mich negativ bewerten.",
+      "Ich zögere, meine Meinung in einer Gruppe zu äußern.",
+      "Ich habe Angst, vor anderen zu essen oder zu trinken.",
+      "Ich fühle mich nervös, wenn ich jemanden um einen Gefallen bitten muss.",
+      "Bei Gesprächen mit Autoritätspersonen bin ich angespannt.",
+      "Ich bin besorgt, dass ich stottern oder rot werden könnte.",
+      "Der Gedanke an ein Vorstellungsgespräch macht mich sehr nervös.",
+      "Ich vermeide Augenkontakt, weil ich unsicher bin.",
+      "Ich befürchte, etwas Dummes zu sagen und ausgelacht zu werden.",
+      "Nach sozialen Situationen grüble ich oft über Fehler nach.",
+      "Ich meide Situationen, in denen ich eine Rede halten müsste.",
+      "Ich fühle mich unwohl, wenn ich Komplimente bekomme.",
+      "Ich vermeide Smalltalk, weil ich Angst habe, nicht interessant zu sein.",
+      "Ich habe Angst vor Verabredungen oder romantischen Situationen.",
+      "Ich empfinde körperliche Symptome (Herzrasen, Schwitzen) in sozialen Situationen.",
+      "Ich sage oft 'nein', selbst wenn ich teilnehmen möchte, aus Angst.",
+      "Ich befürchte, dass Leute mich beurteilen, wenn ich Hilfe brauche.",
+      "Ich habe Angst, mich in Gruppen zu blamieren.",
+      "Ich vermeide Diskussionen, weil ich Angst vor Widerspruch habe.",
+      "Ich fühle mich nervös, wenn ich neue Leute kennenlernen soll.",
+      "Ich vermeide Vorträge oder Präsentationen um jeden Preis.",
+      "Ich denke, andere merken sofort, wenn ich nervös bin.",
+      "Ich habe Probleme, Gespräche zu beginnen.",
+      "Ich denke oft, ich würde in sozialen Situationen negativ auffallen.",
+      "Ich fühle mich unsicher, wenn ich in einer Gruppe etwas sagen soll.",
+      "Ich vermeide das Telefonieren, weil ich mich unwohl fühle.",
+      "Ich befürchte, dass mich Menschen ablehnen werden.",
+      "Ich zögere, jemanden nach einem Date zu fragen.",
+      "Ich fühle mich überwältigt bei großen Menschenmengen.",
+      "Ich vermeide Blickkontakt aus Angst, beurteilt zu werden.",
+      "Ich mache mir Sorgen, wie mein Verhalten auf andere wirkt.",
+      "Ich fühle mich unsicher bei Verhandlungen in Geschäften.",
+      "Ich glaube, andere beobachten mich besonders genau.",
+      "Ich fürchte, in sozialen Situationen zu erröten.",
+      "Ich vermeide es, meine Fähigkeiten in Gegenwart anderer vorzuführen.",
+      "Ich habe Lampenfieber, auch bei kleinen Gruppen.",
+      "Ich halte mich oft zurück, aus Angst, uninteressant zu wirken.",
+      "Ich verzichte auf Freizeitaktivitäten wegen sozialer Angst.",
+      "Ich fürchte, dass meine Stimme unsicher klingt.",
+      "Ich habe Schwierigkeiten, spielerische Signale zu senden.",
+      "Ich denke, ich wirke ungeschickt in sozialen Interaktionen.",
+      "Ich fürchte, ungeeignete Fragen zu stellen und ausgelacht zu werden.",
+      "Ich meide Orte, an denen ich viele Leute treffen könnte.",
+      "Ich fühle mich isoliert, obwohl ich in Gesellschaft bin.",
+      "Ich befürchte, dass meine Nervosität auffällt.",
+      "Ich habe das Gefühl, soziale Situationen zu vermeiden."
+    ],
+    thresholds: [
+      { max:20, label:'Keine bis sehr geringe Angst', advice:'Deine sozialen Interaktionen verlaufen überwiegend entspannt. Weiter so!', level:0 },
+      { max:50, label:'Leichte soziale Angst', advice:'Du erlebst gelegentlich Nervosität in sozialen Situationen. Selbsthilfestrategien können helfen.', level:1 },
+      { max:100, label:'Mässige soziale Angst', advice:'Soziale Situationen belasten dich merklich. Eine psychologische Beratung könnte sehr hilfreich sein.', level:2 },
+      { max:999, label:'Ausgeprägte soziale Angst', advice:'Du vermeidest viele soziale Situationen. Professionelle Unterstützung wird dringend empfohlen.', level:3 }
+    ]
+  },
+  depress: {
+    id: 'depress',
+    name: 'Depression',
+    icon: '🌧',
+    color: '#9b8fcc',
+    questions: [
+      "Ich habe oft das Gefühl, niedergeschlagen oder traurig zu sein.",
+      "Ich habe weniger Interesse an Dingen, die mir früher Spaß gemacht haben.",
+      "Ich fühle mich energielos und müde, auch nach ausreichend Schlaf.",
+      "Ich finde es schwer, mich zu konzentrieren.",
+      "Ich habe das Gefühl, wertlos oder übermäßig schuldig zu sein.",
+      "Ich schlafe mehr oder weniger als üblich.",
+      "Ich habe Veränderungen im Appetit bemerkt.",
+      "Ich habe Schwierigkeiten, Entscheidungen zu treffen.",
+      "Ich ziehe mich von Freunden und Familie zurück.",
+      "Ich habe das Gefühl, dass nichts einen Sinn hat.",
+      "Ich bin schnell reizbar oder habe Stimmungsschwankungen.",
+      "Ich habe Probleme, alltägliche Aufgaben zu bewältigen.",
+      "Ich fühle mich oft hoffnungslos bezüglich der Zukunft.",
+      "Ich habe häufiger negative Gedanken über mich selbst.",
+      "Ich habe körperliche Beschwerden ohne klare Ursache.",
+      "Ich habe weniger Interesse an sexuellen Aktivitäten.",
+      "Ich finde es schwer, morgens aufzustehen.",
+      "Ich vernachlässige gepflegte Gewohnheiten oder Hobbys.",
+      "Ich denke viel über vergangene Fehler nach.",
+      "Ich habe das Gefühl, dass meine Gedanken langsamer sind.",
+      "Ich habe verzögerte Reaktionen oder empfinde inneren Stillstand.",
+      "Ich fühle mich oft beschämt oder minderwertig.",
+      "Ich vermeide Entscheidungen, weil ich Angst habe, falsch zu liegen.",
+      "Ich habe Schwierigkeiten, Emotionen zu regulieren.",
+      "Ich fühle mich von Zukunftsplanung überfordert.",
+      "Ich habe ein geringeres Interesse an sozialen Aktivitäten.",
+      "Ich nehme negative Ereignisse stärker persönlich.",
+      "Ich habe plötzliche Stimmungseinbrüche.",
+      "Ich habe das Gefühl, dass ich anderen zur Last falle.",
+      "Ich merke, dass ich öfter weine oder Tränen nahe bin.",
+      "Ich habe das Gefühl, langsamer zu denken oder zu handeln.",
+      "Ich habe Schwierigkeiten, positive Erlebnisse zu genießen.",
+      "Ich tendiere zu schwarz-weiß-Denken.",
+      "Ich habe das Gefühl, dass meine Motivation stark abgenommen hat.",
+      "Ich vernachlässige meine Arbeit wegen Antriebslosigkeit.",
+      "Ich fühle mich oft leer oder innerlich abgestumpft.",
+      "Ich habe Gedanken, dass das Leben nicht lebenswert ist.",
+      "Ich habe Probleme, mich für Treffen aufzuraffen.",
+      "Ich verspüre häufiger Angst in Verbindung mit Niedergeschlagenheit.",
+      "Ich habe das Gefühl, meine Gefühle sind überwältigend.",
+      "Ich nehme mir weniger Zeit für Selbstfürsorge.",
+      "Ich fühle mich schneller überfordert als früher.",
+      "Ich stelle mir häufig vor, wie es wäre, wenn alles anders wäre.",
+      "Ich habe das Gefühl, dass sich meine Situation nicht verbessern wird.",
+      "Ich bemerke, dass ich öfter zurückgezogen reagiere.",
+      "Ich habe Schwierigkeiten, positive Rückmeldungen zu glauben.",
+      "Ich fühle mich oft geistig müde, auch ohne körperliche Anstrengung.",
+      "Ich habe deaktivierende Grübeleien über meine Zukunft.",
+      "Ich empfinde innere Leere in sozialen Situationen.",
+      "Ich habe Schwierigkeiten, Freude zu empfinden."
+    ],
+    thresholds: [
+      { max:24, label:'Keine bis sehr geringe Symptome', advice:'Du zeigst kaum depressive Anzeichen. Achte weiterhin auf deine Selbstfürsorge.', level:0 },
+      { max:49, label:'Leichte depressive Symptome', advice:'Du erlebst gelegentlich Phasen der Niedergeschlagenheit. Beobachte und such dir Unterstützung.', level:1 },
+      { max:99, label:'Mässige depressive Symptome', advice:'Deine Symptome beeinträchtigen deinen Alltag merklich. Psychotherapie oder ärztliche Abklärung sind sinnvoll.', level:2 },
+      { max:999, label:'Ausgeprägte depressive Symptome', advice:'Deine Symptome sind schwerwiegend. Bitte suche dringend therapeutische Unterstützung.', level:3 }
+    ]
+  },
+  body: {
+    id: 'body',
+    name: 'Body Dysmorphia',
+    icon: '🪞',
+    color: '#c86ea0',
+    questions: [
+      "Ich bin oft unzufrieden mit meinem Aussehen.",
+      "Ich vergleiche meinen Körper regelmäßig mit anderen.",
+      "Ich fühle mich unwohl, wenn ich mich im Spiegel sehe.",
+      "Ich denke oft über vermeintliche Makel nach.",
+      "Ich vermeide Fotos oder Spiegel wegen meines Aussehens.",
+      "Ich habe Angst vor negativer Bewertung meines Körpers.",
+      "Ich kontrolliere regelmäßig mein Aussehen.",
+      "Ich fühle mich unattraktiv, auch wenn andere das nicht sagen.",
+      "Ich vergleiche Gewicht oder Figur mit Social Media.",
+      "Ich fühle mich schuldig, wenn ich bestimmte Nahrungsmittel esse.",
+      "Ich vermeide soziale Situationen wegen meines Körpers.",
+      "Ich trainiere exzessiv, um mein Aussehen zu ändern.",
+      "Ich fühle mich unsicher in enger Kleidung.",
+      "Ich habe Schwierigkeiten, Komplimente anzunehmen.",
+      "Ich denke, andere bemerken sofort meine vermeintlichen Makel.",
+      "Ich verbringe viel Zeit vor dem Spiegel.",
+      "Ich fühle mich gestresst durch meinen Körper in der Öffentlichkeit.",
+      "Ich habe Angst, dass andere meine Makel kommentieren.",
+      "Ich fühle mich häufig unwohl nackt oder in Unterwäsche.",
+      "Ich denke über chirurgische Eingriffe nach, um mich zu verbessern.",
+      "Ich ziehe Kleidung an, um Makel zu verstecken.",
+      "Ich meide Sport, weil ich mich beobachtet fühle.",
+      "Ich vergleiche oft Gesichtszüge mit anderen.",
+      "Ich fühle mich unzulänglich in intimen Situationen.",
+      "Ich verbringe viel Zeit online, um Körperideale zu sehen.",
+      "Ich kritisiere mein Aussehen stark im Geiste.",
+      "Ich glaube, mein Aussehen beeinflusst meinen sozialen Erfolg.",
+      "Ich fühle mich manchmal gezwungen, Diäten zu machen.",
+      "Ich habe das Gefühl, andere beurteilen meinen Körper ständig.",
+      "Ich verstecke Körperbereiche, die ich nicht mag.",
+      "Ich fühle mich unwohl bei Komplimenten über meinen Körper.",
+      "Ich überprüfe regelmäßig mein Gewicht.",
+      "Ich vergleiche Haut, Haare oder Nägel mit anderen.",
+      "Ich fühle mich oft peinlich berührt wegen meines Aussehens.",
+      "Ich denke, dass kleine Makel andere stark stören.",
+      "Ich verbringe Zeit, Bilder von mir zu retuschieren.",
+      "Ich fühle mich unwohl bei neuen sozialen Kontakten wegen meines Körpers.",
+      "Ich habe Angst, dass andere über mich lachen wegen meines Aussehens.",
+      "Ich übe Kritik an meinem Körper selbst aus.",
+      "Ich meide Spiegel oder Fotos, um Stress zu vermeiden.",
+      "Ich fühle mich nie vollkommen zufrieden mit meinem Aussehen.",
+      "Ich denke, mein Wert hängt von meinem Körper ab.",
+      "Ich habe Angst, dass andere meine 'Fehler' bemerken.",
+      "Ich verbringe viel Zeit mit Diäten oder Essensplanung.",
+      "Ich fühle mich gestresst, wenn ich meinen Körper anderen zeige.",
+      "Ich meide Umkleiden oder Fitnessräume.",
+      "Ich denke, dass mein Körper nie gut genug ist.",
+      "Ich vergleiche mich täglich mit Social-Media-Bildern.",
+      "Ich kritisiere mich stark nach Spiegelkontrolle.",
+      "Ich fühle mich unwohl, wenn ich mein Gesicht sehe."
+    ],
+    thresholds: [
+      { max:25, label:'Geringe Anzeichen', advice:'Du zeigst kaum Anzeichen von Körperbildstörung. Weiter beobachten.', level:0 },
+      { max:60, label:'Leichte Symptome', advice:'Du denkst gelegentlich negativ über deinen Körper. Selbstreflexion & Beratung sind sinnvoll.', level:1 },
+      { max:100, label:'Mässige Symptome', advice:'Deine Gedanken über deinen Körper belasten dich. Psychologische Beratung wird empfohlen.', level:2 },
+      { max:999, label:'Ausgeprägte Symptome', advice:'Dein Körperbild beeinträchtigt deinen Alltag stark. Bitte hol dir professionelle Hilfe.', level:3 }
+    ]
+  },
+  media: {
+    id: 'media',
+    name: 'Mediensucht',
+    icon: '📱',
+    color: '#c8a96e',
+    questions: [
+      "Ich verbringe viel Zeit auf sozialen Medien täglich.",
+      "Ich fühle mich gestresst, wenn ich keine Social-Media-Updates sehe.",
+      "Ich checke mein Handy oft, auch ohne Grund.",
+      "Ich vernachlässige Schlaf, um online zu sein.",
+      "Ich vergleiche mich ständig mit anderen online.",
+      "Ich fühle mich unruhig ohne Internetzugang.",
+      "Ich habe Schwierigkeiten, Offline-Zeit einzuplanen.",
+      "Ich ignoriere wichtige Aufgaben zugunsten von Mediennutzung.",
+      "Ich fühle mich schlecht, wenn ich online weniger Likes erhalte.",
+      "Ich kontrolliere ständig Nachrichten und Kommentare.",
+      "Ich vernachlässige Hobbys wegen Mediennutzung.",
+      "Ich verspüre Schuldgefühle für zu viel Bildschirmzeit.",
+      "Ich fühle mich abhängig von Streaming-Plattformen.",
+      "Ich habe Schwierigkeiten, offline mit Freunden zu sprechen.",
+      "Ich verbringe Stunden mit Videospielen oder Serien.",
+      "Ich fühle mich leer nach längerem Social-Media-Konsum.",
+      "Ich habe oft das Bedürfnis, online präsent zu sein.",
+      "Ich fühle mich gestresst durch ständige Benachrichtigungen.",
+      "Ich verliere Zeit, ohne es zu merken, beim Scrollen.",
+      "Ich habe Angst, etwas Wichtiges online zu verpassen.",
+      "Ich checke mein Handy sofort nach dem Aufwachen.",
+      "Ich fühle mich gereizt ohne Medienzugang.",
+      "Ich überspringe Mahlzeiten wegen Mediennutzung.",
+      "Ich fühle mich isoliert, wenn ich offline bin.",
+      "Ich vernachlässige reale Kontakte.",
+      "Ich priorisiere Online-Interaktionen über echte Beziehungen.",
+      "Ich fühle mich einsam ohne Social Media.",
+      "Ich habe Schwierigkeiten, Medienzeit zu reduzieren.",
+      "Ich fühle mich niedergeschlagen nach Online-Interaktionen.",
+      "Ich habe Angst, dass mein Online-Image negativ wahrgenommen wird.",
+      "Ich verbringe zu viel Zeit mit Streaming-Plattformen.",
+      "Ich fühle mich unruhig, wenn ich mein Handy verliere.",
+      "Ich habe Schwierigkeiten, offline zu entspannen.",
+      "Ich ignoriere Anrufe wegen Online-Aktivität.",
+      "Ich fühle mich gestresst von ständigen Updates.",
+      "Ich verbringe viel Zeit auf Foren oder Communitys.",
+      "Ich fühle mich müde nach stundenlanger Mediennutzung.",
+      "Ich fühle mich schuldig wegen Online-Abhängigkeit.",
+      "Ich ignoriere Termine zugunsten von Mediennutzung.",
+      "Ich fühle mich gezwungen, ständig online zu sein.",
+      "Ich verliere den Überblick über Zeit bei Mediennutzung.",
+      "Ich fühle mich unproduktiv durch zu viel Online-Zeit.",
+      "Ich priorisiere Online-Inhalte über reale Aufgaben.",
+      "Ich fühle mich gestresst von Online-Kommunikation.",
+      "Ich habe Schwierigkeiten, offline zu schlafen.",
+      "Ich habe Angst, von Freunden online ignoriert zu werden.",
+      "Ich verbringe mehr Zeit online als geplant.",
+      "Ich fühle mich angespannt, wenn ich offline gehen muss.",
+      "Ich fühle mich abhängig von Medien für Unterhaltung.",
+      "Ich kann mir Freizeit kaum noch ohne Bildschirm vorstellen."
+    ],
+    thresholds: [
+      { max:25, label:'Geringe Medienabhängigkeit', advice:'Du hast eine gesunde Beziehung zu digitalen Medien.', level:0 },
+      { max:60, label:'Leichte Symptome', advice:'Du verbringst etwas mehr Zeit online als ideal. Digitale Pausen können helfen.', level:1 },
+      { max:100, label:'Mässige Abhängigkeit', advice:'Dein Medienkonsum beeinträchtigt deinen Alltag. Digitale Beratung oder Therapie ist sinnvoll.', level:2 },
+      { max:999, label:'Ausgeprägte Abhängigkeit', advice:'Dein Medienkonsum ist schwerwiegend. Bitte such dir professionelle Unterstützung.', level:3 }
+    ]
+  }
+};
+
+const STEPS = [
+  'Sprich mit einer vertrauten Person über deine Gefühle.',
+  'Erwäge eine Beratungsstelle, deinen Hausarzt oder eine Psychotherapeutin.',
+  'Achte auf Schlaf, Bewegung und regelmäßige Mahlzeiten.',
+  'Bei akuten Suizidgedanken: Bitte ruf sofort die Telefonseelsorge an.'
+];
+
+// =================== STATE ===================
+let state = {
+  currentTest: 'social',
+  index: 0,
+  answers: {
+    social: new Array(50).fill(null),
+    depress: new Array(50).fill(null),
+    body: new Array(50).fill(null),
+    media: new Array(50).fill(null)
+  },
+  showResult: false
+};
+
+// =================== RENDER SIDEBAR ===================
+function renderSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  const mob = document.getElementById('mobile-tabs');
+  nav.innerHTML = '';
+  mob.innerHTML = '';
+
+  Object.values(TESTS).forEach(t => {
+    const filled = state.answers[t.id].filter(a => a !== null).length;
+    const pct = Math.round((filled / t.questions.length) * 100);
+    const isActive = state.currentTest === t.id;
+
+    // Progress ring SVG
+    const r = 10, cx = 14, cy = 14, circ = 2 * Math.PI * r;
+    const dash = (pct / 100) * circ;
+    const ring = `<svg class="nav-progress-ring" viewBox="0 0 28 28"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${t.color}" stroke-width="2" stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${circ * 0.25}" stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/></svg>`;
+
+    const item = document.createElement('div');
+    item.className = 'nav-item' + (isActive ? ' active' : '');
+    item.innerHTML = `
+      <div class="nav-icon">${t.icon}</div>
+      <div class="nav-info">
+        <div class="nav-name">${t.name}</div>
+        <div class="nav-count">${filled}/${t.questions.length} beantwortet</div>
+      </div>
+      ${ring}
+    `;
+    item.addEventListener('click', () => { state.currentTest = t.id; state.showResult = false; renderAll(); });
+    nav.appendChild(item);
+
+    // Mobile
+    const mob_item = document.createElement('div');
+    mob_item.className = 'mob-tab' + (isActive ? ' active' : '');
+    mob_item.innerHTML = `${t.icon} ${t.name}`;
+    mob_item.addEventListener('click', () => { state.currentTest = t.id; state.showResult = false; renderAll(); });
+    mob.appendChild(mob_item);
+  });
+}
+
+// =================== RENDER QUESTION ===================
+function renderQuestion() {
+  const t = TESTS[state.currentTest];
+  const idx = state.index;
+  const q = t.questions[idx];
+  const chosen = state.answers[state.currentTest][idx];
+  const filled = state.answers[state.currentTest].filter(a => a !== null).length;
+  const pct = Math.round((filled / t.questions.length) * 100);
+  const score = state.answers[state.currentTest].map(a => a === null ? 0 : a).reduce((s,a)=>s+a,0);
+  const max = t.questions.length * 3;
+  const scorePct = Math.round((score / max) * 100);
+
+  const labels = ['Nie','Selten','Manchmal','Oft'];
+
+  document.getElementById('content').innerHTML = `
+    <div class="q-card">
+      <div class="q-card-header">
+        <div class="q-meta">
+          <div class="q-test-name">${t.name}</div>
+          <div class="q-pos">${idx+1} <span>/ ${t.questions.length}</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div class="key-hint"><span class="key">1</span><span class="key">2</span><span class="key">3</span><span class="key">4</span> wählen · <span class="key">→</span> weiter</div>
+          <div style="font-size:12px;color:var(--text-3);font-family:var(--font-ui)">${pct}% ausgefüllt</div>
+        </div>
+      </div>
+      <div class="q-card-body">
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="scale-legend">
+          ${labels.map((l,i)=>`<div class="scale-pill">${i} — ${l}</div>`).join('')}
+        </div>
+        <div class="q-text">${q}</div>
+        <div class="options-grid">
+          ${labels.map((label,i) => `
+            <div class="opt-btn${chosen===i?' selected':''}" data-val="${i}" tabindex="0" role="radio" aria-checked="${chosen===i}">
+              <div class="opt-dot">
+                <svg width="10" height="8" viewBox="0 0 10 8" class="check-icon"><polyline points="1 4 4 7 9 1"/></svg>
+              </div>
+              <div class="opt-label">${label}</div>
+              <div class="opt-score">${i} Pkt</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="q-nav">
+        <div class="btn-group">
+          <button class="btn btn-danger" id="btn-reset">↺ Reset</button>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-ghost" id="btn-prev" ${idx===0?'disabled':''}>← Zurück</button>
+          ${idx < t.questions.length - 1
+            ? `<button class="btn btn-primary" id="btn-next">Weiter →</button>`
+            : `<button class="btn btn-primary" id="btn-finish">Auswertung →</button>`
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="score-widget">
+      <div class="score-widget-header">
+        <div class="score-label">Live-Score</div>
+        <div class="score-value">${score} <span>/ ${max}</span></div>
+      </div>
+      <div class="score-bar-track">
+        <div class="score-bar-fill" style="width:${scorePct}%;background:${t.color}"></div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      <span style="font-size:16px;flex-shrink:0">ℹ️</span>
+      <span>Diese Auswertung ist keine klinische Diagnose und ersetzt keinen Arztbesuch oder eine professionelle Beratung.</span>
+    </div>
+  `;
+
+  // Events
+  document.querySelectorAll('.opt-btn').forEach(el => {
+    el.addEventListener('click', () => {
+      state.answers[state.currentTest][idx] = Number(el.dataset.val);
+      if(idx < t.questions.length - 1) {
+        state.index++;
+      }
+      renderAll();
+    });
+    el.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){el.click();e.preventDefault();} });
+  });
+
+  document.getElementById('btn-prev').addEventListener('click', () => { if(state.index>0){state.index--;renderAll();} });
+  const btnNext = document.getElementById('btn-next');
+  if(btnNext) btnNext.addEventListener('click', () => { state.index++; renderAll(); });
+  const btnFinish = document.getElementById('btn-finish');
+  if(btnFinish) btnFinish.addEventListener('click', () => {
+    const missing = state.answers[state.currentTest].filter(a=>a===null).length;
+    if(missing>0 && !confirm(`Noch ${missing} Frage(n) unbeantwortet. Trotzdem auswerten?`)) return;
+    state.showResult = true; renderAll();
+  });
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    if(confirm('Test zurücksetzen?')) {
+      state.answers[state.currentTest] = new Array(t.questions.length).fill(null);
+      state.index = 0;
+      renderAll();
+    }
+  });
+
+  // Keyboard shortcuts
+  document.onkeydown = e => {
+    if(['1','2','3','4'].includes(e.key)) {
+      state.answers[state.currentTest][idx] = Number(e.key)-1;
+      if(idx < t.questions.length - 1) state.index++;
+      renderAll();
+    }
+    if(e.key==='ArrowRight'&&idx<t.questions.length-1) { state.index++; renderAll(); }
+    if(e.key==='ArrowLeft'&&idx>0) { state.index--; renderAll(); }
+  };
+}
+
+// =================== RENDER RESULT ===================
+function renderResult() {
+  document.onkeydown = null;
+  const t = TESTS[state.currentTest];
+  const answers = state.answers[state.currentTest];
+  const score = answers.map(a=>a===null?0:a).reduce((s,a)=>s+a,0);
+  const max = t.questions.length * 3;
+  const pct = Math.round((score/max)*100);
+
+  let thresh = t.thresholds[t.thresholds.length-1];
+  for(const th of t.thresholds) { if(score <= th.max){ thresh = th; break; } }
+
+  const levelColors = ['#6eb5c8','#8bc86e','#c8b06e','#e06060'];
+  const levelLabels = ['Gering','Leicht','Mässig','Ausgeprägt'];
+
+  document.getElementById('content').innerHTML = `
+    <div class="result-screen">
+      <div class="result-hero">
+        <div class="result-hero-header">
+          <div class="result-eyebrow">${t.icon} ${t.name} — Ergebnis</div>
+          <div class="result-severity">${thresh.label}</div>
+          <div class="result-advice">${thresh.advice}</div>
+          <div class="result-score-pill">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="${t.color}" stroke-width="1.5"/><path d="M4 7l2 2 4-4" stroke="${t.color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Score: ${score} / ${max} Punkte (${pct}%)
+          </div>
+        </div>
+        <div class="result-body">
+          <div class="result-section-title">Schweregrad</div>
+          <div class="severity-scale">
+            ${[0,1,2,3].map(i=>`<div class="severity-seg${thresh.level===i?' active':''}" style="${thresh.level===i?'':''}background:${levelColors[i]}"></div>`).join('')}
+          </div>
+          <div class="severity-labels">
+            ${levelLabels.map(l=>`<span>${l}</span>`).join('')}
+          </div>
+
+          <div class="result-section-title">Nächste Schritte</div>
+          <ul class="steps-list">
+            ${STEPS.map((s,i)=>`<li><div class="step-num">${i+1}</div><span>${s}</span></li>`).join('')}
+          </ul>
+        </div>
+        <div style="padding:0 32px 24px">
+          <div class="crisis-box">
+            <div class="crisis-icon">🆘</div>
+            <div>
+              <div class="crisis-text"><strong>Akute Krise?</strong> Du musst das nicht alleine durchstehen. Ruf jetzt an.</div>
+              <div class="crisis-links">
+                <a class="crisis-link" href="tel:0800111 0111">Telefonseelsorge: 0800 111 0 111</a>
+                <a class="crisis-link" href="tel:112">Notruf: 112</a>
+                <a class="crisis-link" href="https://www.telefonseelsorge.de" target="_blank">telefonseelsorge.de ↗</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn btn-primary" id="r-back">← Zurück zum Test</button>
+          <button class="btn btn-ghost" id="r-restart">Nochmals starten</button>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="result-section-title" style="margin-bottom:16px">Punkteverteilung</div>
+        <canvas id="resultChart" height="80"></canvas>
+      </div>
+
+      <div class="disclaimer">
+        <span style="font-size:16px;flex-shrink:0">⚠️</span>
+        <span><strong style="color:var(--text-2)">Wichtig:</strong> Dieses Screening ersetzt keine professionelle Diagnose. Bitte wende dich an einen Arzt oder Psychotherapeuten für eine vollständige Beurteilung deiner Situation.</span>
+      </div>
+    </div>
+  `;
+
+  // Chart
+  const ctx = document.getElementById('resultChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Dein Score','Verbleibend'],
+      datasets:[{
+        data: [score, max-score],
+        backgroundColor: [t.color, 'rgba(255,255,255,0.04)'],
+        borderWidth: 0,
+        borderRadius: 4
+      }]
+    },
+    options:{
+      cutout: '75%',
+      responsive:true,
+      animation: { animateRotate:true, duration:800 },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          callbacks:{
+            label: ctx => ` ${ctx.label}: ${ctx.raw} Punkte`
+          }
+        }
+      }
+    }
+  });
+
+  document.getElementById('r-back').addEventListener('click', () => { state.showResult=false; renderAll(); });
+  document.getElementById('r-restart').addEventListener('click', () => {
+    state.answers[state.currentTest] = new Array(TESTS[state.currentTest].questions.length).fill(null);
+    state.index = 0; state.showResult = false; renderAll();
+  });
+}
+
+// =================== MAIN RENDER ===================
+function renderAll() {
+  renderSidebar();
+  if(state.showResult) {
+    renderResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+renderAll();
+</script>
+</body>
+</html>
