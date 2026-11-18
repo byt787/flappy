@@ -1,0 +1,252 @@
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: black;
+  color: white;
+  font-family: "Metal Mania", cursive;
+  text-align: center;
+  font-size: 18px;
+}
+
+hr {
+  margin: 20px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+h1 {
+  font-size: 48px;
+}
+
+.logo {
+  width: 160px;
+}
+
+.Will {
+  width: 300px;
+  max-width: 85%;
+  border: 3px solid white;
+  border-radius: 12%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.Will:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 55px rgb(49, 47, 47);
+}
+
+.image {
+  box-sizing: border-box;
+  font-size: 14px;
+  border: 2px solid white;
+  border-radius: 12px;
+  padding: 6px;
+  width: 310px;
+  max-width: 90%;
+  margin: 10px auto 0;
+}
+
+.about2 {
+  font-size: 36px;
+}
+
+.about {
+  box-sizing: border-box;
+  border: 2px solid white;
+  border-radius: 10px;
+  width: 500px;
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 10px;
+  font-size: 20px;
+}
+
+.Fav {
+  font-size: 26px;
+}
+
+ul,
+ol {
+  width: max-content;
+  max-width: 90%;
+  margin: 0 auto;
+  padding-left: 25px;
+}
+
+li {
+  text-align: center;
+  font-size: 18px;
+}
+
+.album-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.album-card {
+  width: 180px;
+  padding: 10px;
+  border: 2px solid rgb(68, 65, 65);
+  border-radius: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.album-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 55px rgb(49, 47, 47);
+}
+
+.album-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.album-card h3 {
+  font-size: 20px;
+  margin: 10px 0 4px;
+}
+
+.album-card p {
+  font-size: 16px;
+  margin: 0;
+}
+
+.button {
+  display: inline-block;
+  background-color: white;
+  color: #333;
+  padding: 10px 16px;
+  margin: 6px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 18px;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #ddd;
+}
+
+.favorite {
+  max-width: 500px;
+  margin: 30px auto;
+  padding: 10px;
+}
+
+.vinyl-record {
+  position: relative;
+  width: 250px;
+  aspect-ratio: 1;
+  margin: 20px auto;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    #1a1919 0 2px,
+    #070606 3px 4px
+  );
+  animation: drehen 7s linear infinite;
+}
+
+.favalbum {
+  position: absolute;
+  width: 125px;
+  height: 125px;
+  object-fit: cover;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.record-hole {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: black;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes drehen {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.site-footer {
+  margin: 40px 20px 20px;
+}
+
+.foot {
+  margin: 0 0 20px;
+}
+
+.footer-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.logofoot {
+  width: 80px;
+}
+
+.footer-note {
+  color: #aaa;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .title-row {
+    gap: 8px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  .logo {
+    width: 90px;
+  }
+
+  .about2 {
+    font-size: 30px;
+  }
+
+  .about {
+    font-size: 17px;
+  }
+
+  .Fav {
+    font-size: 22px;
+  }
+
+  li {
+    font-size: 16px;
+  }
+
+  .logofoot {
+    width: 60px;
+  }
+}

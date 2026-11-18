@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="extras.css">
+
+  <title>Lorna Shore</title>
+</head>
+
+<body id="top">
+  <div class="title-row">
+    <h1>Lorna Shore</h1>
+    <img class="logo" src="src/logo.png" alt="Lorna Shore logo">
+    <h1>Lorna Shore</h1>
+  </div>
+
+  <hr>
+
+  <img class="Will" id="willImg" src="src/will.png" alt="Will Ramos onstage">
+
+  <p class="image">This is the singer Will Ramos onstage.</p>
+
+  <p class="about2">About</p>
+
+  <p class="about">
+    Lorna Shore is an American deathcore band from New Jersey, formed in 2009.
+    Their sound combines heavy breakdowns and growled vocals with orchestral
+    and symphonic elements. They’re known for songs like “To the Hellfire”
+    and the album <em>Pain Remains</em>.
+  </p>
+
+  <p class="Fav"><strong>Members</strong></p>
+
+  <ul>
+    <li>Singer: Will Ramos</li>
+    <li>Lead guitarist: Adam De Micco</li>
+    <li>Rhythm guitarist: Andrew O'Connor</li>
+    <li>Drummer: Austin Archey</li>
+    <li>Bassist: Michael Yager</li>
+  </ul>
+
+  <p class="Fav">My Top 5 Songs</p>
+
+  <ol id="songList">
+    <li>Forevermore - IFTEFWM</li>
+    <li>Pain Remains III - Pain Remains</li>
+    <li>In Darkness - IFTEFWM</li>
+    <li>Oblivion - IFTEFWM</li>
+    <li>Of the Abyss - ...AIRTN</li>
+  </ol>
+
+  <h2 class="Fav">Studio Albums</h2>
+
+  <div class="controls">
+    <button class="button" data-sort="asc">Oldest first</button>
+    <button class="button" data-sort="desc">Newest first</button>
+    <button class="button" id="shuffleBtn">Random album</button>
+  </div>
+
+  <div class="album-grid" id="albumGrid">
+    <div class="album-card" data-year="2015" data-title="Psalms" data-img="src/psalms.jpg">
+      <img src="src/psalms.jpg" alt="Psalms album cover">
+      <h3>Psalms</h3>
+      <p>2015</p>
+    </div>
+
+    <div class="album-card" data-year="2017" data-title="Flesh Coffin" data-img="src/flesh.jpg">
+      <img src="src/flesh.jpg" alt="Flesh Coffin album cover">
+      <h3>Flesh Coffin</h3>
+      <p>2017</p>
+    </div>
+
+    <div class="album-card" data-year="2020" data-title="Immortal" data-img="src/immortal.jpg">
+      <img src="src/immortal.jpg" alt="Immortal album cover">
+      <h3>Immortal</h3>
+      <p>2020</p>
+    </div>
+
+    <div class="album-card" data-year="2022" data-title="Pain Remains" data-img="src/painr.jpg">
+      <img src="src/painr.jpg" alt="Pain Remains album cover">
+      <h3>Pain Remains</h3>
+      <p>2022</p>
+    </div>
+
+    <div class="album-card" data-year="2025" data-title="I Feel the Everblack Festering Within Me" data-img="src/ifeel.jpg">
+      <img src="src/ifeel.jpg" alt="I Feel the Everblack Festering Within Me album cover">
+      <h3>I Feel the Everblack Festering Within Me</h3>
+      <p>2025</p>
+    </div>
+  </div>
+
+  <p>
+    <a class="button back-to-top" href="#top">Back to top ↑</a>
+  </p>
+
+  <section class="favorite">
+    <h2 class="Fav">My Favorite Album</h2>
+
+    <div class="vinyl-record" id="vinyl" title="Click to pause / play">
+      <img class="favalbum" src="src/painr.jpg" alt="Pain Remains album cover">
+      <span class="record-hole"></span>
+    </div>
+
+    <p class="hint">Click the record to stop it.</p>
+
+    <p>
+      My favorite album is <em>Pain Remains</em> because I love its intense sound
+      and emotional atmosphere.
+    </p>
+  </section>
+
+  <footer class="site-footer">
+    <hr class="foot">
+
+    <div class="footer-row">
+      <img class="logofoot" src="https://i.postimg.cc/HkswBNtN/image.png" alt="Lorna Shore logo">
+      <a class="button" href="https://lornashoreband.com/">Visit the Store</a>
+      <img class="logofoot" src="https://i.postimg.cc/HkswBNtN/image.png" alt="Lorna Shore logo">
+    </div>
+
+    <p class="footer-note">Fan-made page — not affiliated with Lorna Shore.</p>
+  </footer>
+
+  <!-- Overlay für Album-Details und Foto -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-box">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <img id="modalImg" src="" alt="">
+      <h3 id="modalTitle"></h3>
+      <p id="modalYear"></p>
+      <div class="stars" id="stars" aria-label="Your rating"></div>
+      <p class="hint" id="starHint"></p>
+    </div>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Back to top" hidden>↑</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
